@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama_partai');
             $table->text('keterangan');
+            $table->enum('kategori', ['barang masuk', 'barang keluar'])->default('barang masuk');
             $table->timestamps();
         });
     }
