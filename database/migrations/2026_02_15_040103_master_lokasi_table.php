@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('lokasi', function (Blueprint $table) {
             $table->id();
             $table->string('nama_lokasi');
+            $table->boolean('is_jasa_cuci')->default(true);
             $table->timestamps();
         });
     }
