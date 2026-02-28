@@ -50,12 +50,15 @@
                                 <label for="tanggal_kirim" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pemberian Bahan <span class="text-red-500">*</span></label>
                                 <input type="date" name="tanggal_kirim" id="tanggal_kirim" required
                                     value="{{ session('jasa_cuci_step1.tanggal_kirim', date('Y-m-d')) }}"
-                                    class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200">
+                                    class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('tanggal_kirim') border-red-500 @enderror">
+                                @error('tanggal_kirim')
+                                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div>
                                 <label for="lokasi_id" class="block text-sm font-medium text-gray-700 mb-1">Nama (Jasa Cuci) <span class="text-red-500">*</span></label>
-                                <select name="lokasi_id" id="lokasi_id" required class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200">
+                                <select name="lokasi_id" id="lokasi_id" required class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('lokasi_id') border-red-500 @enderror">
                                     <option value="">-- Pilih Jasa Cuci --</option>
                                     @foreach($lokasis as $lokasi)
                                         <option value="{{ $lokasi->id }}" {{ session('jasa_cuci_step1.lokasi_id') == $lokasi->id ? 'selected' : '' }}>
@@ -63,6 +66,9 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                @error('lokasi_id')
+                                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 

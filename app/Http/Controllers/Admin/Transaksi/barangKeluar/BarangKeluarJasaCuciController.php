@@ -21,10 +21,13 @@ class BarangKeluarJasaCuciController extends Controller
 
     public function index(Request $request)
     {
-        $query = BarangKeluarJasaCuci::with(['barangKeluar.lokasi', 'kodeBahan']);
+        $jenisJasaCuci = \App\Models\JenisBarangKeluar::firstOrCreate(['nama' => 'Jasa Cuci']);
+
+        $query = BarangKeluar::where('jenis_barang_keluar_id', $jenisJasaCuci->id)
+            ->with(['lokasi', 'barangKeluarJasaCuci.kodeBahan']);
 
         if ($request->has('search') && $request->search != '') {
-            $query->whereHas('kodeBahan', function ($q) use ($request) {
+            $query->whereHas('barangKeluarJasaCuci.kodeBahan', function ($q) use ($request) {
                 $q->where('nama', 'like', '%' . $request->search . '%');
             });
         }
@@ -37,7 +40,8 @@ class BarangKeluarJasaCuciController extends Controller
     public function step1()
     {
         $lokasis = Lokasi::where('is_jasa_cuci', true)->get();
-        return view('admin.barang-keluar.jasa-cuci.step1', compact('lokasis'));
+        $step1Data = session('jasa_cuci_step1', []);
+        return view('admin.barang-keluar.jasa-cuci.step1', compact('lokasis', 'step1Data'));
     }
 
     public function storeStep1(Request $request)
@@ -49,6 +53,10 @@ class BarangKeluarJasaCuciController extends Controller
 
         session(['jasa_cuci_step1' => $request->only('tanggal_kirim', 'lokasi_id')]);
 
+        if (!session()->has('jasa_cuci_items')) {
+            session(['jasa_cuci_items' => []]);
+        }
+
         return redirect()->route('barang-keluar.jasa-cuci.step2');
     }
 
@@ -58,25 +66,65 @@ class BarangKeluarJasaCuciController extends Controller
             return redirect()->route('barang-keluar.jasa-cuci.step1')->with('error', 'Silakan isi step 1 terlebih dahulu.');
         }
 
+        $step1Data = session('jasa_cuci_step1');
+        $lokasi = Lokasi::find($step1Data['lokasi_id']);
         $kodeBahans = KodeBahan::all();
-        return view('admin.barang-keluar.jasa-cuci.step2', compact('kodeBahans'));
+        $items = session('jasa_cuci_items', []);
+
+        return view('admin.barang-keluar.jasa-cuci.step2', compact('kodeBahans', 'items', 'lokasi', 'step1Data'));
     }
 
-    public function storeStep2(Request $request)
+    public function addStep2Item(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'kode_bahan_id' => 'required|exists:kode_bahan,id',
             'keterangan_cetak' => 'nullable|string',
             'berat_per_pcs' => 'required|numeric',
             'kadar_air' => 'nullable|numeric',
         ]);
 
+        $items = session('jasa_cuci_items', []);
+
+        $validated['kode_bahan_nama'] = KodeBahan::find($validated['kode_bahan_id'])->nama ?? '-';
+
+        $items[] = $validated;
+        session(['jasa_cuci_items' => $items]);
+
+        return redirect()->route('barang-keluar.jasa-cuci.step2')->with('success', 'Barang ditambahkan ke daftar.');
+    }
+
+    public function removeStep2Item(Request $request, $index)
+    {
+        $items = session('jasa_cuci_items', []);
+
+        if (isset($items[$index])) {
+            unset($items[$index]);
+            $items = array_values($items);
+            session(['jasa_cuci_items' => $items]);
+            return redirect()->route('barang-keluar.jasa-cuci.step2')->with('success', 'Barang dihapus dari daftar.');
+        }
+
+        return redirect()->route('barang-keluar.jasa-cuci.step2')->with('error', 'Barang tidak ditemukan.');
+    }
+
+    public function storeStep2(Request $request)
+    {
         $step1Data = session('jasa_cuci_step1');
+        $items = session('jasa_cuci_items', []);
+
+        if (!$step1Data) {
+            return redirect()->route('barang-keluar.jasa-cuci.step1')->with('error', 'Sesi telah habis, silakan ulangi proses.');
+        }
+
+        if (empty($items)) {
+            return redirect()->route('barang-keluar.jasa-cuci.step2')->with('error', 'Tidak ada barang di dalam daftar, silakan tambah minimal 1 barang.');
+        }
 
         try {
-            $this->service->store($step1Data, $request->all());
+            $this->service->store($step1Data, $items);
             session()->forget('jasa_cuci_step1');
-            return redirect()->route('barang-keluar.jasa-cuci.index')->with('success', 'Data berhasil ditambahkan.');
+            session()->forget('jasa_cuci_items');
+            return redirect()->route('barang-keluar.jasa-cuci.index')->with('success', 'Data Batch berhasil ditambahkan.');
         }
         catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -85,13 +133,13 @@ class BarangKeluarJasaCuciController extends Controller
 
     public function show($id)
     {
-        $data = BarangKeluarJasaCuci::with(['barangKeluar.lokasi', 'kodeBahan'])->findOrFail($id);
+        $data = BarangKeluar::with(['lokasi', 'barangKeluarJasaCuci.kodeBahan'])->findOrFail($id);
         return view('admin.barang-keluar.jasa-cuci.show', compact('data'));
     }
 
     public function edit($id)
     {
-        $data = BarangKeluarJasaCuci::with(['barangKeluar'])->findOrFail($id);
+        $data = BarangKeluar::with(['barangKeluarJasaCuci'])->findOrFail($id);
         $lokasis = Lokasi::where('is_jasa_cuci', true)->get();
         $kodeBahans = KodeBahan::all();
         return view('admin.barang-keluar.jasa-cuci.edit', compact('data', 'lokasis', 'kodeBahans'));
@@ -102,15 +150,16 @@ class BarangKeluarJasaCuciController extends Controller
         $request->validate([
             'tanggal_kirim' => 'required|date',
             'lokasi_id' => 'required|exists:lokasi,id',
-            'kode_bahan_id' => 'required|exists:kode_bahan,id',
-            'keterangan_cetak' => 'nullable|string',
-            'berat_per_pcs' => 'required|numeric',
-            'kadar_air' => 'nullable|numeric',
+            'items' => 'required|array|min:1',
+            'items.*.kode_bahan_id' => 'required|exists:kode_bahan,id',
+            'items.*.keterangan_cetak' => 'nullable|string',
+            'items.*.berat_per_pcs' => 'required|numeric',
+            'items.*.kadar_air' => 'nullable|numeric',
         ]);
 
         try {
             $this->service->update($id, $request->all());
-            return redirect()->route('barang-keluar.jasa-cuci.index')->with('success', 'Data berhasil diperbarui.');
+            return redirect()->route('barang-keluar.jasa-cuci.index')->with('success', 'Data Batch berhasil diperbarui.');
         }
         catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -121,7 +170,7 @@ class BarangKeluarJasaCuciController extends Controller
     {
         try {
             $this->service->delete($id);
-            return redirect()->route('barang-keluar.jasa-cuci.index')->with('success', 'Data berhasil dihapus.');
+            return redirect()->route('barang-keluar.jasa-cuci.index')->with('success', 'Data Batch berhasil dihapus beserta seluruh isinya.');
         }
         catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());

@@ -28,6 +28,8 @@ Route::prefix('admin')->group(function () {
             Route::post('/step1', 'storeStep1')->name('store-step1');
             Route::get('/step2', 'step2')->name('step2');
             Route::post('/step2', 'storeStep2')->name('store-step2');
+            Route::post('/step2/add-item', 'addStep2Item')->name('add.step2.item');
+            Route::delete('/step2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
             Route::get('/{id}', 'show')->name('show');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
@@ -40,6 +42,8 @@ Route::prefix('admin')->group(function () {
             Route::post('/step1', 'storeStep1')->name('store-step1');
             Route::get('/step2', 'step2')->name('step2');
             Route::post('/step2', 'storeStep2')->name('store-step2');
+            Route::post('/step2/add-item', 'addStep2Item')->name('add.step2.item');
+            Route::delete('/step2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
             Route::get('/{id}', 'show')->name('show');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
