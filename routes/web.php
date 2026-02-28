@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\Master\LokasiController;
+use App\Http\Controllers\Admin\Master\NamaBarangController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +17,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get("/", [AuthController::class, "showLogin"]);
+Route::get("/dashboard", [DashboardController::class, "index"])->name('dashboard');
+
+Route::prefix('admin')->group(function () {
+    Route::resource('lokasi', LokasiController::class);
+    Route::resource('nama-barang', NamaBarangController::class)->parameters([
+        'nama-barang' => 'nama_barang'
+    ]);
 });
