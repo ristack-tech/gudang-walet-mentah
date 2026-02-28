@@ -15,4 +15,9 @@ class Warna extends Model
         'kode_warna',
         'warna',
     ];
+
+    public function barangKeluarDemak()
+    {
+        return $this->hasMany(BarangKeluarDemak::class, 'warna_id');
+    }
 }

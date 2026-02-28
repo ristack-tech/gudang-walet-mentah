@@ -15,4 +15,9 @@ class NamaBarang extends Model
         'nama_barang',
         'deskripsi',
     ];
+
+    public function barangKeluarJasaCuci()
+    {
+        return $this->hasMany(BarangKeluarJasaCuci::class, 'barang_id');
+    }
 }
