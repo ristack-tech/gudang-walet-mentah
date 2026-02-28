@@ -14,4 +14,9 @@ class KodeBahan extends Model
     protected $fillable = [
         'nama',
     ];
+
+    public function barangKeluarJasaCuci()
+    {
+        return $this->hasMany(BarangKeluarJasaCuci::class, 'kode_bahan_id');
+    }
 }
