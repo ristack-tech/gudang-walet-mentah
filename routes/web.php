@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Master\LokasiController;
 use App\Http\Controllers\Admin\Master\NamaBarangController;
+use App\Http\Controllers\Admin\Master\KodeBahanController;
 use App\Http\Controllers\Admin\Master\PartaiController;
 use App\Http\Controllers\Admin\Master\SupplierController;
 use App\Http\Controllers\Auth\AuthController;
@@ -26,6 +27,9 @@ Route::prefix('admin')->group(function () {
     Route::resource('lokasi', LokasiController::class);
     Route::resource('nama-barang', NamaBarangController::class)->parameters([
         'nama-barang' => 'nama_barang'
+    ]);
+    Route::resource('kode-bahan', KodeBahanController::class)->parameters([
+        'kode-bahan' => 'kode_bahan'
     ]);
     Route::resource('partai', PartaiController::class);
     Route::resource('supplier', SupplierController::class);
