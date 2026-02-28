@@ -72,12 +72,6 @@
                 document.getElementById('nama').focus();
                 return false;
             }
-
-            // Konfirmasi sebelum submit
-            if (!confirm('Apakah Anda yakin ingin menyimpan supplier ini?')) {
-                e.preventDefault();
-                return false;
-            }
         });
     </script>
 @endsection
