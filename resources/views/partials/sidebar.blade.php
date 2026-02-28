@@ -18,6 +18,7 @@
             $isNamaBarang = request()->routeIs('nama-barang.*');
             $isPartai = request()->routeIs('partai.*');
             $isSupplier = request()->routeIs('supplier.*');
+            $isBarangKeluar = request()->routeIs('barang-keluar.*');
         @endphp
 
         <a href="{{ route('dashboard') }}"
@@ -31,6 +32,24 @@
             <span class="font-medium">Dashboard</span>
         </a>
 
+
+        <div class="pt-4">
+            <div class="border-t border-gray-200 mb-4"></div>
+            <h3 class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                Transaksi
+            </h3>
+            
+            <a href="{{ route('barang-keluar.index') }}"
+                class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 group
+            {{ $isBarangKeluar ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800' }}">
+                <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-4h2a2 2 0 012 2v2H8V2a2 2 0 012-2z"></path>
+                </svg>
+                <span class="font-medium">Barang Keluar</span>
+            </a>
+
+        </div>
 
         <div class="pt-4">
             <div class="border-t border-gray-200 mb-4"></div>
