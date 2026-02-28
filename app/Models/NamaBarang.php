@@ -18,6 +18,21 @@ class NamaBarang extends Model
 
     public function barangKeluarJasaCuci()
     {
-        return $this->hasMany(BarangKeluarJasaCuci::class, 'barang_id');
+        return $this->hasMany(BarangKeluarJasaCuci::class , 'barang_id');
+    }
+
+    public function barangMasukJasaCuci()
+    {
+        return $this->hasMany(BarangMasukJasaCuci::class , 'barang_id');
+    }
+
+    public function barangMasukDemak()
+    {
+        return $this->hasMany(BarangMasukDemak::class , 'barang_id');
+    }
+
+    public function barangMasukSupplier()
+    {
+        return $this->hasMany(BarangMasukPembelianSupplier::class , 'barang_id');
     }
 }

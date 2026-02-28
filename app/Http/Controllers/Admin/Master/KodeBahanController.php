@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Services\Admin\Master\KodeBahanService;
 use Illuminate\Http\Request;
-use App\Services\Admin\KodeBahanService;
-
 class KodeBahanController extends Controller
 {
     protected $kodeBahanService;

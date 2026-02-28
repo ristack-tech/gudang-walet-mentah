@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\Admin\LokasiService;
+use App\Services\Admin\Master\LokasiService;
 
 class LokasiController extends Controller
 {

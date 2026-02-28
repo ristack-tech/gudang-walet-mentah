@@ -14,4 +14,9 @@ class Supplier extends Model
     protected $fillable = [
         'nama',
     ];
+
+    public function barangMasukSupplier()
+    {
+        return $this->hasMany(BarangMasukPembelianSupplier::class , 'supplier_id');
+    }
 }

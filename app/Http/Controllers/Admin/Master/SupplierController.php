@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Services\Admin\Master\SupplierService;
 use Illuminate\Http\Request;
-use App\Services\Admin\SupplierService;
 
 class SupplierController extends Controller
 {
