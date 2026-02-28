@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Admin;
+namespace App\Services\Admin\Master;
 
 use App\Models\Lokasi;
 
@@ -8,7 +8,7 @@ class LokasiService
 {
     /**
      * Get all lokasi.
-     * 
+     *
      * @param string|null $search
      * @param int $perPage
      */
