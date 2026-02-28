@@ -18,6 +18,6 @@ class NamaBarang extends Model
 
     public function barangKeluarJasaCuci()
     {
-        return $this->hasMany(BarangKeluarJasaCuci::class, 'barang_id');
+        return $this->hasMany(BarangKeluarJasaCuci::class, 'nama_barang_id');
     }
 }
