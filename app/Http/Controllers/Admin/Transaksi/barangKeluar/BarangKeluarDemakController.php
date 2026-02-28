@@ -1,131 +1,148 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Transaksi\barangKeluar;
+namespace App\Http\Controllers\Admin\Transaksi;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\BarangKeluarDemak;
-use App\Models\BarangKeluar;
-use App\Models\Partai;
-use App\Models\Warna;
-use App\Services\Admin\Transaksi\barangKeluar\BarangKeluarDemakService;
 
 class BarangKeluarDemakController extends Controller
 {
-    protected $service;
-
-    public function __construct(BarangKeluarDemakService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index(Request $request)
     {
-        $query = BarangKeluarDemak::with(['barangKeluar', 'partai']);
+        $query = BarangKeluarDemak::with(['barangKeluar', 'partai', 'warna'])->latest();
 
-        if ($request->has('search') && $request->search != '') {
-            $query->where('kode_lp', 'like', '%' . $request->search . '%');
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->whereHas('partai', function ($q) use ($search) {
+                $q->where('nama_partai', 'like', "%{$search}%");
+            });
         }
 
-        $data = $query->latest()->paginate(10);
+        $barangKeluarDemak = $query->paginate(10);
 
-        return view('admin.barang-keluar.demak.index', compact('data'));
+        return view('admin.barang-keluar.demak.index', compact('barangKeluarDemak'));
     }
 
-    public function step1()
+    public function createStep1(Request $request)
     {
-        $partais = Partai::all();
-        return view('admin.barang-keluar.demak.step1', compact('partais'));
+        $partai = \App\Models\Partai::all();
+        $step1Data = session('barang_keluar_demak_step1', []);
+
+        return view('admin.barang-keluar.demak.step1', compact('partai', 'step1Data'));
     }
 
     public function storeStep1(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'tanggal_kirim' => 'required|date',
-            'partai_id' => 'required|exists:partai,id'
+            'partai_id' => 'required|exists:partai,id',
         ]);
 
-        session(['demak_step1' => $request->only('tanggal_kirim', 'partai_id')]);
+        session(['barang_keluar_demak_step1' => $validated]);
 
-        return redirect()->route('barang-keluar.demak.step2');
+        return redirect()->route('barang-keluar.demak.create.step2');
     }
 
-    public function step2()
+    public function createStep2(Request $request)
     {
-        if (!session()->has('demak_step1')) {
-            return redirect()->route('barang-keluar.demak.step1')->with('error', 'Silakan isi step 1 terlebih dahulu.');
+        if (!session()->has('barang_keluar_demak_step1')) {
+            return redirect()->route('barang-keluar.demak.create.step1')
+                ->with('error', 'Silakan lengkapi Data Awal terlebih dahulu.');
         }
 
-        $warnas = Warna::all();
-        return view('admin.barang-keluar.demak.step2', compact('warnas'));
+        $warna = \App\Models\Warna::all();
+        $step1Data = session('barang_keluar_demak_step1');
+        $partai = \App\Models\Partai::find($step1Data['partai_id']);
+
+        return view('admin.barang-keluar.demak.step2', compact('warna', 'step1Data', 'partai'));
     }
 
-    public function storeStep2(Request $request)
+    public function storeStep2(Request $request, \App\Services\Admin\Transaksi\BarangKeluarDemakService $service)
     {
-        $request->validate([
-            'kode_lp' => 'required|string',
+        $validated = $request->validate([
+            'warna_id' => 'required|exists:warna,id',
+            'kode_lp' => 'nullable|string|max:255',
             'gram' => 'required|numeric',
-            'pcs' => 'required|integer',
-            'kadar_air' => 'nullable|numeric',
-            'warna_id' => 'nullable|exists:warna,id',
+            'pcs' => 'required|numeric',
+            'kadar_air' => 'required|numeric',
             'timbangan_ulang' => 'nullable|numeric',
-            'keterangan' => 'nullable|string'
+            'keterangan' => 'nullable|string',
         ]);
 
-        $step1Data = session('demak_step1');
+        $step1Data = session('barang_keluar_demak_step1');
+
+        if (!$step1Data) {
+            return redirect()->route('barang-keluar.demak.create.step1')
+                ->with('error', 'Sesi telah habis, silakan ulangi proses.');
+        }
+
+        $data = array_merge($step1Data, $validated);
 
         try {
-            $this->service->store($step1Data, $request->all());
-            session()->forget('demak_step1');
-            return redirect()->route('barang-keluar.demak.index')->with('success', 'Data berhasil ditambahkan.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            $service->storeData($data);
+            session()->forget('barang_keluar_demak_step1');
+            return redirect()->route('barang-keluar.demak.index')
+                ->with('success', 'Data Barang Keluar (Demak) berhasil ditambahkan.');
+        }
+        catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
 
     public function show($id)
     {
-        $data = BarangKeluarDemak::with(['barangKeluar', 'partai', 'warna'])->findOrFail($id);
-        return view('admin.barang-keluar.demak.show', compact('data'));
+        $barangKeluarDemak = BarangKeluarDemak::with(['barangKeluar', 'partai', 'warna'])->findOrFail($id);
+        return view('admin.barang-keluar.demak.show', compact('barangKeluarDemak'));
     }
 
     public function edit($id)
     {
-        $data = BarangKeluarDemak::with(['barangKeluar'])->findOrFail($id);
-        $partais = Partai::all();
-        $warnas = Warna::all();
-        return view('admin.barang-keluar.demak.edit', compact('data', 'partais', 'warnas'));
+        $barangKeluarDemak = BarangKeluarDemak::with(['barangKeluar'])->findOrFail($id);
+        $partai = \App\Models\Partai::all();
+        $warna = \App\Models\Warna::all();
+
+        return view('admin.barang-keluar.demak.edit', compact('barangKeluarDemak', 'partai', 'warna'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, \App\Services\Admin\Transaksi\BarangKeluarDemakService $service)
     {
-        $request->validate([
+        $validated = $request->validate([
             'tanggal_kirim' => 'required|date',
             'partai_id' => 'required|exists:partai,id',
-            'kode_lp' => 'required|string',
+            'warna_id' => 'required|exists:warna,id',
+            'kode_lp' => 'nullable|string|max:255',
             'gram' => 'required|numeric',
-            'pcs' => 'required|integer',
-            'kadar_air' => 'nullable|numeric',
-            'warna_id' => 'nullable|exists:warna,id',
+            'pcs' => 'required|numeric',
+            'kadar_air' => 'required|numeric',
             'timbangan_ulang' => 'nullable|numeric',
-            'keterangan' => 'nullable|string'
+            'keterangan' => 'nullable|string',
         ]);
 
+        $barangKeluarDemak = BarangKeluarDemak::findOrFail($id);
+
         try {
-            $this->service->update($id, $request->all());
-            return redirect()->route('barang-keluar.demak.index')->with('success', 'Data berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            $service->updateData($barangKeluarDemak, $validated);
+            return redirect()->route('barang-keluar.demak.index')
+                ->with('success', 'Data Barang Keluar (Demak) berhasil diperbarui.');
+        }
+        catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
 
-    public function destroy($id)
+    public function destroy($id, \App\Services\Admin\Transaksi\BarangKeluarDemakService $service)
     {
+        $barangKeluarDemak = BarangKeluarDemak::findOrFail($id);
+
         try {
-            $this->service->delete($id);
-            return redirect()->route('barang-keluar.demak.index')->with('success', 'Data berhasil dihapus.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            $service->destroyData($barangKeluarDemak);
+            return redirect()->route('barang-keluar.demak.index')
+                ->with('success', 'Data Barang Keluar (Demak) berhasil dihapus.');
+        }
+        catch (\Exception $e) {
+            return redirect()->route('barang-keluar.demak.index')
+                ->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
 }

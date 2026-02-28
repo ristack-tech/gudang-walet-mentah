@@ -8,7 +8,7 @@ class LokasiService
 {
     /**
      * Get all lokasi.
-     *
+     * 
      * @param string|null $search
      * @param int $perPage
      */

@@ -8,7 +8,7 @@ class KodeBahanService
 {
     /**
      * Get all kode bahan with pagination and search.
-     *
+     * 
      * @param string|null $search
      * @param int $perPage
      */

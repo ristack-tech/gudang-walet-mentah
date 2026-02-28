@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Manajemen Warna')
+@section('title', 'Data Barang Masuk (Pembelian Supplier)')
 
 @section('content')
     <div class="bg-white min-h-screen">
@@ -8,34 +8,32 @@
 
             <!-- Header -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <h1 class="text-2xl font-semibold text-gray-800">Manajemen Warna</h1>
-
+                <h1 class="text-2xl font-semibold text-gray-800">Data Barang Masuk (Pembelian Supplier)</h1>
+                
                 <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <!-- Search Form -->
-                    <form action="{{ route('warna.index') }}" method="GET" class="flex w-full sm:w-auto">
+                    <form action="{{ route('barang-masuk.pembelian-supplier.index') }}" method="GET" class="flex w-full sm:w-auto">
                         <div class="relative flex-grow sm:flex-grow-0">
-                            <input type="text" name="search" value="{{ request('search') }}"
-                                placeholder="Cari kode atau warna..."
+                            <input type="text" name="search" value="{{ request('search') }}" 
+                                placeholder="Cari nama supplier..." 
                                 class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
                         </div>
-                        <button type="submit"
-                            class="ml-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded-md text-sm font-medium transition duration-200">
+                        <button type="submit" class="ml-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded-md text-sm font-medium transition duration-200">
                             Cari
                         </button>
                     </form>
 
-                    <a href="{{ route('warna.create') }}"
+                    <a href="{{ route('barang-masuk.pembelian-supplier.create.step1') }}"
                         class="flex justify-center items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 whitespace-nowrap">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        Tambah Warna
+                        Tambah Data
                     </a>
                 </div>
             </div>
@@ -43,49 +41,58 @@
             <!-- Table -->
             <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200" id="warnaTable">
+                    <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     No
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Kode Warna
+                                    Tanggal Terima
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Warna
+                                    Barang
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Tanggal Dibuat
+                                    Supplier
                                 </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Berat / Pcs / Box
+                                </th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Action
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($warna as $index => $item)
+                            @forelse($barangMasukSupplier as $index => $item)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $warna->firstItem() + $index }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                                        {{ $item->kode_warna }}
+                                        {{ $barangMasukSupplier->firstItem() + $index }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $item->warna }}
+                                        {{ $item->barangMasuk->tanggal_terima ?? '-' }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        {{ $item->created_at ? $item->created_at->format('d M Y') : '-' }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $item->barang->nama_barang ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $item->supplier->nama ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ number_format($item->berat, 2) }} kg / {{ $item->pcs }} pcs / {{ $item->box }} box
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                         <div class="flex items-center justify-center space-x-2">
-                                            <a href="{{ route('warna.edit', $item->id) }}"
+                                            <a href="{{ route('barang-masuk.pembelian-supplier.show', $item->id) }}"
+                                                class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">
+                                                Detail
+                                            </a>
+                                            <a href="{{ route('barang-masuk.pembelian-supplier.edit', $item->id) }}"
                                                 class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">
                                                 Edit
                                             </a>
-                                            <button onclick="confirmDelete({{ $item->id }}, '{{ $item->warna }}')"
+                                            <button onclick="confirmDelete({{ $item->id }}, '{{ $item->supplier->nama ?? '' }}')"
                                                 class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
                                                 Hapus
                                             </button>
@@ -94,18 +101,18 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-12 text-center text-sm text-gray-500">
-                                        Tidak ada data warna
+                                    <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
+                                        Tidak ada data.
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
-                @if($warna->hasPages())
-                    <div class="px-6 py-4 border-t border-gray-200">
-                        {{ $warna->withQueryString()->links() }}
-                    </div>
+                @if($barangMasukSupplier->hasPages())
+                <div class="px-6 py-4 border-t border-gray-200">
+                    {{ $barangMasukSupplier->withQueryString()->links() }}
+                </div>
                 @endif
             </div>
         </div>
@@ -121,10 +128,9 @@
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mt-4">Hapus Data Warna</h3>
+                <h3 class="text-lg font-medium text-gray-900 mt-4">Hapus Data</h3>
                 <p class="text-sm text-gray-500 mt-2">
-                    Apakah Anda yakin ingin menghapus data warna <span id="itemName"
-                        class="font-semibold text-gray-900"></span>?
+                    Apakah Anda yakin ingin menghapus data supplier <span id="dataName" class="font-semibold text-gray-900"></span>?
                 </p>
                 <form id="deleteForm" method="POST" class="mt-6">
                     @csrf
@@ -145,10 +151,9 @@
     </div>
 
     <script>
-        // Delete modal functions
         function confirmDelete(id, name) {
-            document.getElementById('itemName').textContent = name;
-            var url = '{{ route('warna.destroy', ':id') }}';
+            document.getElementById('dataName').textContent = name;
+            var url = '{{ route('barang-masuk.pembelian-supplier.destroy', ':id') }}';
             url = url.replace(':id', id);
             document.getElementById('deleteForm').action = url;
             document.getElementById('deleteModal').classList.remove('hidden');
@@ -158,14 +163,12 @@
             document.getElementById('deleteModal').classList.add('hidden');
         }
 
-        // Close modal when clicking outside
-        document.getElementById('deleteModal')?.addEventListener('click', function (event) {
+        document.getElementById('deleteModal')?.addEventListener('click', function(event) {
             if (event.target === this) {
                 closeDeleteModal();
             }
         });
 
-        // Auto-hide alerts after 5 seconds
         setTimeout(() => {
             const alerts = document.querySelectorAll('[id^="alert-"]');
             alerts.forEach(alert => {

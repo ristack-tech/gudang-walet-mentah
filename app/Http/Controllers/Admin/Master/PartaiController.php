@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Services\Admin\Master\PartaiService;
+use Illuminate\Http\Request;
 
 class PartaiController extends Controller
 {

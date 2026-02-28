@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('jenis_barang_keluar_id')->constrained('jenis_barang_keluar')->onDelete('cascade');
             $table->date('tanggal_kirim');
-            $table->foreignId('lokasi_id')->nullable()->constrained('lokasi')->onDelete('cascade');
             $table->timestamps();
         });
     }

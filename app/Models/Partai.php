@@ -18,6 +18,7 @@ class Partai extends Model
 
     public function barangKeluarDemak()
     {
-        return $this->hasMany(BarangKeluarDemak::class, 'partai_id');
+        return $this->hasMany(BarangKeluarDemak::class , 'partai_id');
     }
+
 }

@@ -8,7 +8,7 @@ class NamaBarangService
 {
     /**
      * Get all nama barang with pagination and search.
-     *
+     * 
      * @param string|null $search
      * @param int $perPage
      */
