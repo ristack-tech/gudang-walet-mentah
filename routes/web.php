@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\Master\NamaBarangController;
 use App\Http\Controllers\Admin\Master\KodeBahanController;
 use App\Http\Controllers\Admin\Master\PartaiController;
 use App\Http\Controllers\Admin\Master\SupplierController;
+use App\Http\Controllers\Admin\Master\WarnaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,7 @@ Route::prefix('admin')->group(function () {
     Route::resource('kode-bahan', KodeBahanController::class)->parameters([
         'kode-bahan' => 'kode_bahan'
     ]);
+    Route::resource('warna', WarnaController::class);
     Route::resource('partai', PartaiController::class);
     Route::resource('supplier', SupplierController::class);
 });
