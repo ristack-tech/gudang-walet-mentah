@@ -85,12 +85,6 @@
                 document.getElementById('nama_barang').focus();
                 return false;
             }
-
-            // Konfirmasi sebelum submit
-            if (!confirm('Apakah Anda yakin ingin menyimpan nama barang ini?')) {
-                e.preventDefault();
-                return false;
-            }
         });
     </script>
 @endsection

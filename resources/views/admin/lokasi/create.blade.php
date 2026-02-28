@@ -87,12 +87,6 @@
                 document.getElementById('nama_lokasi').focus();
                 return false;
             }
-
-            // Konfirmasi sebelum submit
-            if (!confirm('Apakah Anda yakin ingin menyimpan lokasi ini?')) {
-                e.preventDefault();
-                return false;
-            }
         });
     </script>
 @endsection

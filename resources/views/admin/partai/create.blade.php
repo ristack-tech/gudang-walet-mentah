@@ -85,12 +85,6 @@
                 document.getElementById('nama_partai').focus();
                 return false;
             }
-
-            // Konfirmasi sebelum submit
-            if (!confirm('Apakah Anda yakin ingin menyimpan partai ini?')) {
-                e.preventDefault();
-                return false;
-            }
         });
     </script>
 @endsection
