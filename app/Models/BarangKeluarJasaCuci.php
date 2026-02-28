@@ -13,7 +13,7 @@ class BarangKeluarJasaCuci extends Model
 
     protected $fillable = [
         'barang_keluar_id',
-        'barang_id',
+        'nama_barang_id',
         'kode_bahan_id',
         'keterangan_cetak',
         'berat_per_pcs',
@@ -22,16 +22,16 @@ class BarangKeluarJasaCuci extends Model
 
     public function barangKeluar()
     {
-        return $this->belongsTo(BarangKeluar::class, 'barang_keluar_id');
+        return $this->belongsTo(BarangKeluar::class , 'barang_keluar_id');
     }
 
     public function namaBarang()
     {
-        return $this->belongsTo(NamaBarang::class, 'barang_id');
+        return $this->belongsTo(NamaBarang::class , 'nama_barang_id');
     }
 
     public function kodeBahan()
     {
-        return $this->belongsTo(KodeBahan::class, 'kode_bahan_id');
+        return $this->belongsTo(KodeBahan::class , 'kode_bahan_id');
     }
 }
