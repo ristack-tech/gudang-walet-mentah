@@ -9,7 +9,7 @@
             <!-- Header -->
             <div class="mb-6">
                 <h1 class="text-2xl font-semibold text-gray-800 mb-4">Barang Keluar Demak</h1>
-                
+
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <a href="{{ route('barang-keluar.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 shadow-sm">
                         <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,8 +22,8 @@
                         <!-- Search Form -->
                         <form action="{{ route('barang-keluar.demak.index') }}" method="GET" class="flex w-full sm:w-auto">
                             <div class="relative flex-grow sm:flex-grow-0">
-                                <input type="text" name="search" value="{{ request('search') }}" 
-                                    placeholder="Cari Kode LP..." 
+                                <input type="text" name="search" value="{{ request('search') }}"
+                                    placeholder="Cari Kode LP..."
                                     class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,19 +57,13 @@
                                     No
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Batch
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Tgl Kirim
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Partai
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Kode LP
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Gram
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Pcs
                                 </th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -83,42 +77,36 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $data->firstItem() + $index }}
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">
+                                        {{ \Carbon\Carbon::parse($item->tanggal_kirim)->format('Ymd') . '-' . strtoupper(substr(md5($item->id), 0, 3)) }}
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        {{ $item->barangKeluar->tanggal_kirim ? \Carbon\Carbon::parse($item->barangKeluar->tanggal_kirim)->format('d M Y') : '-' }}
+                                        {{ $item->tanggal_kirim ? \Carbon\Carbon::parse($item->tanggal_kirim)->format('d M Y') : '-' }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900">
-                                        {{ $item->partai->nama_partai ?? '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
-                                        {{ $item->kode_lp ?? '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
-                                        {{ $item->gram ?? '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
-                                        {{ $item->pcs ?? '-' }}
+                                        {{ optional($item->barangKeluarDemak->first())->partai->nama_partai ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                         <div class="flex items-center justify-center space-x-2">
                                             <a href="{{ route('barang-keluar.demak.show', $item->id) }}"
                                                 class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">
-                                                Detail
+                                                Detail Batch
                                             </a>
                                             <a href="{{ route('barang-keluar.demak.edit', $item->id) }}"
                                                 class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">
-                                                Edit
+                                                Edit Batch
                                             </a>
-                                            <button onclick="confirmDelete({{ $item->id }}, '{{ $item->kode_lp }}')"
+                                            <button onclick="confirmDelete({!! $item->id !!}, 'BKD-{{ \Carbon\Carbon::parse($item->tanggal_kirim)->format('Ymd') . '-' . strtoupper(substr(md5($item->id), 0, 3)) }}')"
                                                 class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
-                                                Hapus
+                                                Hapus Batch
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
-                                        Tidak ada data
+                                    <td colspan="5" class="px-6 py-12 text-center text-sm text-gray-500">
+                                        Tidak ada data batch.
                                     </td>
                                 </tr>
                             @endforelse
@@ -131,7 +119,7 @@
                 </div>
                 @endif
             </div>
-            
+
         </div>
     </div>
 
@@ -145,9 +133,9 @@
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mt-4">Hapus Data</h3>
+                <h3 class="text-lg font-medium text-gray-900 mt-4">Hapus Data Batch</h3>
                 <p class="text-sm text-gray-500 mt-2">
-                    Apakah Anda yakin ingin menghapus data dengan Kode LP <span id="itemCode" class="font-semibold text-gray-900"></span>?
+                    Apakah Anda yakin ingin menghapus seluruh data batch <span id="itemCode" class="font-semibold text-gray-900"></span> beserta isinya?
                 </p>
                 <form id="deleteForm" method="POST" class="mt-6">
                     @csrf

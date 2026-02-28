@@ -10,13 +10,10 @@
             <div class="flex justify-between items-start mb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900">Tambah Barang Keluar Jasa Cuci</h2>
-                    <p class="text-gray-500 text-sm mt-1">Lengkapi data rincian barang keluar ke jasa cuci.</p>
+                    <p class="text-gray-500 text-sm mt-1">Lengkapi data rincian barang keluar untuk lokasi <strong>{{ $lokasi->nama_lokasi ?? '-' }}</strong>.</p>
                 </div>
-                <a href="{{ route('barang-keluar.jasa-cuci.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200 shadow-sm">
-                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Batal
+                <a href="{{ route('barang-keluar.jasa-cuci.step1') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200 shadow-sm">
+                    Kembali
                 </a>
             </div>
 
@@ -42,10 +39,22 @@
                 </div>
             </div>
 
+            @if(session('error'))
+                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+                    <div class="text-red-700 text-sm">{{ session('error') }}</div>
+                </div>
+            @endif
+            @if(session('success'))
+                <div id="alert-success" class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-md">
+                    <div class="text-green-700 text-sm">{{ session('success') }}</div>
+                </div>
+            @endif
+
             <!-- Form Box -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
                 <div class="p-6 sm:p-8">
-                    <form action="{{ route('barang-keluar.jasa-cuci.store-step2') }}" method="POST">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Tambah Detail Barang</h3>
+                    <form action="{{ route('barang-keluar.jasa-cuci.add.step2.item') }}" method="POST">
                         @csrf
                         <div class="space-y-6">
                             
@@ -53,25 +62,34 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="kode_bahan_id" class="block text-sm font-medium text-gray-700 mb-1">Kode Bahan <span class="text-red-500">*</span></label>
-                                    <select name="kode_bahan_id" id="kode_bahan_id" required class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200">
+                                    <select name="kode_bahan_id" id="kode_bahan_id" required class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('kode_bahan_id') border-red-500 @enderror">
                                         <option value="">-- Pilih Kode Bahan --</option>
                                         @foreach($kodeBahans as $kode)
-                                            <option value="{{ $kode->id }}">{{ $kode->nama }}</option>
+                                            <option value="{{ $kode->id }}" {{ old('kode_bahan_id') == $kode->id ? 'selected' : '' }}>{{ $kode->nama }}</option>
                                         @endforeach
                                     </select>
+                                    @error('kode_bahan_id')
+                                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div>
                                     <label for="berat_per_pcs" class="block text-sm font-medium text-gray-700 mb-1">Berat Per Pcs (Gram/Pcs) <span class="text-red-500">*</span></label>
-                                    <input type="number" step="0.01" name="berat_per_pcs" id="berat_per_pcs" required
-                                        class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200">
+                                    <input type="number" step="0.01" min="0" name="berat_per_pcs" id="berat_per_pcs" required value="{{ old('berat_per_pcs') }}"
+                                        class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('berat_per_pcs') border-red-500 @enderror">
+                                    @error('berat_per_pcs')
+                                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="kadar_air" class="block text-sm font-medium text-gray-700 mb-1">Kadar Air (%)</label>
-                                    <input type="number" step="0.01" name="kadar_air" id="kadar_air"
-                                        class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200">
+                                    <input type="number" step="0.01" min="0" max="100" name="kadar_air" id="kadar_air" value="{{ old('kadar_air') }}"
+                                        class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('kadar_air') border-red-500 @enderror">
+                                    @error('kadar_air')
+                                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
 
@@ -79,23 +97,79 @@
                             <div>
                                 <label for="keterangan_cetak" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Cetak</label>
                                 <textarea name="keterangan_cetak" id="keterangan_cetak" rows="3"
-                                    class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200"></textarea>
+                                    class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('keterangan_cetak') border-red-500 @enderror">{{ old('keterangan_cetak') }}</textarea>
+                                @error('keterangan_cetak')
+                                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
-                        <div class="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
-                            <a href="{{ route('barang-keluar.jasa-cuci.step1') }}" class="inline-flex items-center px-6 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
-                                <svg class="mr-2 -ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                                Kembali ke Step 1
-                            </a>
-                            <button type="submit" class="bg-teal-600 border border-transparent rounded-lg shadow-sm py-2.5 px-8 inline-flex justify-center text-sm font-medium text-white hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
-                                Simpan Data
+                        <div class="mt-6 flex justify-end">
+                            <button type="submit" class="bg-teal-500 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition duration-150">
+                                + Tambahkan ke Daftar
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
-            
+
+            <!-- CART TABLE -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-6 sm:p-8">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Daftar Barang Keluar Jasa Cuci</h3>
+                @if(count($items) > 0)
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm mb-6">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Bahan</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Berat (Gram/Pcs)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($items as $index => $item)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">{{ $item['kode_bahan_nama'] }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                                            <span class="font-bold text-gray-800">{{ number_format($item['berat_per_pcs'], 2, ',', '.') }}</span>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $item['keterangan_cetak'] ?? '-' }}
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-center text-sm">
+                                            <form action="{{ route('barang-keluar.jasa-cuci.remove.step2.item', $index) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">Hapus</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-gray-100 flex items-center justify-between">
+                        <div class="text-sm text-gray-600">
+                            Total <span class="font-bold">{{ count($items) }}</span> item
+                        </div>
+                        <form action="{{ route('barang-keluar.jasa-cuci.store-step2') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="bg-teal-600 border border-transparent rounded-lg shadow-sm py-2.5 px-8 inline-flex justify-center text-sm font-medium text-white hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
+                                Simpan Data Batch
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <div class="text-center py-8 border border-gray-200 border-dashed rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-500">Belum ada barang di dalam daftar. Silakan tambahkan barang melalui form di atas.</p>
+                    </div>
+                @endif
+            </div>
+
         </div>
     </div>
 @endsection

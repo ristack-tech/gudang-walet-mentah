@@ -3,7 +3,7 @@
 @section('title', 'Barang Keluar Jasa Cuci')
 
 @section('content')
-    <div class="bg-white min-h-screen">
+    <div class="bg-gray-50 min-h-screen">
         <div class="w-full px-4 sm:px-6 lg:px-8 py-8">
 
             <!-- Header -->
@@ -37,7 +37,7 @@
                         </form>
 
                         <a href="{{ route('barang-keluar.jasa-cuci.step1') }}"
-                            class="flex justify-center items-center bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 whitespace-nowrap">
+                            class="flex justify-center items-center bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 whitespace-nowrap shadow-sm">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
@@ -48,7 +48,7 @@
             </div>
 
             <!-- Table -->
-            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200" id="dataTable">
                         <thead class="bg-gray-50">
@@ -57,13 +57,13 @@
                                     No
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Batch
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tgl Kirim
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Nama Jasa Cuci
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Tanggal Pemberian Bahan
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Kode Bahan
                                 </th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -73,32 +73,35 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($data as $index => $item)
+                                @php
+                                    $batchStr = \Carbon\Carbon::parse($item->tanggal_kirim)->format('Ymd') . '-' . strtoupper(substr(md5($item->id), 0, 3));
+                                @endphp
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $data->firstItem() + $index }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
-                                        {{ $item->barangKeluar->lokasi->nama_lokasi ?? '-' }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-teal-600">
+                                        {{ $batchStr }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        {{ $item->barangKeluar->tanggal_kirim ? \Carbon\Carbon::parse($item->barangKeluar->tanggal_kirim)->format('d M Y') : '-' }}
+                                        {{ \Carbon\Carbon::parse($item->tanggal_kirim)->format('d M Y') }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
-                                        {{ $item->kodeBahan->nama ?? '-' }}
+                                    <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                                        {{ $item->lokasi->nama_lokasi ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                         <div class="flex items-center justify-center space-x-2">
                                             <a href="{{ route('barang-keluar.jasa-cuci.show', $item->id) }}"
-                                                class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">
-                                                Detail
+                                                class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 rounded-md border border-green-200 hover:bg-green-100 transition duration-200 font-medium">
+                                                Detail Batch
                                             </a>
                                             <a href="{{ route('barang-keluar.jasa-cuci.edit', $item->id) }}"
-                                                class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">
-                                                Edit
+                                                class="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200 hover:bg-blue-100 transition duration-200 font-medium">
+                                                Edit Batch
                                             </a>
-                                            <button onclick="confirmDelete({{ $item->id }}, '{{ $item->kodeBahan->nama ?? '' }}')"
-                                                class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
-                                                Hapus
+                                            <button onclick="confirmDelete({{ $item->id }}, '{{ $batchStr }}')"
+                                                class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 rounded-md border border-red-200 hover:bg-red-100 transition duration-200 font-medium">
+                                                Hapus Batch
                                             </button>
                                         </div>
                                     </td>
@@ -106,7 +109,7 @@
                             @empty
                                 <tr>
                                     <td colspan="5" class="px-6 py-12 text-center text-sm text-gray-500">
-                                        Tidak ada data
+                                        Tidak ada data batch.
                                     </td>
                                 </tr>
                             @endforelse
@@ -125,29 +128,29 @@
 
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
             <div class="mt-3 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
                     <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mt-4">Hapus Data</h3>
-                <p class="text-sm text-gray-500 mt-2">
-                    Apakah Anda yakin ingin menghapus data dengan Kode Bahan <span id="itemCode" class="font-semibold text-gray-900"></span>?
+                <h3 class="text-lg font-medium text-gray-900 mt-4">Hapus Data Batch</h3>
+                <p class="text-sm text-gray-500 mt-2 px-4">
+                    Apakah Anda yakin ingin menghapus seluruh data batch <span id="itemCode" class="font-bold text-gray-900"></span> dan isinya? Tindakan ini tidak dapat dibatalkan.
                 </p>
                 <form id="deleteForm" method="POST" class="mt-6">
                     @csrf
                     @method('DELETE')
-                    <div class="flex gap-3 justify-center">
+                    <div class="flex gap-3 justify-center px-4">
                         <button type="button" onclick="closeDeleteModal()"
-                            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition duration-200">
+                            class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-200">
                             Batal
                         </button>
                         <button type="submit"
-                            class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm font-medium transition duration-200">
-                            Hapus
+                            class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition duration-200 shadow-sm">
+                            Ya, Hapus
                         </button>
                     </div>
                 </form>

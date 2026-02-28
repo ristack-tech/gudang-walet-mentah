@@ -50,12 +50,15 @@
                                 <label for="tanggal_kirim" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kirim <span class="text-red-500">*</span></label>
                                 <input type="date" name="tanggal_kirim" id="tanggal_kirim" required
                                     value="{{ session('demak_step1.tanggal_kirim', date('Y-m-d')) }}"
-                                    class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-200">
+                                    class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-200 @error('tanggal_kirim') border-red-500 @enderror">
+                                @error('tanggal_kirim')
+                                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div>
                                 <label for="partai_id" class="block text-sm font-medium text-gray-700 mb-1">Partai <span class="text-red-500">*</span></label>
-                                <select name="partai_id" id="partai_id" required class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-200">
+                                <select name="partai_id" id="partai_id" required class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-200 @error('partai_id') border-red-500 @enderror">
                                     <option value="">-- Pilih Partai --</option>
                                     @foreach($partais as $partai)
                                         <option value="{{ $partai->id }}" {{ session('demak_step1.partai_id') == $partai->id ? 'selected' : '' }}>
@@ -63,6 +66,9 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                @error('partai_id')
+                                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 

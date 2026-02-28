@@ -10,9 +10,9 @@ use App\Models\KodeBahan;
 
 class BarangKeluarJasaCuciService
 {
-    public function store($step1Data, $step2Data)
+    public function store($step1Data, $items)
     {
-        return DB::transaction(function () use ($step1Data, $step2Data) {
+        return DB::transaction(function () use ($step1Data, $items) {
             $jenis = JenisBarangKeluar::firstOrCreate(['nama' => 'Jasa Cuci']);
             $jenisId = $jenis->id;
 
@@ -22,45 +22,54 @@ class BarangKeluarJasaCuciService
                 'lokasi_id' => $step1Data['lokasi_id'],
             ]);
 
-            return BarangKeluarJasaCuci::create([
-                'barang_keluar_id' => $barangKeluar->id,
-                'kode_bahan_id' => $step2Data['kode_bahan_id'],
-                'keterangan_cetak' => $step2Data['keterangan_cetak'],
-                'berat_per_pcs' => $step2Data['berat_per_pcs'],
-                'kadar_air' => $step2Data['kadar_air'],
-            ]);
+            foreach ($items as $item) {
+                BarangKeluarJasaCuci::create([
+                    'barang_keluar_id' => $barangKeluar->id,
+                    'kode_bahan_id' => $item['kode_bahan_id'],
+                    'keterangan_cetak' => $item['keterangan_cetak'] ?? null,
+                    'berat_per_pcs' => $item['berat_per_pcs'],
+                    'kadar_air' => $item['kadar_air'] ?? null,
+                ]);
+            }
+
+            return $barangKeluar;
         });
     }
 
     public function update($id, $data)
     {
         return DB::transaction(function () use ($id, $data) {
-            $jasaCuci = BarangKeluarJasaCuci::findOrFail($id);
+            $barangKeluar = BarangKeluar::findOrFail($id);
 
-            $jasaCuci->barangKeluar->update([
+            $barangKeluar->update([
                 'tanggal_kirim' => $data['tanggal_kirim'],
                 'lokasi_id' => $data['lokasi_id'],
             ]);
 
-            $jasaCuci->update([
-                'kode_bahan_id' => $data['kode_bahan_id'],
-                'keterangan_cetak' => $data['keterangan_cetak'],
-                'berat_per_pcs' => $data['berat_per_pcs'],
-                'kadar_air' => $data['kadar_air'],
-            ]);
+            // Clear old items
+            $barangKeluar->barangKeluarJasaCuci()->delete();
 
-            return $jasaCuci;
+            // Insert new ones
+            foreach ($data['items'] as $item) {
+                BarangKeluarJasaCuci::create([
+                    'barang_keluar_id' => $barangKeluar->id,
+                    'kode_bahan_id' => $item['kode_bahan_id'],
+                    'keterangan_cetak' => $item['keterangan_cetak'] ?? null,
+                    'berat_per_pcs' => $item['berat_per_pcs'],
+                    'kadar_air' => $item['kadar_air'] ?? null,
+                ]);
+            }
+
+            return $barangKeluar;
         });
     }
 
     public function delete($id)
     {
         return DB::transaction(function () use ($id) {
-            $jasaCuci = BarangKeluarJasaCuci::findOrFail($id);
-            if ($jasaCuci->barangKeluar) {
-                $jasaCuci->barangKeluar->delete();
-            }
-            return $jasaCuci->delete();
+            $barangKeluar = BarangKeluar::findOrFail($id);
+            $barangKeluar->barangKeluarJasaCuci()->delete();
+            return $barangKeluar->delete();
         });
     }
 }
