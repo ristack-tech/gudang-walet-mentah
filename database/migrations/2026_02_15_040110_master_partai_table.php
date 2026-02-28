@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('partai', function (Blueprint $table) {
             $table->id();
             $table->string('nama_partai');
-            $table->text('keterangan');
+            $table->text('keterangan')->nullable();
             $table->enum('kategori', ['barang masuk', 'barang keluar'])->default('barang masuk');
             $table->timestamps();
         });
