@@ -17,6 +17,7 @@
             $isLokasi = request()->routeIs('lokasi.*');
             $isNamaBarang = request()->routeIs('nama-barang.*');
             $isKodeBahan = request()->routeIs('kode-bahan.*');
+            $isWarna = request()->routeIs('warna.*');
             $isPartai = request()->routeIs('partai.*');
             $isSupplier = request()->routeIs('supplier.*');
         @endphp
@@ -71,6 +72,15 @@
                     </path>
                 </svg>
                 <span class="font-medium">Kode Bahan</span>
+            </a>
+
+            <a href="{{ route('warna.index') }}"
+                class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 group
+            {{ $isWarna ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800' }}">
+                <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                </svg>
+                <span class="font-medium">Warna</span>
             </a>
 
             <a href="{{ route('partai.index') }}"
