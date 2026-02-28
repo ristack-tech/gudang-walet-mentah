@@ -20,8 +20,6 @@ Route::prefix('admin')->group(function () {
         }
         )->name('barang-keluar.index');
 
-    });
-
     Route::resource('lokasi', LokasiController::class);
     Route::resource('nama-barang', NamaBarangController::class)->parameters([
         'nama-barang' => 'nama_barang'
