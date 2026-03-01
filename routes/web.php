@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\Transaksi\BarangKeluar\BarangKeluarJasaCuciContro
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukDemakController;
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukJasaCuciController;
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukPembelianSupplierController;
+use App\Http\Controllers\Admin\Transaksi\StokGradingController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -96,6 +97,14 @@ Route::prefix('admin')->group(function () {
             Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
+    });
+
+    // Transaksi Lainnya
+    Route::prefix('stok-grading')->name('stok-grading.')->controller(StokGradingController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create/step-1', 'createStep1')->name('create.step1');
+        Route::get('/create/step-2', 'createStep2')->name('create.step2');
+        Route::post('/', 'store')->name('store');
     });
 
     // Master Data
