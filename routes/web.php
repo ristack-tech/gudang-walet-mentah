@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukDemakController;
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukJasaCuciController;
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukPembelianSupplierController;
 use App\Http\Controllers\Admin\Transaksi\StokGradingController;
+use App\Http\Controllers\Admin\Transaksi\StokBarangJadiController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -104,7 +105,15 @@ Route::prefix('admin')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create/step-1', 'createStep1')->name('create.step1');
         Route::get('/create/step-2', 'createStep2')->name('create.step2');
-        Route::post('/', 'store')->name('store');
+        Route::post('/store', 'store')->name('store');
+        Route::get('/{id}', 'show')->name('show');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+    });
+
+    Route::prefix('stok-barang-jadi')->name('stok-barang-jadi.')->controller(StokBarangJadiController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/transfer', 'transfer')->name('transfer');
+        Route::delete('/{id}', 'destroy')->name('destroy');
     });
 
     // Master Data
