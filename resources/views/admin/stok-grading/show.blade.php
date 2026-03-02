@@ -54,12 +54,12 @@
                 </div>
             </div>
 
-            <!-- ✅ Detail Item Grading Lempeng -->
+            <!-- ✅ Detail Item Grading Lempeng Bersih -->
             <div class="bg-white shadow rounded-lg border overflow-hidden mb-6">
                 <div class="px-6 py-4 border-b bg-blue-50">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-blue-900">Hasil Grading - Lempeng</h2>
-                        <span class="text-sm text-blue-800">{{ count($gradingBatch['lempeng']) }} grade terisi</span>
+                        <h2 class="text-lg font-semibold text-blue-900">Hasil Grading - Lempeng Bersih</h2>
+                        <span class="text-sm text-blue-800">{{ count($gradingBatch['lempeng_bersih']) }} grade terisi</span>
                     </div>
                 </div>
 
@@ -75,7 +75,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
-                                @forelse($gradingBatch['lempeng'] as $index => $item)
+                                @forelse($gradingBatch['lempeng_bersih'] as $index => $item)
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-4 py-3 font-semibold text-gray-900 align-top">{{ $index + 1 }}</td>
                                         <td class="px-4 py-3 text-gray-700 align-top text-sm font-medium">
@@ -90,7 +90,52 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-4 py-8 text-center text-gray-500 text-sm border-t border-gray-200">Tidak ada output lempeng.</td>
+                                        <td colspan="4" class="px-4 py-8 text-center text-gray-500 text-sm border-t border-gray-200">Tidak ada output lempeng bersih.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✅ Detail Item Grading Lempeng Kotor -->
+            <div class="bg-white shadow rounded-lg border overflow-hidden mb-6">
+                <div class="px-6 py-4 border-b bg-yellow-50">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-yellow-900">Hasil Grading - Lempeng Kotor</h2>
+                        <span class="text-sm text-yellow-800">{{ count($gradingBatch['lempeng_kotor']) }} grade terisi</span>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="w-full text-sm">
+                            <thead class="text-left text-xs font-medium text-gray-500 bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 rounded-tl-md">No</th>
+                                    <th class="px-4 py-3">Pilih Grade</th>
+                                    <th class="px-4 py-3 text-right">Berat (Gram)</th>
+                                    <th class="px-4 py-3 text-right">Box</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                @forelse($gradingBatch['lempeng_kotor'] as $index => $item)
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-4 py-3 font-semibold text-gray-900 align-top">{{ $index + 1 }}</td>
+                                        <td class="px-4 py-3 text-gray-700 align-top text-sm font-medium">
+                                            {{ $item['grade'] }}
+                                        </td>
+                                        <td class="px-4 py-3 font-mono text-gray-700 text-right align-top text-sm">
+                                            {{ number_format($item['berat'], 2, ',', '.') }}
+                                        </td>
+                                        <td class="px-4 py-3 font-mono text-gray-700 text-right align-top text-sm">
+                                            {{ number_format($item['box'], 0, ',', '.') }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-8 text-center text-gray-500 text-sm border-t border-gray-200">Tidak ada output lempeng kotor.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -146,28 +191,43 @@
 
             <!-- ✅ Ringkasan Total -->
             @php
-                $totalGramLempeng = collect($gradingBatch['lempeng'])->sum('berat');
+                $totalGramLempengBersih = collect($gradingBatch['lempeng_bersih'])->sum('berat');
+                $totalGramLempengKotor = collect($gradingBatch['lempeng_kotor'])->sum('berat');
                 $totalGramMangkok = collect($gradingBatch['mangkok'])->sum('berat');
                 
-                $totalBoxLempeng = collect($gradingBatch['lempeng'])->sum('box');
+                $totalBoxLempengBersih = collect($gradingBatch['lempeng_bersih'])->sum('box');
+                $totalBoxLempengKotor = collect($gradingBatch['lempeng_kotor'])->sum('box');
                 $totalBoxMangkok = collect($gradingBatch['mangkok'])->sum('box');
 
-                $totalGramKeseluruhan = $totalGramLempeng + $totalGramMangkok;
-                $totalBoxKeseluruhan = $totalBoxLempeng + $totalBoxMangkok;
+                $totalGramKeseluruhan = $totalGramLempengBersih + $totalGramLempengKotor + $totalGramMangkok;
+                $totalBoxKeseluruhan = $totalBoxLempengBersih + $totalBoxLempengKotor + $totalBoxMangkok;
             @endphp
             <div class="bg-white shadow rounded-lg border p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Output Grading</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
-                    <!-- Lempeng Gram -->
+                    <!-- Lempeng Bersih Gram -->
                     <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
                         <div class="flex items-center">
                             <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14-4H9m4 8H9m-4-4h.01M6 16h.01" />
                             </svg>
                             <div>
-                                <div class="text-sm text-blue-600 font-medium">Total Berat Lempeng</div>
-                                <div class="text-2xl font-bold text-blue-900">{{ number_format($totalGramLempeng, 2, ',', '.') }}<span class="text-sm font-medium ml-1">gr</span></div>
+                                <div class="text-sm text-blue-600 font-medium">Total Berat Lempeng Bersih</div>
+                                <div class="text-2xl font-bold text-blue-900">{{ number_format($totalGramLempengBersih, 2, ',', '.') }}<span class="text-sm font-medium ml-1">gr</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lempeng Kotor Gram -->
+                    <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 p-4 rounded-lg border border-yellow-200">
+                        <div class="flex items-center">
+                            <svg class="w-8 h-8 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14-4H9m4 8H9m-4-4h.01M6 16h.01" />
+                            </svg>
+                            <div>
+                                <div class="text-sm text-yellow-600 font-medium">Total Berat Lempeng Kotor</div>
+                                <div class="text-2xl font-bold text-yellow-900">{{ number_format($totalGramLempengKotor, 2, ',', '.') }}<span class="text-sm font-medium ml-1">gr</span></div>
                             </div>
                         </div>
                     </div>
@@ -186,7 +246,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Total Keseluruhan Gram -->
                     <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
                         <div class="flex items-center">
@@ -216,7 +278,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
