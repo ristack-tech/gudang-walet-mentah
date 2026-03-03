@@ -110,6 +110,11 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{id}', 'destroy')->name('destroy');
     });
 
+    Route::prefix('stok-gudang')->name('stok-gudang.')->group(function () {
+        Route::get('/', fn() => view('admin.stok-gudang.index'))->name('index');
+
+    });
+
     Route::prefix('stok-barang-jadi')->name('stok-barang-jadi.')->controller(StokBarangJadiController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/transfer', 'transfer')->name('transfer');

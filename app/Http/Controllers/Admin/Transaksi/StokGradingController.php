@@ -37,15 +37,21 @@ class StokGradingController extends Controller
         // Mock step 2 form for a specific batch/stok
         $batchId = $request->query('stok_id', 'A-1'); 
         
-        $gradesLempeng = [
-            'ZT', 'ZT (B)', 'YT', 'YT (B)', 'MB', 'MB B', 'SB'
+        $gradesLempengBersih = [
+            'ZT', 'ZT (B)', 'YT', 'YT (B)', 'MB', 'MB (B)', 'SB', 'SB B', 'SB 2', 'SB 2 (B)', 'SB 3'
+        ];
+
+        $gradesLempengKotor = [
+            'MBS', 'MBS (B)', 'SBS', 'SBS (B)', 'SBS 2', 'SBS 2 (B)', 'SBS 3', 'SBS 3 (B)'
         ];
         
         $gradesMangkok = [
-            'MK R', 'PM', 'MK HC'
+            'MK R' => ['S3', 'S4', 'S5', 'S6'],
+            'PM' => ['KECIL', 'SEDANG', 'BESAR', 'JUMBO'],
+            'MK HC' => ['JUMBO', 'SUPER', 'SUPER G']
         ];
 
-        return view('admin.stok-grading.create-step-2', compact('batchId', 'gradesLempeng', 'gradesMangkok'));
+        return view('admin.stok-grading.create-step-2', compact('batchId', 'gradesLempengBersih', 'gradesLempengKotor', 'gradesMangkok'));
     }
 
     public function store(Request $request)

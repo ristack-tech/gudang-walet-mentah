@@ -43,8 +43,11 @@
         </div>
 
         <div class="mb-6 flex space-x-4">
-            <button type="button" id="tabLempeng" onclick="switchTab('lempeng')" class="px-6 py-2 bg-blue-50 border border-blue-200 text-blue-600 font-medium rounded-md shadow-sm transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                Lempeng
+            <button type="button" id="tabLempengBersih" onclick="switchTab('lempengBersih')" class="px-6 py-2 bg-blue-50 border border-blue-200 text-blue-600 font-medium rounded-md shadow-sm transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                Lempeng Bersih
+            </button>
+            <button type="button" id="tabLempengKotor" onclick="switchTab('lempengKotor')" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 shadow-sm transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                Lempeng Kotor
             </button>
             <button type="button" id="tabMangkok" onclick="switchTab('mangkok')" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 shadow-sm transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 Mangkok
@@ -56,8 +59,8 @@
             
             <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
                 <div class="p-6">
-                    <!-- Invisible Table Structure for Layout -->
-                    <table class="w-full" id="tableLempeng">
+                    <!-- Tables for Layout -->
+                    <table class="w-full" id="tableLempengBersih">
                         <thead>
                             <tr>
                                 <th class="text-left text-sm font-medium text-gray-600 tracking-wider w-16 px-4 pb-4">No</th>
@@ -67,7 +70,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($gradesLempeng as $index => $grade)
+                            @foreach($gradesLempengBersih as $index => $grade)
                             <tr>
                                 <td class="whitespace-nowrap text-sm text-gray-800 px-4 py-3">{{ $index + 1 }}.</td>
                                 <td class="whitespace-nowrap px-4 py-3 w-1/4">
@@ -75,7 +78,7 @@
                                         {{ $grade }}
                                     </div>
                                     <input type="hidden" name="grades[{{ $index }}][name]" value="{{ $grade }}">
-                                    <input type="hidden" name="grades[{{ $index }}][type]" value="lempeng">
+                                    <input type="hidden" name="grades[{{ $index }}][type]" value="lempeng_bersih">
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 w-1/3">
                                     <input type="text" name="grades[{{ $index }}][berat]" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="0.00">
@@ -88,7 +91,7 @@
                         </tbody>
                     </table>
 
-                    <table class="w-full hidden" id="tableMangkok">
+                    <table class="w-full hidden" id="tableLempengKotor">
                         <thead>
                             <tr>
                                 <th class="text-left text-sm font-medium text-gray-600 tracking-wider w-16 px-4 pb-4">No</th>
@@ -98,8 +101,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($gradesMangkok as $idx => $grade)
-                            @php $index = count($gradesLempeng) + $idx; @endphp
+                            @foreach($gradesLempengKotor as $idx => $grade)
+                            @php $index = count($gradesLempengBersih) + $idx; @endphp
                             <tr>
                                 <td class="whitespace-nowrap text-sm text-gray-800 px-4 py-3">{{ $idx + 1 }}.</td>
                                 <td class="whitespace-nowrap px-4 py-3 w-1/4">
@@ -107,7 +110,7 @@
                                         {{ $grade }}
                                     </div>
                                     <input type="hidden" name="grades[{{ $index }}][name]" value="{{ $grade }}">
-                                    <input type="hidden" name="grades[{{ $index }}][type]" value="mangkok">
+                                    <input type="hidden" name="grades[{{ $index }}][type]" value="lempeng_kotor">
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 w-1/3">
                                     <input type="text" name="grades[{{ $index }}][berat]" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="0.00">
@@ -119,6 +122,51 @@
                             @endforeach
                         </tbody>
                     </table>
+
+                    <div class="hidden" id="containerMangkok">
+                        <div class="mb-4 flex space-x-2">
+                            @foreach($gradesMangkok as $kategori => $subgrades)
+                                <button type="button" id="tabMangkok_{{ Str::slug($kategori) }}" onclick="switchMangkokTab('{{ Str::slug($kategori) }}')" class="px-4 py-1.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded hover:bg-gray-50 shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    {{ $kategori }}
+                                </button>
+                            @endforeach
+                        </div>
+
+                        @php $globalIndex = count($gradesLempengBersih) + count($gradesLempengKotor); @endphp
+                        @foreach($gradesMangkok as $kategori => $subgrades)
+                            <table class="w-full hidden mangkok-table" id="tableMangkok_{{ Str::slug($kategori) }}">
+                                <thead>
+                                    <tr>
+                                        <th class="text-left text-sm font-medium text-gray-600 tracking-wider w-16 px-4 pb-4">No</th>
+                                        <th class="text-center text-sm font-medium text-gray-600 tracking-wider w-1/4 pb-4">Pilih Grade</th>
+                                        <th class="text-center text-sm font-medium text-gray-600 tracking-wider w-1/3 pb-4">Berat</th>
+                                        <th class="text-center text-sm font-medium text-gray-600 tracking-wider w-1/3 pb-4">Box</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($subgrades as $idx => $grade)
+                                    @php $index = $globalIndex++; @endphp
+                                    <tr>
+                                        <td class="whitespace-nowrap text-sm text-gray-800 px-4 py-3">{{ $idx + 1 }}.</td>
+                                        <td class="whitespace-nowrap px-4 py-3 w-1/4">
+                                            <div class="w-full px-4 py-2 border border-gray-300 rounded-md text-center text-gray-700 font-medium bg-gray-50">
+                                                {{ $kategori }} ({{ $grade }})
+                                            </div>
+                                            <input type="hidden" name="grades[{{ $index }}][name]" value="{{ $kategori }} ({{ $grade }})">
+                                            <input type="hidden" name="grades[{{ $index }}][type]" value="mangkok">
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3 w-1/3">
+                                            <input type="text" name="grades[{{ $index }}][berat]" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="0.00">
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3 w-1/3">
+                                            <input type="text" name="grades[{{ $index }}][box]" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="0">
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endforeach
+                    </div>
                 </div>
 
                 <div class="p-6 bg-gray-50 border-t border-gray-200 flex justify-end">
@@ -138,33 +186,70 @@
 
 <script>
     function switchTab(tab) {
-        const btnLempeng = document.getElementById('tabLempeng');
+        const btnLempengBersih = document.getElementById('tabLempengBersih');
+        const btnLempengKotor = document.getElementById('tabLempengKotor');
         const btnMangkok = document.getElementById('tabMangkok');
-        const tableLempeng = document.getElementById('tableLempeng');
-        const tableMangkok = document.getElementById('tableMangkok');
+        
+        const tableLempengBersih = document.getElementById('tableLempengBersih');
+        const tableLempengKotor = document.getElementById('tableLempengKotor');
+        const containerMangkok = document.getElementById('containerMangkok');
 
-        // Styling for active state
+        // Reset all
+        [tableLempengBersih, tableLempengKotor, containerMangkok].forEach(t => t.classList.add('hidden'));
+        
         const activeClass = ['bg-blue-50', 'border-blue-200', 'text-blue-600'];
         const inactiveClass = ['bg-white', 'border-gray-300', 'text-gray-700', 'hover:bg-gray-50'];
 
-        if (tab === 'lempeng') {
-            tableLempeng.classList.remove('hidden');
-            tableMangkok.classList.add('hidden');
-            
-            btnLempeng.classList.remove(...inactiveClass);
-            btnLempeng.classList.add(...activeClass);
-            
-            btnMangkok.classList.remove(...activeClass);
-            btnMangkok.classList.add(...inactiveClass);
+        [btnLempengBersih, btnLempengKotor, btnMangkok].forEach(b => {
+            b.classList.remove(...activeClass);
+            b.classList.add(...inactiveClass);
+        });
+
+        // Set active
+        if (tab === 'lempengBersih') {
+            tableLempengBersih.classList.remove('hidden');
+            btnLempengBersih.classList.remove(...inactiveClass);
+            btnLempengBersih.classList.add(...activeClass);
+        } else if (tab === 'lempengKotor') {
+            tableLempengKotor.classList.remove('hidden');
+            btnLempengKotor.classList.remove(...inactiveClass);
+            btnLempengKotor.classList.add(...activeClass);
         } else {
-            tableLempeng.classList.add('hidden');
-            tableMangkok.classList.remove('hidden');
-            
+            containerMangkok.classList.remove('hidden');
             btnMangkok.classList.remove(...inactiveClass);
             btnMangkok.classList.add(...activeClass);
             
-            btnLempeng.classList.remove(...activeClass);
-            btnLempeng.classList.add(...inactiveClass);
+            // Auto-select first mangkok tab if none selected
+            const activeMangkokTables = document.querySelectorAll('.mangkok-table:not(.hidden)');
+            if (activeMangkokTables.length === 0) {
+                const firstMangkokBtn = document.querySelector('[id^="tabMangkok_"]');
+                if (firstMangkokBtn) firstMangkokBtn.click();
+            }
+        }
+    }
+
+    function switchMangkokTab(subCategorySlug) {
+        // Hide all mangkok tables
+        document.querySelectorAll('.mangkok-table').forEach(t => t.classList.add('hidden'));
+        
+        // Reset all mangkok buttons
+        const mangkokBtns = document.querySelectorAll('[id^="tabMangkok_"]');
+        const activeClass = ['bg-blue-50', 'border-blue-200', 'text-blue-600'];
+        const inactiveClass = ['bg-white', 'border-gray-300', 'text-gray-700', 'hover:bg-gray-50'];
+        
+        mangkokBtns.forEach(b => {
+            b.classList.remove(...activeClass);
+            b.classList.add(...inactiveClass);
+        });
+
+        // Show selected table and activate button
+        const selectedTable = document.getElementById(`tableMangkok_${subCategorySlug}`);
+        const selectedBtn = document.getElementById(`tabMangkok_${subCategorySlug}`);
+        
+        if (selectedTable) selectedTable.classList.remove('hidden');
+        if (selectedBtn) {
+            selectedBtn.classList.remove(...inactiveClass);
+            selectedBtn.classList.add(...activeClass);
         }
     }
 </script>
