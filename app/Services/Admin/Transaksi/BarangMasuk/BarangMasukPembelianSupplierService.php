@@ -43,7 +43,7 @@ class BarangMasukPembelianSupplierService
             ]);
 
             // Delete existing items
-            $barangMasukBatch->barangMasukPembelianSupplier()->delete();
+            $barangMasukBatch->barangMasukSupplier()->delete();
 
             // Recreate items
             foreach ($data['items'] as $item) {
