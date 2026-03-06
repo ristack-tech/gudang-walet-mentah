@@ -37,7 +37,7 @@
                     <p class="text-gray-500">Silakan masuk untuk mengelola stok gudang Anda.</p>
                 </div>
 
-                <form class="space-y-5">
+                <form class="space-y-5" method="POST" action="{{ route('login.post') }}">
                     @csrf
 
                     <!-- Email Field -->

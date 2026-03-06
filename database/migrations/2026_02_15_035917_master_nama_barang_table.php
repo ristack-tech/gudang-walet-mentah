@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('nama_barang');
             $table->text('deskripsi')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

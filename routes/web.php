@@ -16,116 +16,123 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use Illuminate\Support\Facades\Route;
 
-Route::get("/", [AuthController::class, "showLogin"]);
-Route::get("/dashboard", [DashboardController::class, "index"])->name('dashboard');
+Route::middleware('guest')->group(function () {
+    Route::get("/", [AuthController::class, "showLogin"])->name('login');
+    Route::post("/", [AuthController::class, "login"])->name('login.post');
+});
 
-Route::prefix('admin')->group(function () {
-    // Barang Keluar
-    Route::prefix('barang-keluar')->name('barang-keluar.')->group(function () {
-        Route::get('/', fn() => view('admin.barang-keluar.index'))->name('index');
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get("/dashboard", [DashboardController::class, "index"])->name('dashboard');
 
-        Route::prefix('demak')->name('demak.')->controller(BarangKeluarDemakController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/step1', 'step1')->name('step1');
-            Route::post('/step1', 'storeStep1')->name('store-step1');
-            Route::get('/step2', 'step2')->name('step2');
-            Route::post('/step2', 'storeStep2')->name('store-step2');
-            Route::post('/step2/add-item', 'addStep2Item')->name('add.step2.item');
-            Route::delete('/step2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
-            Route::get('/{id}', 'show')->name('show');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('destroy');
+    Route::prefix('admin')->group(function () {
+        // Barang Keluar
+        Route::prefix('barang-keluar')->name('barang-keluar.')->group(function () {
+            Route::get('/', fn() => view('admin.barang-keluar.index'))->name('index');
+
+            Route::prefix('demak')->name('demak.')->controller(BarangKeluarDemakController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/step1', 'step1')->name('step1');
+                Route::post('/step1', 'storeStep1')->name('store-step1');
+                Route::get('/step2', 'step2')->name('step2');
+                Route::post('/step2', 'storeStep2')->name('store-step2');
+                Route::post('/step2/add-item', 'addStep2Item')->name('add.step2.item');
+                Route::delete('/step2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
+                Route::get('/{id}', 'show')->name('show');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::put('/{id}', 'update')->name('update');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+            });
+
+            Route::prefix('jasa-cuci')->name('jasa-cuci.')->controller(BarangKeluarJasaCuciController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/step1', 'step1')->name('step1');
+                Route::post('/step1', 'storeStep1')->name('store-step1');
+                Route::get('/step2', 'step2')->name('step2');
+                Route::post('/step2', 'storeStep2')->name('store-step2');
+                Route::post('/step2/add-item', 'addStep2Item')->name('add.step2.item');
+                Route::delete('/step2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
+                Route::get('/{id}', 'show')->name('show');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::put('/{id}', 'update')->name('update');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+            });
         });
 
-        Route::prefix('jasa-cuci')->name('jasa-cuci.')->controller(BarangKeluarJasaCuciController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/step1', 'step1')->name('step1');
-            Route::post('/step1', 'storeStep1')->name('store-step1');
-            Route::get('/step2', 'step2')->name('step2');
-            Route::post('/step2', 'storeStep2')->name('store-step2');
-            Route::post('/step2/add-item', 'addStep2Item')->name('add.step2.item');
-            Route::delete('/step2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
-            Route::get('/{id}', 'show')->name('show');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('destroy');
+        // Barang Masuk
+        Route::prefix('barang-masuk')->name('barang-masuk.')->group(function () {
+            Route::get('/', fn() => view('admin.barang-masuk.index'))->name('index');
+
+            Route::prefix('pembelian-supplier')->name('pembelian-supplier.')->controller(BarangMasukPembelianSupplierController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/create/step-1', 'createStep1')->name('create.step1');
+                Route::post('/create/step-1', 'storeStep1')->name('store.step1');
+                Route::get('/create/step-2', 'createStep2')->name('create.step2');
+                Route::post('/create/step-2', 'storeStep2')->name('store.step2');
+                Route::post('/create/step-2/add-item', 'addStep2Item')->name('add.step2.item');
+                Route::delete('/create/step-2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
+                Route::get('/{id}', 'show')->name('show');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::put('/{id}', 'update')->name('update');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+            });
+
+            Route::prefix('demak')->name('demak.')->controller(BarangMasukDemakController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/create/step-1', 'createStep1')->name('create.step1');
+                Route::post('/create/step-1', 'storeStep1')->name('store.step1');
+                Route::get('/create/step-2', 'createStep2')->name('create.step2');
+                Route::post('/create/step-2', 'storeStep2')->name('store.step2');
+                Route::post('/create/step-2/add-item', 'addStep2Item')->name('add.step2.item');
+                Route::delete('/create/step-2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
+                Route::get('/{id}', 'show')->name('show');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::put('/{id}', 'update')->name('update');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+            });
+
+            Route::prefix('jasa-cuci')->name('jasa-cuci.')->controller(BarangMasukJasaCuciController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/create/step-1', 'createStep1')->name('create.step1');
+                Route::post('/create/step-1', 'storeStep1')->name('store.step1');
+                Route::get('/create/step-2', 'createStep2')->name('create.step2');
+                Route::post('/create/step-2', 'storeStep2')->name('store.step2');
+                Route::post('/create/step-2/add-item', 'addStep2Item')->name('add.step2.item');
+                Route::delete('/create/step-2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
+                Route::get('/{id}', 'show')->name('show');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::put('/{id}', 'update')->name('update');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+            });
         });
-    });
 
-    // Barang Masuk
-    Route::prefix('barang-masuk')->name('barang-masuk.')->group(function () {
-        Route::get('/', fn() => view('admin.barang-masuk.index'))->name('index');
-
-        Route::prefix('pembelian-supplier')->name('pembelian-supplier.')->controller(BarangMasukPembelianSupplierController::class)->group(function () {
+        // Transaksi Lainnya
+        Route::prefix('stok-grading')->name('stok-grading.')->controller(StokGradingController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/create/step-1', 'createStep1')->name('create.step1');
-            Route::post('/create/step-1', 'storeStep1')->name('store.step1');
             Route::get('/create/step-2', 'createStep2')->name('create.step2');
-            Route::post('/create/step-2', 'storeStep2')->name('store.step2');
-            Route::post('/create/step-2/add-item', 'addStep2Item')->name('add.step2.item');
-            Route::delete('/create/step-2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
+            Route::post('/store', 'store')->name('store');
             Route::get('/{id}', 'show')->name('show');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
-        Route::prefix('demak')->name('demak.')->controller(BarangMasukDemakController::class)->group(function () {
+        Route::prefix('stok-gudang')->name('stok-gudang.')->group(function () {
+            Route::get('/', fn() => view('admin.stok-gudang.index'))->name('index');
+
+        });
+
+        Route::prefix('stok-barang-jadi')->name('stok-barang-jadi.')->controller(StokBarangJadiController::class)->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('/create/step-1', 'createStep1')->name('create.step1');
-            Route::post('/create/step-1', 'storeStep1')->name('store.step1');
-            Route::get('/create/step-2', 'createStep2')->name('create.step2');
-            Route::post('/create/step-2', 'storeStep2')->name('store.step2');
-            Route::post('/create/step-2/add-item', 'addStep2Item')->name('add.step2.item');
-            Route::delete('/create/step-2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
-            Route::get('/{id}', 'show')->name('show');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
+            Route::post('/transfer', 'transfer')->name('transfer');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
-        Route::prefix('jasa-cuci')->name('jasa-cuci.')->controller(BarangMasukJasaCuciController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create/step-1', 'createStep1')->name('create.step1');
-            Route::post('/create/step-1', 'storeStep1')->name('store.step1');
-            Route::get('/create/step-2', 'createStep2')->name('create.step2');
-            Route::post('/create/step-2', 'storeStep2')->name('store.step2');
-            Route::post('/create/step-2/add-item', 'addStep2Item')->name('add.step2.item');
-            Route::delete('/create/step-2/remove-item/{index}', 'removeStep2Item')->name('remove.step2.item');
-            Route::get('/{id}', 'show')->name('show');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('destroy');
-        });
+        // Master Data
+        Route::resource('lokasi', LokasiController::class);
+        Route::resource('nama-barang', NamaBarangController::class)->parameters(['nama-barang' => 'nama_barang']);
+        Route::resource('kode-bahan', KodeBahanController::class)->parameters(['kode-bahan' => 'kode_bahan']);
+        Route::resource('partai', PartaiController::class);
+        Route::resource('supplier', SupplierController::class);
     });
-
-    // Transaksi Lainnya
-    Route::prefix('stok-grading')->name('stok-grading.')->controller(StokGradingController::class)->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('/create/step-1', 'createStep1')->name('create.step1');
-        Route::get('/create/step-2', 'createStep2')->name('create.step2');
-        Route::post('/store', 'store')->name('store');
-        Route::get('/{id}', 'show')->name('show');
-        Route::delete('/{id}', 'destroy')->name('destroy');
-    });
-
-    Route::prefix('stok-gudang')->name('stok-gudang.')->group(function () {
-        Route::get('/', fn() => view('admin.stok-gudang.index'))->name('index');
-
-    });
-
-    Route::prefix('stok-barang-jadi')->name('stok-barang-jadi.')->controller(StokBarangJadiController::class)->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::post('/transfer', 'transfer')->name('transfer');
-        Route::delete('/{id}', 'destroy')->name('destroy');
-    });
-
-    // Master Data
-    Route::resource('lokasi', LokasiController::class);
-    Route::resource('nama-barang', NamaBarangController::class)->parameters(['nama-barang' => 'nama_barang']);
-    Route::resource('kode-bahan', KodeBahanController::class)->parameters(['kode-bahan' => 'kode_bahan']);
-    Route::resource('partai', PartaiController::class);
-    Route::resource('supplier', SupplierController::class);
 });
 
