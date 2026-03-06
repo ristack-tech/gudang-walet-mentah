@@ -17,30 +17,29 @@ class BarangMasukPembelianSupplierController extends Controller
         $query = \App\Models\BarangMasuk::whereHas('jenisBarangMasuk', function ($q) {
             $q->where('nama', 'Pembelian Supplier');
         })
-            ->with(['barangMasukPembelianSupplier.barang', 'barangMasukPembelianSupplier.supplier'])
+            ->with(['barangMasukSupplier.barang', 'barangMasukSupplier.supplier'])
             ->latest('tanggal_terima');
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->whereHas('barangMasukPembelianSupplier.barang', function ($q) use ($search) {
+            $query->whereHas('barangMasukSupplier.barang', function ($q) use ($search) {
                 $q->where('nama_barang', 'like', "%{$search}%");
-            })->orWhereHas('barangMasukPembelianSupplier.supplier', function ($q) use ($search) {
+            })->orWhereHas('barangMasukSupplier.supplier', function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%");
             });
         }
 
-        $barangMasukSupplier = $query->paginate(10);
+        $barangMasukBatch = $query->paginate(10);
 
-        return view('admin.barang-masuk.pembelian-supplier.index', compact('barangMasukSupplier'));
+        return view('admin.barang-masuk.pembelian-supplier.index', compact('barangMasukBatch'));
     }
 
     public function createStep1(Request $request)
     {
-        $barang = NamaBarang::all();
         $supplier = Supplier::all();
         $step1Data = session('barang_masuk_supplier_step1', []);
 
-        return view('admin.barang-masuk.pembelian-supplier.step1', compact('barang', 'supplier', 'step1Data'));
+        return view('admin.barang-masuk.pembelian-supplier.step1', compact('supplier', 'step1Data'));
     }
 
     public function storeStep1(Request $request)
@@ -107,8 +106,7 @@ class BarangMasukPembelianSupplierController extends Controller
 
         if (strval($index) === 'all') {
             session(['barang_masuk_supplier_items' => []]);
-        }
-        elseif (isset($items[$index])) {
+        } elseif (isset($items[$index])) {
             unset($items[$index]);
             session(['barang_masuk_supplier_items' => array_values($items)]);
         }
@@ -132,60 +130,58 @@ class BarangMasukPembelianSupplierController extends Controller
             session()->forget(['barang_masuk_supplier_step1', 'barang_masuk_supplier_items']);
             return redirect()->route('barang-masuk.pembelian-supplier.index')
                 ->with('success', 'Data Batch Barang Masuk (Pembelian Supplier) berhasil ditambahkan.');
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
 
     public function show($id)
     {
-        $barangMasukSupplier = BarangMasukPembelianSupplier::with(['barangMasuk', 'barang', 'supplier'])->findOrFail($id);
-        return view('admin.barang-masuk.pembelian-supplier.show', compact('barangMasukSupplier'));
+        $barangMasukBatch = \App\Models\BarangMasuk::with(['barangMasukSupplier.barang', 'barangMasukSupplier.supplier'])->findOrFail($id);
+        return view('admin.barang-masuk.pembelian-supplier.show', compact('barangMasukBatch'));
     }
 
     public function edit($id)
     {
-        $barangMasukSupplier = BarangMasukPembelianSupplier::with(['barangMasuk'])->findOrFail($id);
+        $barangMasukBatch = \App\Models\BarangMasuk::with(['barangMasukSupplier.barang', 'barangMasukSupplier.supplier'])->findOrFail($id);
         $barang = NamaBarang::all();
         $supplier = Supplier::all();
 
-        return view('admin.barang-masuk.pembelian-supplier.edit', compact('barangMasukSupplier', 'barang', 'supplier'));
+        return view('admin.barang-masuk.pembelian-supplier.edit', compact('barangMasukBatch', 'barang', 'supplier'));
     }
 
     public function update(Request $request, $id, BarangMasukPembelianSupplierService $service)
     {
         $validated = $request->validate([
             'tanggal_terima' => 'required|date',
-            'barang_id' => 'required|exists:nama_barang,id',
             'supplier_id' => 'required|exists:supplier,id',
-            'berat' => 'required|numeric',
-            'pcs' => 'required|integer',
-            'box' => 'required|integer',
+            'items' => 'required|array|min:1',
+            'items.*.barang_id' => 'required|exists:nama_barang,id',
+            'items.*.berat' => 'required|numeric',
+            'items.*.pcs' => 'required|integer',
+            'items.*.box' => 'required|integer',
         ]);
 
-        $barangMasukSupplier = BarangMasukPembelianSupplier::findOrFail($id);
+        $barangMasukBatch = \App\Models\BarangMasuk::findOrFail($id);
 
         try {
-            $service->updateData($barangMasukSupplier, $validated);
+            $service->updateData($barangMasukBatch, $validated);
             return redirect()->route('barang-masuk.pembelian-supplier.index')
-                ->with('success', 'Data Barang Masuk (Pembelian Supplier) berhasil diperbarui.');
-        }
-        catch (\Exception $e) {
+                ->with('success', 'Data Batch Barang Masuk (Pembelian Supplier) berhasil diperbarui.');
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
 
     public function destroy($id, BarangMasukPembelianSupplierService $service)
     {
-        $barangMasukSupplier = BarangMasukPembelianSupplier::findOrFail($id);
+        $barangMasukBatch = \App\Models\BarangMasuk::findOrFail($id);
 
         try {
-            $service->destroyData($barangMasukSupplier);
+            $service->destroyData($barangMasukBatch);
             return redirect()->route('barang-masuk.pembelian-supplier.index')
-                ->with('success', 'Data Barang Masuk (Pembelian Supplier) berhasil dihapus.');
-        }
-        catch (\Exception $e) {
+                ->with('success', 'Data Batch Barang Masuk (Pembelian Supplier) berhasil dihapus.');
+        } catch (\Exception $e) {
             return redirect()->route('barang-masuk.pembelian-supplier.index')
                 ->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
