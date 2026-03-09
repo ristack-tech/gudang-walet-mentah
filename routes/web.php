@@ -10,8 +10,8 @@ use App\Http\Controllers\Admin\Transaksi\BarangKeluar\BarangKeluarJasaCuciContro
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukDemakController;
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukJasaCuciController;
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukPembelianSupplierController;
-use App\Http\Controllers\Admin\Transaksi\StokGradingController;
-use App\Http\Controllers\Admin\Transaksi\StokBarangJadiController;
+use App\Http\Controllers\Admin\Transaksi\StokGrading\StokGradingController;
+use App\Http\Controllers\Admin\Transaksi\StokBarangJadi\StokBarangJadiController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -116,9 +116,12 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
-        Route::prefix('stok-gudang')->name('stok-gudang.')->group(function () {
-            Route::get('/', fn() => view('admin.stok-gudang.index'))->name('index');
-
+        Route::prefix('stok-gudang')->name('stok-gudang.')->controller(\App\Http\Controllers\Admin\Transaksi\StokGudang\StokGudangController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/demak', 'demak')->name('demak');
+            Route::get('/demak/{id}', 'showDemak')->name('demak.show');
+            Route::get('/jasa-cuci', 'jasaCuci')->name('jasa-cuci');
+            Route::get('/jasa-cuci/{id}', 'showJasaCuci')->name('jasa-cuci.show');
         });
 
         Route::prefix('stok-barang-jadi')->name('stok-barang-jadi.')->controller(StokBarangJadiController::class)->group(function () {

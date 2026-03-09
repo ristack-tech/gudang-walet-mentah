@@ -51,17 +51,17 @@
                                         {{ $stokGradingBatch->firstItem() + $index }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        SG-{{ str_pad($item['id'], 5, '0', STR_PAD_LEFT) }}
+                                        SG-{{ str_pad($item->id, 3, '0', STR_PAD_LEFT) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <div class="flex justify-center items-center space-x-2">
-                                            <a href="{{ route('stok-grading.show', $item['id']) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-md transition duration-200" title="Detail">
+                                            <a href="{{ route('stok-grading.show', $item->id) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-md transition duration-200" title="Detail">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                 </svg>
                                             </a>
-                                            <form action="{{ route('stok-grading.destroy', $item['id']) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data grading ini?');">
+                                            <form action="{{ route('stok-grading.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data grading ini?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-md transition duration-200" title="Hapus">
