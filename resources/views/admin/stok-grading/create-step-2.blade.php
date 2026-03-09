@@ -56,6 +56,7 @@
 
         <form method="POST" action="{{ route('stok-grading.store') }}" id="mainForm">
             @csrf
+            <input type="hidden" name="stok_id" value="{{ $batchId }}">
             
             <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
                 <div class="p-6">

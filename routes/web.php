@@ -10,8 +10,8 @@ use App\Http\Controllers\Admin\Transaksi\BarangKeluar\BarangKeluarJasaCuciContro
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukDemakController;
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukJasaCuciController;
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukPembelianSupplierController;
-use App\Http\Controllers\Admin\Transaksi\StokGradingController;
-use App\Http\Controllers\Admin\Transaksi\StokBarangJadiController;
+use App\Http\Controllers\Admin\Transaksi\StokGrading\StokGradingController;
+use App\Http\Controllers\Admin\Transaksi\StokBarangJadi\StokBarangJadiController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use Illuminate\Support\Facades\Route;

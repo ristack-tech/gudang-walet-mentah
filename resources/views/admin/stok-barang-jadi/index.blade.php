@@ -94,17 +94,17 @@
                                         {{ $index + 1 }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ $item['nama_barang'] }}
+                                        {{ $item->batch }} - {{ $item->tanggal }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
-                                        {{ number_format($item['berat'], 2, ',', '.') }}
+                                        {{ number_format($item->details->sum('berat'), 2, ',', '.') }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <div class="flex justify-center items-center space-x-2">
                                             <button type="button" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded text-xs font-medium border border-blue-200 transition duration-200">
                                                 Edit
                                             </button>
-                                            <form action="{{ route('stok-barang-jadi.destroy', $item['id']) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                            <form action="{{ route('stok-barang-jadi.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded text-xs font-medium border border-red-200 transition duration-200">
@@ -178,10 +178,10 @@
                                         @foreach($stokGlobal as $idx => $globalItem)
                                         <tr class="hover:bg-gray-50 transition-colors">
                                             <td class="px-4 py-3 text-gray-500">{{ $idx + 1 }}</td>
-                                            <td class="px-4 py-3 font-medium text-gray-900">{{ $globalItem['nama_barang'] }} - (Tersedia: {{ number_format($globalItem['berat'], 2, ',', '.') }}gr)</td>
+                                            <td class="px-4 py-3 font-medium text-gray-900">{{ $globalItem->batch }} - (Tersedia: {{ number_format($globalItem->details->sum('berat'), 2, ',', '.') }}gr)</td>
                                             <td class="px-4 py-3 text-center">
                                                 <button type="button" 
-                                                    @click="selectedGlobalId = {{ $globalItem['id'] }}; selectedGlobalName = '{{ $globalItem['nama_barang'] }}'" 
+                                                    @click="selectedGlobalId = {{ $globalItem->details->first()->id ?? 0 }}; selectedGlobalName = '{{ $globalItem->batch }}'" 
                                                     class="inline-flex justify-center items-center px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors duration-200">
                                                     Pilih
                                                 </button>

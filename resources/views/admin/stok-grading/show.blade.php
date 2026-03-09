@@ -9,7 +9,7 @@
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h1 class="text-2xl font-semibold text-gray-900">Detail Grading - Batch: {{ $gradingBatch['batch_utama'] }}</h1>
-                    <p class="text-sm text-gray-600">ID Grading: SG-{{ str_pad($gradingBatch['id'], 5, '0', STR_PAD_LEFT) }}</p>
+                    <p class="text-sm text-gray-600">ID Grading: SG-{{ str_pad($gradingBatch['id'], 3, '0', STR_PAD_LEFT) }}</p>
                 </div>
                 <div class="flex gap-2">
                     <a href="{{ route('stok-grading.index') }}"

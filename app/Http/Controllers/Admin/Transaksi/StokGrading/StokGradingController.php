@@ -1,19 +1,25 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Transaksi;
+namespace App\Http\Controllers\Admin\Transaksi\StokGrading;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use App\Services\Admin\Transaksi\StokGrading\StokGradingService;
+use App\Models\StokGrading;
+
 class StokGradingController extends Controller
 {
+    protected $stokGradingService;
+
+    public function __construct(StokGradingService $stokGradingService)
+    {
+        $this->stokGradingService = $stokGradingService;
+    }
+
     public function index(Request $request)
     {
-        // For now, return an empty paginated collection to match the demak index view structure
-        $stokGradingBatch = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10, 1, [
-            'path' => $request->url(),
-            'query' => $request->query(),
-        ]);
+        $stokGradingBatch = StokGrading::orderBy('tanggal', 'desc')->paginate(10);
         
         return view('admin.stok-grading.index', compact('stokGradingBatch'));
     }
@@ -56,7 +62,40 @@ class StokGradingController extends Controller
 
     public function store(Request $request)
     {
-        // Handle form submission and redirect to index with success msg
-        return redirect()->route('stok-grading.index')->with('success', 'Grading berhasil disimpan (Mock)');
+        $validatedData = $request->validate([
+            'stok_id' => 'nullable|string',
+            'grades' => 'required|array',
+            'grades.*.name' => 'required|string',
+            'grades.*.type' => 'required|string',
+            'grades.*.berat' => 'nullable|numeric',
+            'grades.*.box' => 'nullable|integer',
+        ]);
+
+        $batchId = $request->input('stok_id', 'A-1'); 
+        $partai = 'Partai Mock'; // get from stok_id if applicable
+
+        $data = [
+            'batch_utama' => $batchId,
+            'partai' => $partai,
+            'grades' => $request->input('grades'),
+        ];
+
+        $grading = $this->stokGradingService->storeGrading($data);
+
+        return redirect()->route('stok-grading.index')->with('success', 'Grading berhasil disimpan dengan ID: ' . $grading->id);
+    }
+
+    public function show($id)
+    {
+        $gradingBatch = $this->stokGradingService->getGradingFormatted($id);
+        
+        return view('admin.stok-grading.show', compact('gradingBatch'));
+    }
+
+    public function destroy($id)
+    {
+        $this->stokGradingService->deleteGrading($id);
+
+        return redirect()->route('stok-grading.index')->with('success', 'Data grading berhasil dihapus.');
     }
 }

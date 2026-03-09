@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stoks', function (Blueprint $table) {
+        Schema::create('stok_gudangs', function (Blueprint $table) {
             $table->id();
             
             // Lokasi (Demak / Jasa Cuci)
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stoks');
+        Schema::dropIfExists('stok_gudangs');
     }
 };
