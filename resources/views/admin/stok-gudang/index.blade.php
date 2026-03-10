@@ -61,6 +61,29 @@
                     </a>
                 </div>
 
+                {{-- Card 3: Stok Gudang Global --}}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-6">
+                        {{-- Icon --}}
+                        <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        {{-- Badge --}}
+                        <span class="bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-md">
+                            {{ $globalCount }} Item Unik
+                        </span>
+                    </div>
+                    
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">Stok Gudang Global</h3>
+                    <p class="text-sm text-gray-500 mb-6 flex-grow">Lihat seluruh rekap stok gudang secara menyeluruh (Demak + Jasa Cuci)</p>
+                    
+                    <a href="{{ route('stok-gudang.global') }}" class="w-full text-center px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium rounded-lg border border-gray-200 transition-colors">
+                        Buka Detail
+                    </a>
+                </div>
+
             </div>
         </div>
     </div>

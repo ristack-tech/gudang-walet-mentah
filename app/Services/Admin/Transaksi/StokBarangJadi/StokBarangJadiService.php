@@ -52,26 +52,28 @@ class StokBarangJadiService
     /**
      * Transfer stock from global to clop. 
      */
-    public function transferToClop($globalId, $jumlah, $berat)
+    public function transferToClop($stokGradingDetailId, $jumlah, $berat)
     {
-        return DB::transaction(function () use ($globalId, $jumlah, $berat) {
+        return DB::transaction(function () use ($stokGradingDetailId, $jumlah, $berat) {
             
-            // This is a simplified transfer logic. 
-            // Depending on the exact rules:
-            // 1. You may need to deduct from the global stock record
-            // 2. You may need to create a new "clop" stock record
+            // Find the specific graded detail
+            $stokGradingDetail = \App\Models\StokGradingDetail::with('stokGrading')->findOrFail($stokGradingDetailId);
             
-            // Example deduction (assuming we are deducting from a specific detail of the global):
-            $globalDetail = StokBarangJadiDetail::findOrFail($globalId);
-            
-            if ($globalDetail->jumlah_pcs < $jumlah || $globalDetail->berat < $berat) {
-                throw new \Exception('Stok tidak mencukupi untuk ditransfer.');
+            if ($stokGradingDetail->berat < $berat || $stokGradingDetail->box < $jumlah) {
+                throw new \Exception("Stok tidak mencukupi. Tersedia: {$stokGradingDetail->berat}g, {$stokGradingDetail->box} pcs.");
             }
 
-            // Deduct
-            $globalDetail->update([
-                'jumlah_pcs' => $globalDetail->jumlah_pcs - $jumlah,
-                'berat' => $globalDetail->berat - $berat,
+            // Deduct from the detail record
+            $stokGradingDetail->update([
+                'berat' => $stokGradingDetail->berat - $berat,
+                'box' => $stokGradingDetail->box - $jumlah,
+            ]);
+
+            // Deduct from the overall global parent record
+            $stokGrading = $stokGradingDetail->stokGrading;
+            $stokGrading->update([
+                'total_gram_keseluruhan' => max(0, $stokGrading->total_gram_keseluruhan - $berat),
+                'total_box_keseluruhan' => max(0, $stokGrading->total_box_keseluruhan - $jumlah),
             ]);
 
             // Add new "clop" record 
@@ -79,12 +81,12 @@ class StokBarangJadiService
                 'batch' => 'TRF-CLOP-' . time(),
                 'tanggal' => now()->toDateString(),
                 'type' => 'clop',
-                'keterangan' => 'Transfer dari Global ID: ' . $globalDetail->id,
+                'keterangan' => 'Transfer dari Global Stok Grading No Kartu: ' . $stokGrading->no_kartu . ' / ' . $stokGradingDetail->grade,
             ]);
 
             StokBarangJadiDetail::create([
                 'stok_barang_jadi_id' => $clopStok->id,
-                'nama_barang' => $globalDetail->nama_barang, // Cloned name
+                'nama_barang' => $stokGrading->no_kartu . ' - ' . $stokGradingDetail->grade, // Auto-named based on source
                 'jumlah_pcs' => $jumlah,
                 'berat' => $berat,
             ]);

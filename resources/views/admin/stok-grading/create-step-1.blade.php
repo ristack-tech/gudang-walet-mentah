@@ -40,11 +40,13 @@
             </div>
         </div>
 
-        <div class="mb-4">
-            <button class="px-6 py-2 bg-white text-gray-700 border border-gray-300 rounded-md shadow-sm text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+        <form method="GET" action="{{ route('stok-grading.create.step1') }}" class="mb-4 flex space-x-2">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari item..." 
+                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+            <button type="submit" class="px-6 py-2 bg-white text-gray-700 border border-gray-300 rounded-md shadow-sm text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
                 Filter
             </button>
-        </div>
+        </form>
 
         <form method="GET" action="{{ route('stok-grading.create.step2') }}" id="mainForm">
             <!-- Hidden input for stok_id -->
@@ -56,31 +58,35 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Description</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty Gram</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty Pcs</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty Box</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Partai</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Gram</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pcs</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Box</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($stokGudang as $index => $item)
-                            <tr class="hover:bg-gray-50 {{ request('stok_id') == $item->kode_partai ? 'bg-blue-50' : '' }}">
+                            @forelse($stokGudang as $index => $item)
+                            <tr class="hover:bg-gray-50 {{ request('stok_id') == $item->id ? 'bg-blue-50' : '' }}">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $index + 1 }}.</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->item_description }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->qty_gram }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->qty_pcs }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->qty_box }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->kode_partai }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->nama_barang }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ number_format($item->total_gram, 2, ',', '.') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_pcs }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_box }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
-                                    <button type="button" onclick="selectStok('{{ $item->kode_partai }}', this)" 
+                                    <button type="button" onclick="selectStok('{{ $item->id }}', this)" 
                                         class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                         Pilih
                                     </button>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
+                                    Tidak ada data stok gudang.
+                                </td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

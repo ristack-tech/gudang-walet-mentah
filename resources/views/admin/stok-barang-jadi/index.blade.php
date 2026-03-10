@@ -3,11 +3,7 @@
 @section('title', 'Stok Barang Jadi')
 
 @section('content')
-    <div class="bg-gray-50 min-h-[calc(100vh-4rem)]" x-data="{
-        showTransferModal: false,
-        selectedGlobalId: null,
-        selectedGlobalName: ''
-    }">
+    <div class="bg-gray-50 min-h-[calc(100vh-4rem)]">
         <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
             
             <div class="sm:flex sm:items-center sm:justify-between mb-8">
@@ -65,7 +61,7 @@
                 </div>
                 
                 <div class="w-full sm:w-auto">
-                    <button type="button" @click="showTransferModal = true"
+                    <button type="button" onclick="openTransferModal()"
                         class="w-full sm:w-auto flex justify-center items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 whitespace-nowrap shadow-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -94,10 +90,18 @@
                                         {{ $index + 1 }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ $item->batch }} - {{ $item->tanggal }}
+                                        @if($tab === 'global')
+                                            {{ $item->no_kartu }} - {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                                        @else
+                                            {{ $item->batch }} - {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
-                                        {{ number_format($item->details->sum('berat'), 2, ',', '.') }}
+                                        @if($tab === 'global')
+                                            {{ number_format($item->total_gram_keseluruhan, 2, ',', '.') }}
+                                        @else
+                                            {{ number_format($item->details->sum('berat'), 2, ',', '.') }}
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <div class="flex justify-center items-center space-x-2">
@@ -126,35 +130,21 @@
                 </div>
             </div>
             
-            <!-- Transfer Modal via Alpine.js -->
-            <div x-show="showTransferModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
-                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Transfer Modal -->
+            <div id="transferModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                     
-                    <div x-show="showTransferModal" 
-                        x-transition:enter="ease-out duration-300" 
-                        x-transition:enter-start="opacity-0" 
-                        x-transition:enter-end="opacity-100" 
-                        x-transition:leave="ease-in duration-200" 
-                        x-transition:leave-start="opacity-100" 
-                        x-transition:leave-end="opacity-0" 
-                        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeTransferModal()"></div>
 
                     <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                    <div x-show="showTransferModal" 
-                        x-transition:enter="ease-out duration-300" 
-                        x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                        x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
-                        x-transition:leave="ease-in duration-200" 
-                        x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
-                        x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                        class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+                    <div class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
                         
                         <div class="bg-white border-b border-gray-200 px-4 py-4 sm:px-6 flex justify-between items-center">
                             <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
                                 Transfer Global Ke Clop
                             </h3>
-                            <button @click="showTransferModal = false; selectedGlobalId = null" class="text-gray-400 hover:text-gray-500">
+                            <button onclick="closeTransferModal()" class="text-gray-400 hover:text-gray-500">
                                 <span class="sr-only">Close</span>
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -162,10 +152,10 @@
                             </button>
                         </div>
                         
-                        <div class="px-4 py-5 sm:p-6 bg-gray-50">
+                        <div class="px-4 py-6 sm:px-6 sm:py-6 bg-gray-50">
                             
                             <!-- Selection Table for Transfer -->
-                            <div x-show="!selectedGlobalId" class="overflow-x-auto border border-gray-200 rounded-lg bg-white">
+                            <div id="selectionTable" class="overflow-x-auto border border-gray-200 rounded-lg bg-white shadow-sm">
                                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                                     <thead class="bg-gray-50">
                                         <tr>
@@ -175,13 +165,16 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
-                                        @foreach($stokGlobal as $idx => $globalItem)
+                                        @foreach($stokGlobal as $idx => $detailItem)
                                         <tr class="hover:bg-gray-50 transition-colors">
                                             <td class="px-4 py-3 text-gray-500">{{ $idx + 1 }}</td>
-                                            <td class="px-4 py-3 font-medium text-gray-900">{{ $globalItem->batch }} - (Tersedia: {{ number_format($globalItem->details->sum('berat'), 2, ',', '.') }}gr)</td>
+                                            <td class="px-4 py-3 font-medium text-gray-900">
+                                                {{ $detailItem->stokGrading->no_kartu ?? 'N/A' }} - {{ strtoupper(str_replace('_', ' ', $detailItem->type)) }} ({{ $detailItem->grade }})
+                                                <br><span class="text-xs text-gray-500 font-normal">Tersedia: {{ number_format($detailItem->berat, 2, ',', '.') }}gr / {{ $detailItem->box }} Pcs</span>
+                                            </td>
                                             <td class="px-4 py-3 text-center">
                                                 <button type="button" 
-                                                    @click="selectedGlobalId = {{ $globalItem->details->first()->id ?? 0 }}; selectedGlobalName = '{{ $globalItem->batch }}'" 
+                                                    onclick="selectGlobalItem({{ $detailItem->id }}, '{{ $detailItem->stokGrading->no_kartu ?? '' }} - {{ $detailItem->grade }}')" 
                                                     class="inline-flex justify-center items-center px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors duration-200">
                                                     Pilih
                                                 </button>
@@ -193,34 +186,28 @@
                             </div>
 
                             <!-- Transfer Input Form -->
-                            <div x-show="selectedGlobalId" class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mt-4">
+                            <div id="transferFormBox" class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mt-4 hidden">
                                 
                                 <div class="mb-4 bg-blue-50 p-4 rounded-md border border-blue-100 flex justify-between items-center">
                                     <div>
                                         <span class="text-xs text-blue-600 font-bold uppercase tracking-wider block mb-1">Terpilih:</span>
-                                        <span class="font-medium text-blue-900 text-lg" x-text="selectedGlobalName"></span>
+                                        <span class="font-medium text-blue-900 text-lg" id="selectedGlobalName"></span>
                                     </div>
-                                    <button type="button" @click="selectedGlobalId = null" class="text-sm text-blue-600 hover:text-blue-800 underline">Ganti Barang</button>
+                                    <button type="button" onclick="resetSelection()" class="text-sm text-blue-600 hover:text-blue-800 underline">Ganti Barang</button>
                                 </div>
 
                                 <form action="{{ route('stok-barang-jadi.transfer') }}" method="POST">
                                     @csrf
-                                    <input type="hidden" name="global_id" :value="selectedGlobalId">
+                                    <input type="hidden" name="global_id" id="globalIdInput" value="">
                                     
                                     <div class="grid grid-cols-1 gap-6 mt-6 sm:grid-cols-2">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">Nama Barang (Hasil Clop)</label>
-                                            <input type="text" name="nama_barang_clop" required
-                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Contoh: Clop X">
-                                        </div>
-
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Jumlah (Pcs)</label>
                                             <input type="number" name="jumlah" required min="1"
                                                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="10">
                                         </div>
 
-                                        <div class="sm:col-span-2">
+                                        <div>
                                             <label class="block text-sm font-medium text-gray-700">Berat (Gram)</label>
                                             <input type="number" step="0.01" name="berat" required
                                                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="50.00">
@@ -228,7 +215,7 @@
                                     </div>
 
                                     <div class="mt-8 flex justify-end space-x-3 border-t border-gray-200 pt-5">
-                                        <button type="button" @click="showTransferModal = false; selectedGlobalId = null"
+                                        <button type="button" onclick="closeTransferModal()"
                                             class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                                             Batal
                                         </button>
@@ -248,3 +235,34 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    function openTransferModal() {
+        document.getElementById('transferModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTransferModal() {
+        document.getElementById('transferModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        resetSelection(); // Reset form state when closing
+    }
+
+    function selectGlobalItem(id, name) {
+        document.getElementById('selectionTable').classList.add('hidden');
+        document.getElementById('transferFormBox').classList.remove('hidden');
+        
+        document.getElementById('selectedGlobalName').innerText = name;
+        document.getElementById('globalIdInput').value = id;
+    }
+
+    function resetSelection() {
+        document.getElementById('selectionTable').classList.remove('hidden');
+        document.getElementById('transferFormBox').classList.add('hidden');
+        
+        document.getElementById('selectedGlobalName').innerText = '';
+        document.getElementById('globalIdInput').value = '';
+    }
+</script>
+@endpush
