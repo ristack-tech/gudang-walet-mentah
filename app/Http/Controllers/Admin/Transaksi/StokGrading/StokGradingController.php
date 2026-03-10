@@ -11,10 +11,14 @@ use App\Models\StokGrading;
 class StokGradingController extends Controller
 {
     protected $stokGradingService;
+    protected $stokGudangService;
 
-    public function __construct(StokGradingService $stokGradingService)
-    {
+    public function __construct(
+        StokGradingService $stokGradingService,
+        \App\Services\StokGudang\StokGudangService $stokGudangService
+    ) {
         $this->stokGradingService = $stokGradingService;
+        $this->stokGudangService = $stokGudangService;
     }
 
     public function index(Request $request)
@@ -26,14 +30,8 @@ class StokGradingController extends Controller
 
     public function createStep1(Request $request)
     {
-        // Mock data for stok gudang to select
-        $stokGudang = collect([
-            (object)['id' => 1, 'item_description' => 'Sarang Walet Grade A', 'qty_gram' => 500, 'qty_pcs' => 50, 'qty_box' => 2, 'kode_partai' => 'PRT-001'],
-            (object)['id' => 2, 'item_description' => 'Sarang Walet Grade B', 'qty_gram' => 300, 'qty_pcs' => 30, 'qty_box' => 1, 'kode_partai' => 'PRT-002'],
-            (object)['id' => 3, 'item_description' => 'Sarang Walet Grade C', 'qty_gram' => 200, 'qty_pcs' => 20, 'qty_box' => 1, 'kode_partai' => 'PRT-003'],
-            (object)['id' => 4, 'item_description' => 'Sarang Walet Grade D', 'qty_gram' => 100, 'qty_pcs' => 10, 'qty_box' => 1, 'kode_partai' => 'PRT-004'],
-            (object)['id' => 5, 'item_description' => 'Sarang Walet Patahan', 'qty_gram' => 400, 'qty_pcs' => 60, 'qty_box' => 2, 'kode_partai' => 'PRT-005'],
-        ]);
+        // Require StokGudangService globally if not already set up. We already have it injected.
+        $stokGudang = $this->stokGudangService->getGlobalSummary($request->search);
 
         return view('admin.stok-grading.create-step-1', compact('stokGudang'));
     }

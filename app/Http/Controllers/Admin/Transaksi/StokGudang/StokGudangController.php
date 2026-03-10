@@ -18,8 +18,9 @@ class StokGudangController extends Controller
     {
         $demakCount = \App\Models\BarangMasukDemak::count();
         $jasaCuciCount = \App\Models\BarangMasukJasaCuci::count();
+        $globalCount = collect($this->stokGudangService->getGlobalSummary())->count();
 
-        return view('admin.stok-gudang.index', compact('demakCount', 'jasaCuciCount'));
+        return view('admin.stok-gudang.index', compact('demakCount', 'jasaCuciCount', 'globalCount'));
     }
 
     public function demak(\Illuminate\Http\Request $request)
@@ -50,5 +51,21 @@ class StokGudangController extends Controller
         $details = $this->stokGudangService->getJasaCuciDetail($id);
 
         return view('admin.stok-gudang.show-jasa-cuci', compact('namaBarang', 'details'));
+    }
+
+    public function global(\Illuminate\Http\Request $request)
+    {
+        $globalStock = $this->stokGudangService->getGlobalSummary($request->search);
+
+        return view('admin.stok-gudang.global', compact('globalStock'));
+    }
+
+    public function showGlobal($id)
+    {
+        $namaBarang = \App\Models\NamaBarang::findOrFail($id);
+        $details = $this->stokGudangService->getGlobalDetail($id);
+        $summary = $this->stokGudangService->getGlobalSummaryForBarang($id);
+
+        return view('admin.stok-gudang.show-global', compact('namaBarang', 'details', 'summary'));
     }
 }

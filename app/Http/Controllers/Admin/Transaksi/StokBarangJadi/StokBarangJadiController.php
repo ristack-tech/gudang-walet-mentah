@@ -20,9 +20,18 @@ class StokBarangJadiController extends Controller
     {
         $tab = $request->query('tab', 'clop'); // default to clop
 
-        $stokGlobal = StokBarangJadi::with('details')->where('type', 'global')->get();
-        
-        $items = $this->stokBarangJadiService->getPaginatedStok($tab, 10);
+        // For the transfer modal, always provide available specific grading details
+        $stokGlobal = \App\Models\StokGradingDetail::with('stokGrading')
+            ->where('berat', '>', 0)
+            ->get();
+
+        if ($tab === 'global') {
+            // Global items listed in the table comes from completed Stok Grading batches
+            $items = \App\Models\StokGrading::with('details')->orderBy('tanggal', 'desc')->paginate(10);
+        } else {
+            // Clop items are handled normally via StokBarangJadi table
+            $items = $this->stokBarangJadiService->getPaginatedStok('clop', 10);
+        }
 
         return view('admin.stok-barang-jadi.index', compact('items', 'tab', 'stokGlobal'));
     }
@@ -30,17 +39,17 @@ class StokBarangJadiController extends Controller
     public function transfer(Request $request)
     {
         $request->validate([
-            'global_id' => 'required|exists:stok_barang_jadi_details,id',
+            'global_id' => 'required|exists:stok_grading_details,id',
             'jumlah' => 'required|integer|min:1',
             'berat' => 'required|numeric|min:0.1',
         ]);
 
-        $globalId = $request->input('global_id');
+        $stokGradingDetailId = $request->input('global_id');
         $jumlah = $request->input('jumlah');
         $berat = $request->input('berat');
         
         try {
-            $this->stokBarangJadiService->transferToClop($globalId, $jumlah, $berat);
+            $this->stokBarangJadiService->transferToClop($stokGradingDetailId, $jumlah, $berat);
             return redirect()->route('stok-barang-jadi.index', ['tab' => 'clop'])->with('success', 'Transfer ke IDM berhasil diproses.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
