@@ -24,6 +24,7 @@
             $isStokGrading = request()->routeIs('stok-grading.*');
             $isStokBarangJadi = request()->routeIs('stok-barang-jadi.*');
             $isStokGudang = request()->routeIs('stok-gudang.*');
+            $isExport = request()->routeIs('export.*');
         @endphp
 
         <a href="{{ route('dashboard') }}"
@@ -66,17 +67,6 @@
                 <span class="font-medium">Barang Masuk</span>
             </a>
 
-            <a href="{{ route('stok-grading.index') }}"
-                class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 group
-            {{ $isStokGrading ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800' }}">
-                <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                    </path>
-                </svg>
-                <span class="font-medium">Stok Grading</span>
-            </a>
-
             <a href="{{ route('stok-gudang.index') }}"
                 class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 group
             {{ $isStokGudang ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800' }}">
@@ -88,6 +78,16 @@
                 <span class="font-medium">Stok Gudang</span>
             </a>
 
+            <a href="{{ route('stok-grading.index') }}"
+                class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 group
+            {{ $isStokGrading ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800' }}">
+                <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                    </path>
+                </svg>
+                <span class="font-medium">Stok Grading</span>
+            </a>
 
             <a href="{{ route('stok-barang-jadi.index') }}"
                 class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 group
@@ -99,7 +99,7 @@
                 <span class="font-medium">Stok Barang Jadi</span>
             </a>
 
-            <a href="" class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 group">
+            <a href="{{ route('export.index') }}" class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 group {{ $isExport ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800' }}">
                 <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>

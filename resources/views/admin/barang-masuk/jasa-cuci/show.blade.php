@@ -10,7 +10,7 @@
             <div>
                 <h1 class="text-2xl font-semibold text-gray-900">Detail Batch Jasa Cuci</h1>
                 <p class="text-sm text-gray-600 mt-1">
-                    Batch ID: <span class="font-medium text-blue-600">BMJC-{{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    Batch ID: <span class="font-medium text-blue-600">{{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}</span>
                 </p>
             </div>
             <div class="flex gap-2">
@@ -30,7 +30,7 @@
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Informasi Transaksi</h2>
-                    
+
                     <div class="space-y-4">
                         <div>
                             <span class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Tanggal Terima</span>
@@ -39,7 +39,7 @@
                                 {{ \Carbon\Carbon::parse($barangMasukBatch->tanggal_terima)->format('d M Y') }}
                             </span>
                         </div>
-                        
+
                         <div>
                             <span class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Lokasi Jasa Cuci</span>
                             <span class="text-sm font-semibold text-gray-900 flex items-center">
@@ -69,7 +69,7 @@
                             Edit Batch
                         </a>
                     </div>
-                    
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-white">
@@ -118,14 +118,14 @@
                                         </td>
                                     </tr>
                                 @endforelse
-                                
+
                             </tbody>
                         </table>
                     </div>
-                    
+
                 </div>
             </div>
-            
+
         </div>
     </div>
 </div>
