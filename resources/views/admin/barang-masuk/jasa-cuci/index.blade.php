@@ -7,15 +7,22 @@
         <div class="w-full px-4 sm:px-6 lg:px-8 py-8">
 
             <!-- Header -->
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <h1 class="text-2xl font-semibold text-gray-800">Data Barang Masuk (Jasa Cuci)</h1>
-                
+            <div class="mb-6">
+                <h1 class="text-2xl font-semibold text-gray-800 mb-4">Data Barang Masuk (Jasa Cuci)</h1>
+
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <a href="{{ route('barang-masuk.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 shadow-sm">
+                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Daftar Barang Masuk
+                    </a>
                 <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <!-- Search Form -->
                     <form action="{{ route('barang-masuk.jasa-cuci.index') }}" method="GET" class="flex w-full sm:w-auto">
                         <div class="relative flex-grow sm:flex-grow-0">
-                            <input type="text" name="search" value="{{ request('search') }}" 
-                                placeholder="Cari barang..." 
+                            <input type="text" name="search" value="{{ request('search') }}"
+                                placeholder="Cari barang..."
                                 class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,13 +61,13 @@
                             @forelse($barangMasukBatch as $index => $item)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $barangMasukBatch->firstItem() + $index }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">BMJC-{{ str_pad($item->id, 5, '0', STR_PAD_LEFT) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">{{ \Carbon\Carbon::parse($item->tanggal_terima)->format('Ymd') . '-' . strtoupper(substr(md5($item->id), 0, 3)) }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ \Carbon\Carbon::parse($item->tanggal_terima)->format('d M Y') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                         <div class="flex items-center justify-center space-x-2">
                                             <a href="{{ route('barang-masuk.jasa-cuci.show', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">Detail Batch</a>
                                             <a href="{{ route('barang-masuk.jasa-cuci.edit', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">Edit Batch</a>
-                                            <button onclick="confirmDelete({{ $item->id }}, 'BMJC-{{ str_pad($item->id, 5, '0', STR_PAD_LEFT) }}')" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">Hapus Batch</button>
+                                            <button onclick="confirmDelete({{ $item->id }}, '{{ \Carbon\Carbon::parse($item->tanggal_terima)->format('Ymd') . '-' . strtoupper(substr(md5($item->id), 0, 3)) }}')" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">Hapus Batch</button>
                                         </div>
                                     </td>
                                 </tr>

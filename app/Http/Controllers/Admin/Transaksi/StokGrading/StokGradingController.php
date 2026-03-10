@@ -20,7 +20,7 @@ class StokGradingController extends Controller
     public function index(Request $request)
     {
         $stokGradingBatch = StokGrading::orderBy('tanggal', 'desc')->paginate(10);
-        
+
         return view('admin.stok-grading.index', compact('stokGradingBatch'));
     }
 
@@ -41,8 +41,8 @@ class StokGradingController extends Controller
     public function createStep2(Request $request)
     {
         // Mock step 2 form for a specific batch/stok
-        $batchId = $request->query('stok_id', 'A-1'); 
-        
+        $batchId = $request->query('stok_id', 'A-1');
+
         $gradesLempengBersih = [
             'ZT', 'ZT (B)', 'YT', 'YT (B)', 'MB', 'MB (B)', 'SB', 'SB B', 'SB 2', 'SB 2 (B)', 'SB 3'
         ];
@@ -50,7 +50,7 @@ class StokGradingController extends Controller
         $gradesLempengKotor = [
             'MBS', 'MBS (B)', 'SBS', 'SBS (B)', 'SBS 2', 'SBS 2 (B)', 'SBS 3', 'SBS 3 (B)'
         ];
-        
+
         $gradesMangkok = [
             'MK R' => ['S3', 'S4', 'S5', 'S6'],
             'PM' => ['KECIL', 'SEDANG', 'BESAR', 'JUMBO'],
@@ -71,7 +71,7 @@ class StokGradingController extends Controller
             'grades.*.box' => 'nullable|integer',
         ]);
 
-        $batchId = $request->input('stok_id', 'A-1'); 
+        $batchId = $request->input('stok_id', 'A-1');
         $partai = 'Partai Mock'; // get from stok_id if applicable
 
         $data = [
@@ -88,7 +88,7 @@ class StokGradingController extends Controller
     public function show($id)
     {
         $gradingBatch = $this->stokGradingService->getGradingFormatted($id);
-        
+
         return view('admin.stok-grading.show', compact('gradingBatch'));
     }
 

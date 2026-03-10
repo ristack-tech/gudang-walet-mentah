@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukJasaCuciControll
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukPembelianSupplierController;
 use App\Http\Controllers\Admin\Transaksi\StokGrading\StokGradingController;
 use App\Http\Controllers\Admin\Transaksi\StokBarangJadi\StokBarangJadiController;
+use App\Http\Controllers\Admin\Transaksi\Export\ExportController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -127,6 +128,15 @@ Route::middleware('auth')->group(function () {
         Route::prefix('stok-barang-jadi')->name('stok-barang-jadi.')->controller(StokBarangJadiController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::post('/transfer', 'transfer')->name('transfer');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
+        Route::prefix('export')->name('export.')->controller(ExportController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 

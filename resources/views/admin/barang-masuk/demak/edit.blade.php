@@ -10,7 +10,7 @@
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-semibold text-gray-900">Edit Data Batch Barang Masuk (Demak)</h1>
-                <p class="mt-1 text-sm text-gray-600">Perbarui informasi batch BMD-{{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}.</p>
+                <p class="mt-1 text-sm text-gray-600">Perbarui informasi batch {{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}.</p>
             </div>
             <a href="{{ route('barang-masuk.demak.index') }}"
                 class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium">
@@ -39,13 +39,13 @@
         <form method="POST" action="{{ route('barang-masuk.demak.update', $barangMasukBatch->id) }}" id="editForm">
             @csrf
             @method('PUT')
-            
+
             <!-- TRANSAKSI INFO -->
             <div class="bg-white shadow-sm border border-gray-200 rounded-lg mb-6">
                 <div class="p-6 border-b border-gray-100 bg-gray-50">
                     <h2 class="text-base font-semibold text-gray-900">1. Informasi Transaksi Batch</h2>
                 </div>
-                
+
                 <div class="p-6 space-y-6">
                     <div>
                         <label for="tanggal_terima" class="block text-sm font-medium text-gray-700 mb-1">
@@ -66,7 +66,7 @@
                             <label for="transaksi_dari_id" class="block text-sm font-medium text-gray-700 mb-1">
                                 Transaksi Dari <span class="text-red-500">*</span>
                             </label>
-                            <select id="transaksi_dari_id" name="transaksi_dari_id" required 
+                            <select id="transaksi_dari_id" name="transaksi_dari_id" required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white text-sm">
                                 <option value="">-- Pilih Lokasi --</option>
                                 @foreach($lokasi as $l)
@@ -81,7 +81,7 @@
                             <label for="transaksi_ke_id" class="block text-sm font-medium text-gray-700 mb-1">
                                 Transaksi Ke <span class="text-red-500">*</span>
                             </label>
-                            <select id="transaksi_ke_id" name="transaksi_ke_id" required 
+                            <select id="transaksi_ke_id" name="transaksi_ke_id" required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white text-sm">
                                 <option value="">-- Pilih Lokasi --</option>
                                 @foreach($lokasi as $l)
@@ -104,7 +104,7 @@
                         + Tambah Item
                     </button>
                 </div>
-                
+
                 <div class="p-6">
                     <div id="itemsContainer" class="space-y-4">
                         @php
@@ -118,7 +118,7 @@
                                 Hapus
                             </div>
                             <h4 class="font-medium text-sm text-gray-900 mb-4 item-number">Item {{ $index + 1 }}</h4>
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                                 <!-- Partai -->
                                 <div class="col-span-12 md:col-span-4">
@@ -126,7 +126,7 @@
                                     <textarea name="items[{{ $index }}][partai]" rows="2" required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm">{{ $item['partai'] ?? '' }}</textarea>
                                 </div>
-                                
+
                                 <!-- Barang & Quantities -->
                                 <div class="col-span-12 md:col-span-8 flex flex-col gap-4">
                                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -173,13 +173,13 @@
                     <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100 flex justify-between items-center">
                         <span class="text-sm font-medium text-blue-800">Total Keseluruhan:</span>
                         <div class="text-right text-sm">
-                            <span class="font-bold text-blue-900" id="displayTotalGram">0</span> gr &middot; 
-                            <span class="font-bold text-blue-900" id="displayTotalPcs">0</span> pcs &middot; 
+                            <span class="font-bold text-blue-900" id="displayTotalGram">0</span> gr &middot;
+                            <span class="font-bold text-blue-900" id="displayTotalPcs">0</span> pcs &middot;
                             <span class="font-bold text-blue-900" id="displayTotalBox">0</span> box
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg flex justify-end">
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-md transition duration-200 shadow-sm">
                         Simpan Perubahan
@@ -197,7 +197,7 @@
             Hapus
         </div>
         <h4 class="font-medium text-sm text-gray-900 mb-4 item-number">Item __NUMBER__</h4>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
             <!-- Partai -->
             <div class="col-span-12 md:col-span-4">
@@ -205,7 +205,7 @@
                 <textarea name="items[__INDEX__][partai]" rows="2" required
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"></textarea>
             </div>
-            
+
             <!-- Barang & Quantities -->
             <div class="col-span-12 md:col-span-8 flex flex-col gap-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -221,23 +221,23 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Gram</label>
-                        <input type="number" step="0.01" name="items[__INDEX__][gram]" required 
+                        <input type="number" step="0.01" name="items[__INDEX__][gram]" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm item-weight" oninput="calculateTotal()">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Pcs</label>
-                        <input type="number" name="items[__INDEX__][pcs]" required 
+                        <input type="number" name="items[__INDEX__][pcs]" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm item-pcs" oninput="calculateTotal()">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Box</label>
-                        <input type="number" name="items[__INDEX__][box]" value="1" required 
+                        <input type="number" name="items[__INDEX__][box]" value="1" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm item-box" oninput="calculateTotal()">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Keterangan</label>
-                    <input type="text" name="items[__INDEX__][keterangan]" 
+                    <input type="text" name="items[__INDEX__][keterangan]"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Opsional">
                 </div>
             </div>
@@ -252,10 +252,10 @@
     function addNewItem() {
         const container = document.getElementById('itemsContainer');
         let template = document.getElementById('itemTemplate').innerHTML;
-        
+
         template = template.replace(/__INDEX__/g, itemIndexCounter);
         template = template.replace(/__NUMBER__/g, itemIndexCounter + 1);
-        
+
         container.insertAdjacentHTML('beforeend', template);
         itemIndexCounter++;
         reorderItems();

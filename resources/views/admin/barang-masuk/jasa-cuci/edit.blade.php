@@ -8,7 +8,7 @@
         <div class="mb-6 flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-semibold text-gray-800">Edit Batch Jasa Cuci</h1>
-                <p class="text-sm text-gray-500 mt-1">Batch ID: BMJC-{{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}</p>
+                <p class="text-sm text-gray-500 mt-1">Batch ID: {{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}</p>
             </div>
             <a href="{{ route('barang-masuk.jasa-cuci.index') }}" class="text-gray-500 hover:text-gray-700 font-medium transition duration-200">
                 &laquo; Batal & Kembali
@@ -25,28 +25,28 @@
             <form action="{{ route('barang-masuk.jasa-cuci.update', $barangMasukBatch->id) }}" method="POST" id="editForm">
                 @csrf
                 @method('PUT')
-                
+
                 <!-- Section 1: Informasi Transaksi -->
                 <div class="p-6 md:p-8 border-b border-gray-100">
                     <h2 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
                         <span class="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center text-sm mr-2">1</span>
                         Informasi Transaksi
                     </h2>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="tanggal_terima" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Terima <span class="text-red-500">*</span></label>
-                            <input type="date" id="tanggal_terima" name="tanggal_terima" 
+                            <input type="date" id="tanggal_terima" name="tanggal_terima"
                                 value="{{ old('tanggal_terima', $barangMasukBatch->tanggal_terima) }}"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 @error('tanggal_terima') border-red-500 @enderror" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 @error('tanggal_terima') border-red-500 @enderror"
                                 required>
                             @error('tanggal_terima')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
 
                         <div>
                             <label for="lokasi_jasa_cuci_id" class="block text-sm font-medium text-gray-700 mb-1">Lokasi Jasa Cuci <span class="text-red-500">*</span></label>
-                            <select id="lokasi_jasa_cuci_id" name="lokasi_jasa_cuci_id" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 @error('lokasi_jasa_cuci_id') border-red-500 @enderror" 
+                            <select id="lokasi_jasa_cuci_id" name="lokasi_jasa_cuci_id"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 @error('lokasi_jasa_cuci_id') border-red-500 @enderror"
                                 required>
                                 <option value="">-- Pilih Lokasi --</option>
                                 @foreach($lokasiList as $l)
@@ -122,7 +122,7 @@
                         </div>
                         @endforeach
                     </div>
-                    
+
                     @if($errors->has('items') || $errors->has('items.*'))
                         <div class="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100">
                             Mohon periksa kembali isian item Anda. Pastikan semua field wajib terisi dengan format yang benar.
@@ -194,11 +194,11 @@
         // Add Item
         addButton.addEventListener('click', function() {
             const html = template.innerHTML.replace(/__INDEX__/g, itemIndex);
-            
+
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
             const newRow = tempDiv.firstElementChild;
-            
+
             container.appendChild(newRow);
             itemIndex++;
             updateRemoveButtons();
@@ -221,14 +221,14 @@
         function updateRemoveButtons() {
             const rows = container.querySelectorAll('.item-row');
             const btns = container.querySelectorAll('.remove-item-btn');
-            
+
             if (rows.length <= 1) {
                 btns.forEach(btn => btn.style.display = 'none');
             } else {
                 btns.forEach(btn => btn.style.display = 'flex');
             }
         }
-        
+
         // Initial setup
         updateRemoveButtons();
     });
