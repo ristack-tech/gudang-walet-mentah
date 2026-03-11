@@ -13,15 +13,15 @@ class ExportBarang extends Model
 
     protected $fillable = [
         'tanggal_transfer',
-        'barang_id',
+        'stok_barang_jadi_detail_id',
         'berat',
         'pcs',
         'box',
         'harga',
     ];
 
-    public function barang()
+    public function stokBarangJadiDetail()
     {
-        return $this->belongsTo(NamaBarang::class, 'barang_id');
+        return $this->belongsTo(StokBarangJadiDetail::class, 'stok_barang_jadi_detail_id');
     }
 }

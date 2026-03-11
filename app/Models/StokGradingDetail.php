@@ -15,6 +15,7 @@ class StokGradingDetail extends Model
         'type',
         'grade',
         'berat',
+        'pcs',
         'box',
     ];
 

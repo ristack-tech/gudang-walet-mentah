@@ -82,7 +82,7 @@
                         <p class="text-gray-900 whitespace-no-wrap">{{ \Carbon\Carbon::parse($export->tanggal_transfer)->format('d/m/Y') }}</p>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">{{ $export->barang->nama_barang ?? '-' }}</p>
+                        <p class="text-gray-900 whitespace-no-wrap">{{ $export->stokBarangJadiDetail->nama_barang ?? '-' }}</p>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <p class="text-gray-900 whitespace-no-wrap">{{ $export->berat }}</p>
@@ -96,13 +96,17 @@
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <p class="text-gray-900 whitespace-no-wrap">{{ number_format($export->harga, 2) }}</p>
                     </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                        <div class="flex justify-center space-x-2">
-                            <a href="{{ route('export.edit', $export->id) }}" class="text-blue-500 hover:text-blue-800">Edit</a>
-                            <form action="{{ route('export.destroy', $export->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center font-medium">
+                        <div class="flex items-center justify-center space-x-2">
+                            <a href="{{ route('export.edit', $export->id) }}" class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">
+                                Edit
+                            </a>
+                            <form action="{{ route('export.destroy', $export->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-500 hover:text-red-800">Delete</button>
+                                <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
+                                    Hapus
+                                </button>
                             </form>
                         </div>
                     </td>

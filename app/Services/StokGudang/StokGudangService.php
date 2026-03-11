@@ -14,15 +14,30 @@ class StokGudangService
      */
     public function getDemakSummary(?string $search = null)
     {
+        $graded = DB::table('stok_gradings')
+            ->select(
+                'barang_id',
+                DB::raw('SUM(total_gram_keseluruhan) as used_gram'),
+                DB::raw('SUM(pcs_awal) as used_pcs')
+            )
+            ->where('sumber_stok', 'demak')
+            ->whereNull('deleted_at')
+            ->groupBy('barang_id');
+
         $query = DB::table('barang_masuk_demak')
             ->join('nama_barang', 'barang_masuk_demak.barang_id', '=', 'nama_barang.id')
+            ->leftJoinSub($graded, 'graded', function ($join) {
+                $join->on('barang_masuk_demak.barang_id', '=', 'graded.barang_id');
+            })
             ->select(
                 'nama_barang.id',
                 'nama_barang.nama_barang',
-                DB::raw('SUM(barang_masuk_demak.gram) as total_gram'),
-                DB::raw('SUM(barang_masuk_demak.pcs) as total_pcs')
+                DB::raw('SUM(barang_masuk_demak.gram) - COALESCE(MAX(graded.used_gram), 0) as total_gram'),
+                DB::raw('SUM(barang_masuk_demak.pcs) - COALESCE(MAX(graded.used_pcs), 0) as total_pcs'),
+                DB::raw('SUM(barang_masuk_demak.box) as total_box') // Assuming box isn't deducted per source directly or keep consistent
             )
-            ->groupBy('nama_barang.id', 'nama_barang.nama_barang');
+            ->groupBy('nama_barang.id', 'nama_barang.nama_barang')
+            ->having(DB::raw('SUM(barang_masuk_demak.gram) - COALESCE(MAX(graded.used_gram), 0)'), '>', 0);
 
         if ($search) {
             $query->where('nama_barang.nama_barang', 'like', "%{$search}%");
@@ -39,15 +54,30 @@ class StokGudangService
      */
     public function getJasaCuciSummary(?string $search = null)
     {
+        $graded = DB::table('stok_gradings')
+            ->select(
+                'barang_id',
+                DB::raw('SUM(total_gram_keseluruhan) as used_gram'),
+                DB::raw('SUM(pcs_awal) as used_pcs')
+            )
+            ->where('sumber_stok', 'jasa_cuci')
+            ->whereNull('deleted_at')
+            ->groupBy('barang_id');
+
         $query = DB::table('barang_masuk_jasa_cuci')
             ->join('nama_barang', 'barang_masuk_jasa_cuci.barang_id', '=', 'nama_barang.id')
+            ->leftJoinSub($graded, 'graded', function ($join) {
+                $join->on('barang_masuk_jasa_cuci.barang_id', '=', 'graded.barang_id');
+            })
             ->select(
                 'nama_barang.id',
                 'nama_barang.nama_barang',
-                DB::raw('SUM(barang_masuk_jasa_cuci.berat_per_pcs) as total_gram'),
-                DB::raw('COUNT(barang_masuk_jasa_cuci.id) as total_pcs')
+                DB::raw('SUM(barang_masuk_jasa_cuci.berat_per_pcs) - COALESCE(MAX(graded.used_gram), 0) as total_gram'),
+                DB::raw('COUNT(barang_masuk_jasa_cuci.id) - COALESCE(MAX(graded.used_pcs), 0) as total_pcs'),
+                DB::raw('0 as total_box')
             )
-            ->groupBy('nama_barang.id', 'nama_barang.nama_barang');
+            ->groupBy('nama_barang.id', 'nama_barang.nama_barang')
+            ->having(DB::raw('SUM(barang_masuk_jasa_cuci.berat_per_pcs) - COALESCE(MAX(graded.used_gram), 0)'), '>', 0);
 
         if ($search) {
             $query->where('nama_barang.nama_barang', 'like', "%{$search}%");
@@ -130,17 +160,31 @@ class StokGudangService
 
         $unionQuery = $demak->unionAll($jasaCuci);
 
+        $graded = DB::table('stok_gradings')
+            ->select(
+                'barang_id',
+                DB::raw('SUM(total_gram_keseluruhan) as used_gram'),
+                DB::raw('SUM(pcs_awal) as used_pcs'),
+                DB::raw('SUM(total_box_keseluruhan) as used_box')
+            )
+            ->whereNull('deleted_at')
+            ->groupBy('barang_id');
+
         $query = DB::query()
             ->fromSub($unionQuery, 'combined')
             ->join('nama_barang', 'combined.barang_id', '=', 'nama_barang.id')
+            ->leftJoinSub($graded, 'graded', function ($join) {
+                $join->on('combined.barang_id', '=', 'graded.barang_id');
+            })
             ->select(
                 'combined.barang_id as id',
                 'nama_barang.nama_barang',
-                DB::raw('SUM(combined.total_gram) as total_gram'),
-                DB::raw('SUM(combined.total_pcs) as total_pcs'),
-                DB::raw('SUM(combined.total_box) as total_box')
+                DB::raw('SUM(combined.total_gram) - COALESCE(MAX(graded.used_gram), 0) as total_gram'),
+                DB::raw('SUM(combined.total_pcs) - COALESCE(MAX(graded.used_pcs), 0) as total_pcs'),
+                DB::raw('SUM(combined.total_box) - COALESCE(MAX(graded.used_box), 0) as total_box')
             )
-            ->groupBy('combined.barang_id', 'nama_barang.nama_barang');
+            ->groupBy('combined.barang_id', 'nama_barang.nama_barang')
+            ->having(DB::raw('SUM(combined.total_gram) - COALESCE(MAX(graded.used_gram), 0)'), '>', 0);
 
         if ($search) {
             $query->where('nama_barang.nama_barang', 'like', "%{$search}%");
@@ -176,7 +220,21 @@ class StokGudangService
 
         $unionQuery = $demak->unionAll($jasaCuci);
 
-        return DB::query()
+        $graded = DB::table('stok_gradings')
+            ->select(
+                DB::raw('SUM(total_gram_keseluruhan) as used_gram'),
+                DB::raw('SUM(pcs_awal) as used_pcs'),
+                DB::raw('SUM(total_box_keseluruhan) as used_box')
+            )
+            ->where('barang_id', $barangId)
+            ->whereNull('deleted_at')
+            ->first();
+            
+        $usedGram = $graded->used_gram ?? 0;
+        $usedPcs = $graded->used_pcs ?? 0;
+        $usedBox = $graded->used_box ?? 0;
+
+        $result = DB::query()
             ->fromSub($unionQuery, 'combined')
             ->select(
                 DB::raw('SUM(total_gram) as total_gram'),
@@ -184,6 +242,18 @@ class StokGudangService
                 DB::raw('SUM(total_box) as total_box')
             )
             ->first();
+            
+        if ($result) {
+            $result->total_gram -= $usedGram;
+            $result->total_pcs -= $usedPcs;
+            $result->total_box -= $usedBox;
+            
+            $result->total_gram = max(0, $result->total_gram);
+            $result->total_pcs = max(0, $result->total_pcs);
+            $result->total_box = max(0, $result->total_box);
+        }
+        
+        return $result;
     }
 
     /**

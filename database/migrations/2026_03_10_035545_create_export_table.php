@@ -8,10 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::dropIfExists('export_barang');
         Schema::create('export_barang', function (Blueprint $table) {
             $table->id();
             $table->date('tanggal_transfer');
-            $table->foreignId('barang_id')->constrained('nama_barang');
+            $table->foreignId('stok_barang_jadi_detail_id')->constrained('stok_barang_jadi_details')->onDelete('cascade');
             $table->decimal('berat', 10, 2);
             $table->integer('pcs');
             $table->integer('box');

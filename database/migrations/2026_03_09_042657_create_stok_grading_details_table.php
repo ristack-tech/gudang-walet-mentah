@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('type');
             $table->string('grade');
             $table->decimal('berat', 15, 2)->default(0);
+            $table->integer('pcs')->default(0);
             $table->integer('box')->default(0);
             $table->timestamps();
             $table->softDeletes();

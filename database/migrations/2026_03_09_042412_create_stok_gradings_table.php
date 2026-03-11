@@ -18,13 +18,18 @@ return new class extends Migration
             $table->date('tanggal');
             $table->string('partai')->nullable();
             $table->string('pekerja')->nullable();
+            $table->integer('pcs_awal')->default(0);
             $table->decimal('total_gram_lempeng_bersih', 15, 2)->default(0);
+            $table->integer('total_pcs_lempeng_bersih')->default(0);
             $table->integer('total_box_lempeng_bersih')->default(0);
             $table->decimal('total_gram_lempeng_kotor', 15, 2)->default(0);
+            $table->integer('total_pcs_lempeng_kotor')->default(0);
             $table->integer('total_box_lempeng_kotor')->default(0);
             $table->decimal('total_gram_mangkok', 15, 2)->default(0);
+            $table->integer('total_pcs_mangkok')->default(0);
             $table->integer('total_box_mangkok')->default(0);
             $table->decimal('total_gram_keseluruhan', 15, 2)->default(0);
+            $table->integer('total_pcs_keseluruhan')->default(0);
             $table->integer('total_box_keseluruhan')->default(0);
             $table->text('keterangan')->nullable();
             $table->timestamps();

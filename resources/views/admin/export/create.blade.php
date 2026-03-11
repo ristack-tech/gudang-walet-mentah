@@ -40,19 +40,23 @@
 
                     <!-- Nama Barang -->
                     <div>
-                        <label for="barang_id" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="stok_barang_jadi_detail_id" class="block text-sm font-medium text-gray-700 mb-1">
                             Nama Barang <span class="text-red-500">*</span>
                         </label>
-                        <select name="barang_id" id="barang_id"
-                            class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm @error('barang_id') border-red-300 @enderror" required>
+                        <select name="stok_barang_jadi_detail_id" id="stok_barang_jadi_detail_id"
+                            class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm @error('stok_barang_jadi_detail_id') border-red-300 @enderror" required>
                             <option value="">-- Pilih Nama Barang --</option>
-                            @foreach($barangs as $barang)
-                                <option value="{{ $barang->id }}" {{ old('barang_id') == $barang->id ? 'selected' : '' }}>
-                                    {{ $barang->nama_barang }}
+                            @foreach($availableStocks as $stok)
+                                <option value="{{ $stok['id'] }}" 
+                                    data-berat="{{ $stok['available_berat'] ?? 0 }}"
+                                    data-pcs="{{ $stok['available_pcs'] ?? 0 }}"
+                                    {{ old('stok_barang_jadi_detail_id') == $stok['id'] ? 'selected' : '' }}>
+                                    {{ $stok['nama_barang'] }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('barang_id')
+                        <p id="stok_info" class="text-xs text-blue-600 mt-1 hidden"></p>
+                        @error('stok_barang_jadi_detail_id')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
@@ -123,4 +127,57 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const barangSelect = document.getElementById('stok_barang_jadi_detail_id');
+        const beratInput = document.getElementById('berat');
+        const pcsInput = document.getElementById('pcs');
+        const stokInfo = document.getElementById('stok_info');
+
+        function updateMaxLimits() {
+            const selectedOption = barangSelect.options[barangSelect.selectedIndex];
+            if (selectedOption.value) {
+                const maxBerat = parseFloat(selectedOption.getAttribute('data-berat')) || 0;
+                const maxPcs = parseInt(selectedOption.getAttribute('data-pcs')) || 0;
+                
+                beratInput.max = maxBerat;
+                pcsInput.max = maxPcs;
+                
+                stokInfo.textContent = `Stok Clop Tersedia: ${maxBerat}g, ${maxPcs} Pcs`;
+                stokInfo.classList.remove('hidden');
+                
+                // If user entered more than max, restrict it automatically
+                if(parseFloat(beratInput.value) > maxBerat) beratInput.value = maxBerat;
+                if(parseInt(pcsInput.value) > maxPcs) pcsInput.value = maxPcs;
+            } else {
+                beratInput.removeAttribute('max');
+                pcsInput.removeAttribute('max');
+                stokInfo.classList.add('hidden');
+            }
+        }
+
+        barangSelect.addEventListener('change', updateMaxLimits);
+        
+        // initialize on load in case of old input
+        if (barangSelect.value) {
+            updateMaxLimits();
+        }
+        
+        // Ensure manual typing doesn't exceed max
+        beratInput.addEventListener('input', function() {
+            if (this.max && parseFloat(this.value) > parseFloat(this.max)) {
+                this.value = this.max;
+            }
+        });
+        
+        pcsInput.addEventListener('input', function() {
+            if (this.max && parseInt(this.value) > parseInt(this.max)) {
+                this.value = this.max;
+            }
+        });
+    });
+</script>
+@endpush
 @endsection

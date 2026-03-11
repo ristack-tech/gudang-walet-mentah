@@ -49,46 +49,119 @@
         </form>
 
         <form method="GET" action="{{ route('stok-grading.create.step2') }}" id="mainForm">
-            <!-- Hidden input for stok_id -->
+            <!-- Hidden inputs -->
             <input type="hidden" name="stok_id" id="stok_id" value="">
+            <input type="hidden" name="pcs_awal" id="pcs_awal_input" value="">
+            <input type="hidden" name="sumber_stok" id="sumber_stok_input" value="">
 
-            <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                <div class="overflow-x-auto min-h-[350px]">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Gram</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pcs</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Box</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($stokGudang as $index => $item)
-                            <tr class="hover:bg-gray-50 {{ request('stok_id') == $item->id ? 'bg-blue-50' : '' }}">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $index + 1 }}.</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->nama_barang }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ number_format($item->total_gram, 2, ',', '.') }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_pcs }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_box }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
-                                    <button type="button" onclick="selectStok('{{ $item->id }}', this)" 
-                                        class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        Pilih
-                                    </button>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
-                                    Tidak ada data stok gudang.
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6">
+                <div class="p-6 bg-white border-b border-gray-200 flex space-x-4 justify-center">
+                    <button type="button" onclick="showTable('demak')" id="btn_tab_demak" class="px-6 py-3 bg-white border-2 border-blue-500 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition shadow-sm flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        Lihat Stok Gudang Demak
+                    </button>
+                    <button type="button" onclick="showTable('jasacuci')" id="btn_tab_jasacuci" class="px-6 py-3 bg-white border-2 border-purple-500 text-purple-600 font-semibold rounded-lg hover:bg-purple-50 transition shadow-sm flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        Lihat Stok Jasa Cuci
+                    </button>
+                </div>
+
+                <!-- Demak Table Container -->
+                <div id="table_demak" class="hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-blue-50 flex items-center justify-between">
+                        <h3 class="text-lg font-medium text-blue-900 flex items-center">
+                            Sumber: Gudang Demak
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto min-h-[200px]">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Gram</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pcs</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Box</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @forelse($demakSummary as $index => $item)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $index + 1 }}.</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->nama_barang }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ number_format($item->total_gram, 2, ',', '.') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_pcs }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_box }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                                        <div class="flex items-center space-x-2">
+                                            <input type="number" id="input_pcs_demak_{{ $item->id }}" min="1" max="{{ $item->total_pcs }}" placeholder="Jml Pcs" 
+                                                class="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                            <button type="button" onclick="selectStok('{{ $item->id }}', 'demak', this, {{ $item->total_pcs }})" 
+                                                class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                Pilih
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
+                                        Tidak ada ketersediaan stok Demak yang bisa digrading.
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Jasa Cuci Table Container -->
+                <div id="table_jasacuci" class="hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-purple-50 flex items-center justify-between">
+                        <h3 class="text-lg font-medium text-purple-900 flex items-center">
+                            Sumber: Jasa Cuci
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto min-h-[200px]">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Gram</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pcs</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @forelse($jasaCuciSummary as $index => $item)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $index + 1 }}.</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->nama_barang }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ number_format($item->total_gram, 2, ',', '.') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_pcs }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                                        <div class="flex items-center space-x-2">
+                                            <input type="number" id="input_pcs_jasacuci_{{ $item->id }}" min="1" max="{{ $item->total_pcs }}" placeholder="Jml Pcs" 
+                                                class="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                            <button type="button" onclick="selectStok('{{ $item->id }}', 'jasa_cuci', this, {{ $item->total_pcs }})" 
+                                                class="inline-flex items-center px-4 py-2 bg-purple-50 text-purple-600 border border-purple-200 rounded-md hover:bg-purple-100 hover:border-purple-300 transition duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                                                Pilih
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">
+                                        Tidak ada ketersediaan stok Jasa Cuci yang bisa digrading.
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="p-6 bg-gray-50 border-t border-gray-200 flex justify-end">
@@ -107,21 +180,83 @@
 </div>
 
 <script>
-    function selectStok(stokId, btn) {
-        document.getElementById('stok_id').value = stokId;
+    function showTable(type) {
+        const tableDemak = document.getElementById('table_demak');
+        const tableJasaCuci = document.getElementById('table_jasacuci');
+        const btnDemak = document.getElementById('btn_tab_demak');
+        const btnJasaCuci = document.getElementById('btn_tab_jasacuci');
+
+        if (type === 'demak') {
+            tableDemak.classList.remove('hidden');
+            tableJasaCuci.classList.add('hidden');
+            
+            btnDemak.classList.add('bg-blue-50', 'border-blue-500');
+            btnDemak.classList.remove('bg-white', 'border-gray-300', 'text-gray-500');
+            
+            btnJasaCuci.classList.add('bg-white', 'border-gray-300', 'text-gray-500');
+            btnJasaCuci.classList.remove('bg-purple-50', 'border-purple-500', 'text-purple-600');
+        } else {
+            tableJasaCuci.classList.remove('hidden');
+            tableDemak.classList.add('hidden');
+            
+            btnJasaCuci.classList.add('bg-purple-50', 'border-purple-500', 'text-purple-600');
+            btnJasaCuci.classList.remove('bg-white', 'border-gray-300', 'text-gray-500');
+            
+            btnDemak.classList.add('bg-white', 'border-gray-300', 'text-gray-500');
+            btnDemak.classList.remove('bg-blue-50', 'border-blue-500', 'text-blue-600');
+        }
+    }
+
+    // Initialize with gray unselected state for both
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnDemak = document.getElementById('btn_tab_demak');
+        const btnJasaCuci = document.getElementById('btn_tab_jasacuci');
         
-        // Remove active class from all rows
+        btnDemak.classList.remove('border-blue-500');
+        btnDemak.classList.add('border-gray-300', 'text-gray-500');
+        
+        btnJasaCuci.classList.remove('border-purple-500', 'text-purple-600');
+        btnJasaCuci.classList.add('border-gray-300', 'text-gray-500');
+    });
+
+    function selectStok(stokId, sumberStok, btn, maxPcs) {
+        // Build the correct ID based on source logic
+        const inputIdText = sumberStok === 'demak' ? 'demak' : 'jasacuci';
+        const pcsInput = document.getElementById(`input_pcs_${inputIdText}_${stokId}`);
+        const pcsValue = parseInt(pcsInput.value);
+
+        if (!pcsValue || pcsValue < 1) {
+            alert('Masukkan jumlah Pcs yang valid minimal 1.');
+            pcsInput.focus();
+            return;
+        }
+
+        if (pcsValue > maxPcs) {
+            alert(`Jumlah Pcs tidak boleh lebih dari total stok yang tersedia (${maxPcs} Pcs).`);
+            pcsInput.focus();
+            return;
+        }
+
+        document.getElementById('stok_id').value = stokId;
+        document.getElementById('pcs_awal_input').value = pcsValue;
+        document.getElementById('sumber_stok_input').value = sumberStok;
+        
+        // Remove active class from all rows in all tbodys
         document.querySelectorAll('tbody tr').forEach(row => {
-            row.classList.remove('bg-blue-50');
+            row.classList.remove('bg-blue-50', 'bg-purple-50');
         });
         
-        // Add active class to selected row
-        btn.closest('tr').classList.add('bg-blue-50');
+        // Add active class to selected row based on source
+        if(sumberStok === 'demak') {
+            btn.closest('tr').classList.add('bg-blue-50');
+        } else {
+            btn.closest('tr').classList.add('bg-purple-50');
+        }
     }
 
     function checkSelection() {
-        if(!document.getElementById('stok_id').value) {
-            alert('Pilih stok terlebih dahulu');
+        if(!document.getElementById('stok_id').value || !document.getElementById('pcs_awal_input').value || !document.getElementById('sumber_stok_input').value) {
+            alert('Pilih sumber stok (Demak/Jasa Cuci) dan masukkan jumlah Pcs terlebih dahulu');
             return false;
         }
         document.getElementById('mainForm').submit();
