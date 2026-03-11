@@ -91,9 +91,9 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         @if($tab === 'global')
-                                            {{ $item->no_kartu }} - {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                                            {{ $item->namaBarang->nama_barang ?? 'Unknown' }} - {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
                                         @else
-                                            {{ $item->batch }} - {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                                            {{ $item->details->first()->nama_barang ?: ($item->details->first()->namaBarang->nama_barang ?? 'Unknown') }} - {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
@@ -104,17 +104,29 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                        <div class="flex justify-center items-center space-x-2">
-                                            <button type="button" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded text-xs font-medium border border-blue-200 transition duration-200">
-                                                Edit
-                                            </button>
-                                            <form action="{{ route('stok-barang-jadi.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded text-xs font-medium border border-red-200 transition duration-200">
-                                                    Hapus
-                                                </button>
-                                            </form>
+                                        <div class="flex items-center justify-center space-x-2">
+                                            @if($tab === 'global')
+                                                <a href="{{ route('stok-grading.show', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">
+                                                    Detail
+                                                </a>
+                                                <a href="{{ route('stok-grading.edit', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">
+                                                    Edit
+                                                </a>
+                                            @else
+                                                <a href="{{ route('stok-barang-jadi.show', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">
+                                                    Detail
+                                                </a>
+                                                <a href="{{ route('stok-barang-jadi.edit', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">
+                                                    Edit
+                                                </a>
+                                                <form action="{{ route('stok-barang-jadi.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
+                                                        Hapus
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -166,15 +178,18 @@
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
                                         @foreach($stokGlobal as $idx => $detailItem)
+                                        @php
+                                            $namaBarangGlobal = $detailItem->stokGrading->namaBarang->nama_barang ?? 'Unknown';
+                                        @endphp
                                         <tr class="hover:bg-gray-50 transition-colors">
                                             <td class="px-4 py-3 text-gray-500">{{ $idx + 1 }}</td>
                                             <td class="px-4 py-3 font-medium text-gray-900">
-                                                {{ $detailItem->stokGrading->no_kartu ?? 'N/A' }} - {{ strtoupper(str_replace('_', ' ', $detailItem->type)) }} ({{ $detailItem->grade }})
+                                                {{ $namaBarangGlobal }} - {{ strtoupper(str_replace('_', ' ', $detailItem->type)) }} ({{ $detailItem->grade }})
                                                 <br><span class="text-xs text-gray-500 font-normal">Tersedia: {{ number_format($detailItem->berat, 2, ',', '.') }}gr / {{ $detailItem->box }} Pcs</span>
                                             </td>
                                             <td class="px-4 py-3 text-center">
                                                 <button type="button" 
-                                                    onclick="selectGlobalItem({{ $detailItem->id }}, '{{ $detailItem->stokGrading->no_kartu ?? '' }} - {{ $detailItem->grade }}')" 
+                                                    onclick="selectGlobalItem({{ $detailItem->id }}, '{{ addslashes($namaBarangGlobal) }} - {{ $detailItem->grade }}')" 
                                                     class="inline-flex justify-center items-center px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors duration-200">
                                                     Pilih
                                                 </button>

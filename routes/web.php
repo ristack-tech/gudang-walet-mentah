@@ -114,6 +114,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/create/step-2', 'createStep2')->name('create.step2');
             Route::post('/store', 'store')->name('store');
             Route::get('/{id}', 'show')->name('show');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
@@ -130,6 +132,9 @@ Route::middleware('auth')->group(function () {
         Route::prefix('stok-barang-jadi')->name('stok-barang-jadi.')->controller(StokBarangJadiController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::post('/transfer', 'transfer')->name('transfer');
+            Route::get('/{id}', 'show')->name('show');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 

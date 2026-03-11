@@ -1,16 +1,19 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Grading - Batch')
+@section('title', 'Detail Grading - Barang')
 
 @section('content')
-    <div class="bg-white min-h-screen">
-        <div class="w-full px-4 sm:px-6 lg:px-8 py-8">
-
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h1 class="text-2xl font-semibold text-gray-900">Detail Grading - Batch: {{ $gradingBatch['batch_utama'] }}</h1>
-                    <p class="text-sm text-gray-600">ID Grading: SG-{{ str_pad($gradingBatch['id'], 3, '0', STR_PAD_LEFT) }}</p>
-                </div>
+<div class="py-8 bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+            
+            <!-- Header Section -->
+            <div class="p-6 sm:p-10 border-b border-gray-200 bg-white">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-900">Detail Grading - Barang: {{ $namaBarang }}</h1>
+                        <p class="text-sm text-gray-600">ID Grading: SG-{{ str_pad($gradingBatch['id'], 3, '0', STR_PAD_LEFT) }}</p>
+                    </div>
                 <div class="flex gap-2">
                     <a href="{{ route('stok-grading.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 text-sm font-medium text-gray-700">
@@ -26,30 +29,33 @@
             <!-- ✅ Informasi Stok Awal (Dari Step 1) -->
             <div class="bg-white shadow rounded-lg border mb-6 p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Informasi Stok Gudang Awal</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
                     <div>
-                        <p class="text-sm text-gray-500 font-medium">Tanggal Grading</p>
-                        <p class="text-lg font-semibold text-gray-900">
-                            {{ \Carbon\Carbon::parse($gradingBatch['tanggal'])->format('d/m/Y') }}
-                        </p>
+                        <dt class="text-sm font-medium text-gray-500">Tanggal Grading</dt>
+                        <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ \Carbon\Carbon::parse($gradingBatch['tanggal'])->format('d M Y') }}</dd>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 font-medium">Partai</p>
-                        <p class="text-lg font-semibold text-gray-900">
-                            {{ $gradingBatch['partai'] }}
-                        </p>
+                        <dt class="text-sm font-medium text-gray-500">Partai</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $gradingBatch['partai'] }}</dd>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 font-medium">No Kartu Turunan</p>
-                        <p class="text-lg font-semibold text-gray-900">
-                            {{ $gradingBatch['no_kartu'] }}
-                        </p>
+                        <dt class="text-sm font-medium text-gray-500">Pekerja</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $gradingBatch['pekerja'] }}</dd>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 font-medium">Pekerja</p>
-                        <p class="text-lg font-semibold text-gray-900">
-                            {{ $gradingBatch['pekerja'] }}
-                        </p>
+                        <dt class="text-sm font-medium text-gray-500">Nama Barang Stok Sumber</dt>
+                        <dd class="mt-1 text-sm text-blue-600 font-medium">
+                            {{ $namaBarang }}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ml-2 {{ ($gradingBatch['sumber_stok'] ?? '') == 'demak' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                {{ ($gradingBatch['sumber_stok'] ?? '') == 'demak' ? 'Demak' : 'Jasa Cuci' }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div class="md:col-span-2 mt-2 pt-2 border-t border-gray-100">
+                        <dt class="text-sm font-medium text-gray-700">Jumlah Awal Sebelum Digrading</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            Pcs Awal Digrading: <span class="font-bold">{{ number_format($gradingBatch['pcs_awal'] ?? 0, 0, ',', '.') }}</span> Pcs
+                        </dd>
                     </div>
                 </div>
             </div>

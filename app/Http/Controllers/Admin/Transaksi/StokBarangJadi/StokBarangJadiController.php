@@ -27,7 +27,11 @@ class StokBarangJadiController extends Controller
 
         if ($tab === 'global') {
             // Global items listed in the table comes from completed Stok Grading batches
-            $items = \App\Models\StokGrading::with('details')->orderBy('tanggal', 'desc')->paginate(10);
+            // Only show those that still have remaining stock
+            $items = \App\Models\StokGrading::with('details')
+                ->where('total_gram_keseluruhan', '>', 0)
+                ->orderBy('tanggal', 'desc')
+                ->paginate(10);
         } else {
             // Clop items are handled normally via StokBarangJadi table
             $items = $this->stokBarangJadiService->getPaginatedStok('clop', 10);
@@ -53,6 +57,37 @@ class StokBarangJadiController extends Controller
             return redirect()->route('stok-barang-jadi.index', ['tab' => 'clop'])->with('success', 'Transfer ke IDM berhasil diproses.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function show($id)
+    {
+        $stokBarangJadi = StokBarangJadi::with(['details.namaBarang'])->findOrFail($id);
+        return view('admin.stok-barang-jadi.show', compact('stokBarangJadi'));
+    }
+
+    public function edit($id)
+    {
+        $stokBarangJadi = StokBarangJadi::with(['details.namaBarang'])->findOrFail($id);
+        return view('admin.stok-barang-jadi.edit', compact('stokBarangJadi'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+            'keterangan' => 'nullable|string',
+            'details' => 'required|array',
+            'details.*.id' => 'required|exists:stok_barang_jadi_details,id',
+            'details.*.jumlah_pcs' => 'required|integer|min:0',
+            'details.*.berat' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            $this->stokBarangJadiService->updateStok($id, $request->all());
+            return redirect()->route('stok-barang-jadi.index', ['tab' => 'clop'])->with('success', 'Data stok barang jadi berhasil diupdate.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
     }
 

@@ -78,15 +78,22 @@ class StokBarangJadiService
 
             // Add new "clop" record 
             $clopStok = StokBarangJadi::create([
-                'batch' => 'TRF-CLOP-' . time(),
+                'batch' => 'TRF-CLOP-' . date('YmdHis'),
                 'tanggal' => now()->toDateString(),
                 'type' => 'clop',
-                'keterangan' => 'Transfer dari Global Stok Grading No Kartu: ' . $stokGrading->no_kartu . ' / ' . $stokGradingDetail->grade,
+                'keterangan' => 'Transfer dari Global Stok Grading No Kartu: '.$stokGrading->no_kartu.' / '.$stokGradingDetail->grade,
             ]);
 
+            $itemName = $stokGrading->namaBarang ? $stokGrading->namaBarang->nama_barang : 'Unknown Item';
+            $gradeType = strtoupper(str_replace('_', ' ', $stokGradingDetail->type ?? ''));
+            $gradeName = $stokGradingDetail->grade;
+            
+            $fullNamaBarang = "{$itemName} - {$gradeType} ({$gradeName})";
+            
             StokBarangJadiDetail::create([
                 'stok_barang_jadi_id' => $clopStok->id,
-                'nama_barang' => $stokGrading->no_kartu . ' - ' . $stokGradingDetail->grade, // Auto-named based on source
+                'barang_id' => $stokGrading->barang_id,
+                'nama_barang' => $fullNamaBarang,
                 'jumlah_pcs' => $jumlah,
                 'berat' => $berat,
             ]);
@@ -96,16 +103,125 @@ class StokBarangJadiService
     }
 
     /**
+     * Update an existing Stok Barang Jadi record.
+     */
+    public function updateStok($id, array $data)
+    {
+        return DB::transaction(function () use ($id, $data) {
+            $stok = StokBarangJadi::with('details')->findOrFail($id);
+            
+            // Update parent record
+            $stok->update([
+                'tanggal' => $data['tanggal'] ?? $stok->tanggal,
+                'keterangan' => $data['keterangan'] ?? $stok->keterangan,
+            ]);
+
+            // If we are modifying details heavily (or just updating their weight/pcs)
+            // The request validations ensures we receive 'details' array with IDs
+            if (!empty($data['details'])) {
+                foreach ($data['details'] as $detailData) {
+                    $detailRow = StokBarangJadiDetail::where('stok_barang_jadi_id', $stok->id)
+                                ->where('id', $detailData['id'])
+                                ->first();
+
+                    if ($detailRow) {
+                        $detailRow->update([
+                            'jumlah_pcs' => $detailData['jumlah_pcs'],
+                            'berat' => $detailData['berat'],
+                        ]);
+                    }
+                }
+            }
+
+            return $stok;
+        });
+    }
+
+    /**
      * Delete a Stok Barang Jadi record.
      */
     public function deleteStok($id)
     {
         return DB::transaction(function () use ($id) {
-            $stok = StokBarangJadi::findOrFail($id);
+            $stok = StokBarangJadi::with('details')->findOrFail($id);
+            
+            // Check if this was a transfer from Global Stok Grading
+            if ($stok->type === 'clop' && str_starts_with($stok->keterangan, 'Transfer dari Global Stok Grading')) {
+                // Determine the No Kartu and Grade involved
+                // Format: Transfer dari Global Stok Grading No Kartu: [no_kartu] / [grade]
+                if (preg_match('/No Kartu: (.*) \/ (.*)$/', $stok->keterangan, $matches)) {
+                    $noKartu = trim($matches[1]);
+                    $grade = trim($matches[2]);
+                    
+                    $stokGrading = \App\Models\StokGrading::where('no_kartu', $noKartu)->first();
+                    
+                    if ($stokGrading) {
+                        $detail = \App\Models\StokGradingDetail::where('stok_grading_id', $stokGrading->id)
+                            ->where('grade', $grade)
+                            ->first();
+                            
+                        if ($detail) {
+                            $totalBeratTransfer = $stok->details->sum('berat');
+                            $totalBoxTransfer = $stok->details->sum('jumlah_pcs');
+                            
+                            // Restore StokGradingDetail
+                            $detail->update([
+                                'berat' => $detail->berat + $totalBeratTransfer,
+                                'box' => $detail->box + $totalBoxTransfer,
+                            ]);
+                            
+                            // Restore parent StokGrading overall amount
+                            $stokGrading->update([
+                                'total_gram_keseluruhan' => $stokGrading->total_gram_keseluruhan + $totalBeratTransfer,
+                                'total_box_keseluruhan' => $stokGrading->total_box_keseluruhan + $totalBoxTransfer,
+                            ]);
+                        }
+                    }
+                }
+            }
+            
             $stok->details()->delete();
             $stok->delete();
             
             return true;
         });
+    }
+    public function getAvailableClopStocks()
+    {
+        // Get all details that belong to clop stocks
+        $clopStocks = StokBarangJadiDetail::whereHas('stokBarangJadi', function ($query) {
+                $query->where('type', 'clop');
+            })
+            ->select('id', 'nama_barang', 'berat as total_berat', 'jumlah_pcs as total_pcs')
+            ->get()
+            ->keyBy('id');
+
+        // Get all exported stocks grouped by stok_barang_jadi_detail_id
+        $exportStocks = \App\Models\ExportBarang::select('stok_barang_jadi_detail_id', DB::raw('SUM(berat) as total_berat'), DB::raw('SUM(pcs) as total_pcs'))
+            ->groupBy('stok_barang_jadi_detail_id')
+            ->get()
+            ->keyBy('stok_barang_jadi_detail_id');
+
+        $availableStocks = [];
+
+        foreach ($clopStocks as $detailId => $clop) {
+            $export = $exportStocks->get($detailId);
+            $exportedBerat = $export ? $export->total_berat : 0;
+            $exportedPcs = $export ? $export->total_pcs : 0;
+
+            $availableBerat = max(0, $clop->total_berat - $exportedBerat);
+            $availablePcs = max(0, $clop->total_pcs - $exportedPcs);
+
+            if ($availableBerat > 0) {
+                $availableStocks[$detailId] = [
+                    'id' => $detailId,
+                    'nama_barang' => $clop->nama_barang,
+                    'available_berat' => $availableBerat,
+                    'available_pcs' => $availablePcs,
+                ];
+            }
+        }
+
+        return $availableStocks;
     }
 }

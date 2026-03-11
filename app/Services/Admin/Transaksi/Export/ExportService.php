@@ -8,10 +8,10 @@ class ExportService
 {
     public function getAll($search = null)
     {
-        $query = ExportBarang::with('barang')->latest();
+        $query = ExportBarang::with('stokBarangJadiDetail')->latest();
 
         if ($search) {
-            $query->whereHas('barang', function($q) use ($search) {
+            $query->whereHas('stokBarangJadiDetail', function($q) use ($search) {
                 $q->where('nama_barang', 'like', "%{$search}%");
             });
         }

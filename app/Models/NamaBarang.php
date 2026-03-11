@@ -35,4 +35,9 @@ class NamaBarang extends Model
     {
         return $this->hasMany(BarangKeluarJasaCuci::class , 'nama_barang_id');
     }
+
+    public function getNamaAttribute()
+    {
+        return $this->nama_barang;
+    }
 }
