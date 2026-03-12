@@ -3,70 +3,183 @@
 @section('title', 'Detail Batch Pembelian Supplier')
 
 @section('content')
-<div class="bg-gray-50 min-h-screen pb-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="mb-6 flex items-center justify-between">
-            <h1 class="text-2xl font-semibold text-gray-800">Detail Batch Pembelian Supplier</h1>
-            <a href="{{ route('barang-masuk.pembelian-supplier.index') }}" class="text-blue-600 hover:text-blue-800 bg-white px-4 py-2 rounded-md border border-blue-200 shadow-sm transition duration-200 flex items-center">
-                &laquo; Kembali
-            </a>
-        </div>
+    <div class="bg-white min-h-screen">
+        <div class="w-full px-4 sm:px-6 lg:px-8 py-8">
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-            <div class="bg-blue-50 px-6 py-4 border-b border-gray-100">
-                <h2 class="text-lg font-medium text-blue-800">Informasi Batch</h2>
-            </div>
-            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">Batch No</p>
-                    <p class="font-medium text-gray-900">BMP-{{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}</p>
+                    <h1 class="text-2xl font-semibold text-gray-900">Detail Batch Pembelian Supplier</h1>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Batch ID: <span
+                            class="font-medium text-blue-600">{{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    </p>
                 </div>
-                <div>
-                    <p class="text-sm text-gray-500 mb-1">Tanggal Terima</p>
-                    <p class="font-medium text-gray-900">{{ $barangMasukBatch->tanggal_terima ? \Carbon\Carbon::parse($barangMasukBatch->tanggal_terima)->format('d M Y') : '-' }}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500 mb-1">Supplier</p>
-                    <p class="font-medium text-gray-900">{{ $barangMasukBatch->barangMasukSupplier->first()->supplier->nama ?? '-' }}</p>
+                <div class="flex gap-2">
+                    <a href="{{ route('barang-masuk.pembelian-supplier.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 text-sm font-medium text-gray-700">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Kembali
+                    </a>
                 </div>
             </div>
-        </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="bg-blue-50 px-6 py-4 border-b border-gray-100">
-                <h2 class="text-lg font-medium text-blue-800">Daftar Item Barang</h2>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Berat (Kg)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pcs</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Box</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($barangMasukBatch->barangMasukSupplier as $index => $item)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item->barang->nama_barang ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($item->berat, 2, ',', '.') }} kg</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($item->pcs, 0, ',', '.') }} pcs</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($item->box, 0, ',', '.') }} box</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <!-- Search Section -->
+            <div class="mb-6">
+                <div class="relative max-w-md">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="text" id="tableSearch" placeholder="Cari barang atau nama supplier..."
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out">
+                </div>
             </div>
 
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end">
-                <a href="{{ route('barang-masuk.pembelian-supplier.edit', $barangMasukBatch->id) }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium transition duration-200 shadow-sm">
-                    Edit Batch Data
-                </a>
+            <!-- Informasi Batch -->
+            <div class="bg-white shadow rounded-lg border mb-6 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Informasi Batch Transaksi</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Tanggal Terima</p>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {{ $barangMasukBatch->tanggal_terima ? \Carbon\Carbon::parse($barangMasukBatch->tanggal_terima)->format('d/m/Y') : '-' }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Supplier</p>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {{ $barangMasukBatch->barangMasukSupplier->first()->supplier->nama ?? '-' }}
+                        </p>
+                    </div>
+                </div>
             </div>
+
+            <!-- Detail Item -->
+            <div class="bg-white shadow rounded-lg border overflow-hidden mb-6">
+                <div class="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-lg font-semibold text-gray-900">Daftar Item Barang Masuk</h2>
+                        <span class="text-sm text-gray-600 font-medium px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full">
+                            {{ $barangMasukBatch->barangMasukSupplier->count() }} item
+                        </span>
+                    </div>
+                    <a href="{{ route('barang-masuk.pembelian-supplier.edit', $barangMasukBatch->id) }}"
+                        class="inline-flex items-center px-3 py-1.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-md hover:bg-yellow-100 transition-colors text-sm font-medium">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit Batch
+                    </a>
+                </div>
+
+                <div class="p-6">
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="w-full text-sm" id="itemTable">
+                            <thead class="text-left text-xs font-medium text-gray-500 bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th
+                                        class="px-4 py-3 w-12 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        No</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nama
+                                        Barang</th>
+                                    <th
+                                        class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Berat (Kg)</th>
+                                    <th
+                                        class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Pcs</th>
+                                    <th
+                                        class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Box</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                @php
+                                    $totalBerat = 0;
+                                    $totalPcs = 0;
+                                    $totalBox = 0;
+                                @endphp
+                                @forelse($barangMasukBatch->barangMasukSupplier as $index => $item)
+                                    @php
+                                        $totalBerat += $item->berat;
+                                        $totalPcs += $item->pcs;
+                                        $totalBox += $item->box;
+                                    @endphp
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-4 py-3 text-center text-sm text-gray-900">{{ $index + 1 }}</td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                            {{ $item->barang->nama_barang ?? '-' }}</td>
+                                        <td class="px-4 py-3 text-right text-sm font-mono text-gray-700">
+                                            {{ number_format($item->berat, 2, ',', '.') }} kg</td>
+                                        <td class="px-4 py-3 text-right text-sm font-mono text-gray-700">
+                                            {{ number_format($item->pcs, 0, ',', '.') }} pcs</td>
+                                        <td class="px-4 py-3 text-right text-sm font-mono text-gray-700">
+                                            {{ number_format($item->box, 0, ',', '.') }} box</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">Tidak ada item dalam batch
+                                            ini.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ringkasan Kuantitas -->
+            <div class="bg-white shadow rounded-lg border p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Kuantitas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Total Berat -->
+                    <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                        <div class="text-sm text-blue-600 font-medium">Total Berat</div>
+                        <div class="text-2xl font-bold text-blue-900">
+                            {{ number_format($totalBerat, 2, ',', '.') }}<span class="text-sm font-medium ml-1">kg</span>
+                        </div>
+                    </div>
+                    <!-- Total Pcs -->
+                    <div class="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+                        <div class="text-sm text-orange-600 font-medium">Total Pcs</div>
+                        <div class="text-2xl font-bold text-orange-900">
+                            {{ number_format($totalPcs, 0, ',', '.') }}<span class="text-sm font-medium ml-1">pcs</span>
+                        </div>
+                    </div>
+                    <!-- Total Box -->
+                    <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                        <div class="text-sm text-purple-600 font-medium">Total Box</div>
+                        <div class="text-2xl font-bold text-purple-900">
+                            {{ number_format($totalBox, 0, ',', '.') }}<span class="text-sm font-medium ml-1">bx</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
+
+    @push('scripts')
+        <script>
+            document.getElementById('tableSearch').addEventListener('input', function (e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#itemTable tbody tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (row.cells.length > 1) { // Skip empty row
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    }
+                });
+            });
+        </script>
+    @endpush
+
 @endsection
