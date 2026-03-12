@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\Master\LokasiController;
 use App\Http\Controllers\Admin\Master\NamaBarangController;
 use App\Http\Controllers\Admin\Master\PartaiController;
 use App\Http\Controllers\Admin\Master\SupplierController;
+use App\Http\Controllers\Admin\Master\WarnaController;
 use App\Http\Controllers\Admin\Transaksi\BarangKeluar\BarangKeluarDemakController;
 use App\Http\Controllers\Admin\Transaksi\BarangKeluar\BarangKeluarJasaCuciController;
 use App\Http\Controllers\Admin\Transaksi\BarangMasuk\BarangMasukDemakController;
@@ -153,6 +154,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('kode-bahan', KodeBahanController::class)->parameters(['kode-bahan' => 'kode_bahan']);
         Route::resource('partai', PartaiController::class);
         Route::resource('supplier', SupplierController::class);
+        Route::resource('warna', WarnaController::class);
     });
 });
 
