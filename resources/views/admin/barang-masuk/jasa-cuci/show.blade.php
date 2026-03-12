@@ -3,130 +3,188 @@
 @section('title', 'Detail Batch Jasa Cuci')
 
 @section('content')
-<div class="bg-gray-50 min-h-screen pb-8">
-    <div class="w-full px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white min-h-screen">
+        <div class="w-full px-4 sm:px-6 lg:px-8 py-8">
 
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h1 class="text-2xl font-semibold text-gray-900">Detail Batch Jasa Cuci</h1>
-                <p class="text-sm text-gray-600 mt-1">
-                    Batch ID: <span class="font-medium text-blue-600">{{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}</span>
-                </p>
-            </div>
-            <div class="flex gap-2">
-                <a href="{{ route('barang-masuk.jasa-cuci.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium transition-colors">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Kembali
-                </a>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-
-            <!-- Kiri: Info Batch (Header) -->
-            <div class="lg:col-span-1 space-y-6">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Informasi Transaksi</h2>
-
-                    <div class="space-y-4">
-                        <div>
-                            <span class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Tanggal Terima</span>
-                            <span class="text-sm font-semibold text-gray-900 flex items-center">
-                                <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                {{ \Carbon\Carbon::parse($barangMasukBatch->tanggal_terima)->format('d M Y') }}
-                            </span>
-                        </div>
-
-                        <div>
-                            <span class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Lokasi Jasa Cuci</span>
-                            <span class="text-sm font-semibold text-gray-900 flex items-center">
-                                <svg class="w-4 h-4 mr-1.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                {{ $barangMasukBatch->barangMasukJasaCuci->first()->lokasiJasaCuci->nama_lokasi ?? '-' }}
-                            </span>
-                        </div>
-                    </div>
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-semibold text-gray-900">Detail Batch Jasa Cuci</h1>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Batch ID: <span
+                            class="font-medium text-blue-600">{{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    </p>
                 </div>
-
-                <div class="bg-blue-50 rounded-xl shadow-sm border border-blue-100 p-6">
-                    <h2 class="text-sm font-semibold text-blue-800 mb-3 uppercase tracking-wider">Ringkasan</h2>
-                    <div class="flex items-center justify-between">
-                        <span class="text-blue-600 font-medium">Total Item Barang</span>
-                        <span class="text-2xl font-bold text-blue-700">{{ $barangMasukBatch->barangMasukJasaCuci->count() }}</span>
-                    </div>
+                <div class="flex gap-2">
+                    <a href="{{ route('barang-masuk.jasa-cuci.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 text-sm font-medium text-gray-700">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Kembali
+                    </a>
                 </div>
             </div>
 
-            <!-- Kanan: Tabel Detail Item -->
-            <div class="lg:col-span-3">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                        <h2 class="text-lg font-semibold text-gray-800">Daftar Item Barang Masuk</h2>
-                        <a href="{{ route('barang-masuk.jasa-cuci.edit', $barangMasukBatch->id) }}" class="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors text-sm font-medium">
-                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            Edit Batch
-                        </a>
-                    </div>
+            <!-- Search Section -->
+            <div class="mb-6">
+                <div class="relative max-w-md">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="text" id="tableSearch" placeholder="Cari barang atau kode bahan..."
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out">
+                </div>
+            </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-white">
+            <!-- Informasi Batch -->
+            <div class="bg-white shadow rounded-lg border mb-6 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Informasi Batch Transaksi</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Tanggal Terima</p>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {{ \Carbon\Carbon::parse($barangMasukBatch->tanggal_terima)->format('d/m/Y') }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Lokasi Jasa Cuci</p>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {{ $barangMasukBatch->barangMasukJasaCuci->first()->lokasiJasaCuci->nama_lokasi ?? '-' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Item -->
+            <div class="bg-white shadow rounded-lg border overflow-hidden mb-6">
+                <div class="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-lg font-semibold text-gray-900">Daftar Item Barang Masuk</h2>
+                        <span class="text-sm text-gray-600 font-medium px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full">
+                            {{ $barangMasukBatch->barangMasukJasaCuci->count() }} item
+                        </span>
+                    </div>
+                    <a href="{{ route('barang-masuk.jasa-cuci.edit', $barangMasukBatch->id) }}"
+                        class="inline-flex items-center px-3 py-1.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-md hover:bg-yellow-100 transition-colors text-sm font-medium">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit Batch
+                    </a>
+                </div>
+
+                <div class="p-6">
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="w-full text-sm" id="itemTable">
+                            <thead class="text-left text-xs font-medium text-gray-500 bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">No</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spesifikasi Barang</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Berat & Susut</th>
+                                    <th class="px-4 py-3 w-12 text-center">No</th>
+                                    <th class="px-4 py-3">Barang & Kode Bahan</th>
+                                    <th class="px-4 py-3 text-right">Berat/Pcs</th>
+                                    <th class="px-4 py-3 text-right">Susut</th>
+                                    <th class="px-4 py-3 text-right">Kadar Air</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-100">
-                                @forelse ($barangMasukBatch->barangMasukJasaCuci as $index => $item)
+                            <tbody class="divide-y divide-gray-200">
+                                @php
+                                    $totalBeratPcs = 0;
+                                    $totalSusut = 0;
+                                    $totalKA = 0;
+                                    $itemCount = $barangMasukBatch->barangMasukJasaCuci->count();
+                                @endphp
+                                @forelse($barangMasukBatch->barangMasukJasaCuci as $index => $item)
+                                    @php
+                                        $totalBeratPcs += $item->berat_per_pcs;
+                                        $totalSusut += $item->persentase_susut;
+                                        $totalKA += $item->kadar_air;
+                                    @endphp
                                     <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
-                                            {{ $index + 1 }}
+                                        <td class="px-4 py-3 text-center text-gray-500 font-medium">{{ $index + 1 }}</td>
+                                        <td class="px-4 py-3">
+                                            <div class="font-semibold text-gray-900">{{ $item->barang->nama_barang ?? '-' }}
+                                            </div>
+                                            <div class="text-xs text-blue-600 font-medium mt-1">
+                                                {{ $item->kodeBahan->nama ?? '-' }}</div>
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <div class="text-sm font-semibold text-gray-900 mb-1">
-                                                {{ $item->barang->nama_barang ?? '-' }}
-                                            </div>
-                                            <div class="text-sm text-blue-600 font-medium flex items-center">
-                                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
-                                                {{ $item->kodeBahan->nama ?? '-' }}
-                                            </div>
+                                        <td class="px-4 py-3 text-right font-mono text-gray-700">
+                                            {{ number_format($item->berat_per_pcs, 2, ',', '.') }} <span
+                                                class="text-[10px] text-gray-400">gr</span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right">
-                                            <div class="flex flex-col items-end space-y-1">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                    Berat/Pcs: <strong class="ml-1">{{ number_format($item->berat_per_pcs, 2) }} gr</strong>
-                                                </span>
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
-                                                    Susut: <strong class="ml-1">{{ number_format($item->persentase_susut, 2) }}%</strong>
-                                                </span>
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
-                                                    Kadar Air: <strong class="ml-1">{{ number_format($item->kadar_air, 2) }}%</strong>
-                                                </span>
-                                            </div>
+                                        <td class="px-4 py-3 text-right font-mono text-gray-700">
+                                            {{ number_format($item->persentase_susut, 2, ',', '.') }} <span
+                                                class="text-[10px] text-gray-400">%</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-right font-mono text-gray-700">
+                                            {{ number_format($item->kadar_air, 2, ',', '.') }} <span
+                                                class="text-[10px] text-gray-400">%</span>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-6 py-12 text-center">
-                                            <div class="flex justify-center items-center text-gray-400 mb-2">
-                                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                                            </div>
-                                            <p class="text-sm text-gray-500">Tidak ada detail item yang ditemukan dalam batch ini.</p>
-                                        </td>
+                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">Tidak ada item dalam batch
+                                            ini.</td>
                                     </tr>
                                 @endforelse
-
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
 
+            <!-- Ringkasan Kuantitas -->
+            <div class="bg-white shadow rounded-lg border p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Kuantitas (Rata-rata)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Avg Berat -->
+                    <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                        <div class="text-sm text-blue-600 font-medium">Rata-rata Berat/Pcs</div>
+                        <div class="text-2xl font-bold text-blue-900">
+                            {{ $itemCount > 0 ? number_format($totalBeratPcs / $itemCount, 2, ',', '.') : '0' }}<span
+                                class="text-sm font-medium ml-1">gr</span>
+                        </div>
+                    </div>
+                    <!-- Avg Susut -->
+                    <div class="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
+                        <div class="text-sm text-red-600 font-medium">Rata-rata Susut</div>
+                        <div class="text-2xl font-bold text-red-900">
+                            {{ $itemCount > 0 ? number_format($totalSusut / $itemCount, 2, ',', '.') : '0' }}<span
+                                class="text-sm font-medium ml-1">%</span>
+                        </div>
+                    </div>
+                    <!-- Avg Kadar Air -->
+                    <div class="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                        <div class="text-sm text-green-600 font-medium">Rata-rata Kadar Air</div>
+                        <div class="text-2xl font-bold text-green-900">
+                            {{ $itemCount > 0 ? number_format($totalKA / $itemCount, 2, ',', '.') : '0' }}<span
+                                class="text-sm font-medium ml-1">%</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
         </div>
     </div>
-</div>
+
+    @push('scripts')
+        <script>
+            document.getElementById('tableSearch').addEventListener('input', function (e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#itemTable tbody tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (row.cells.length > 1) { // Skip empty row
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    }
+                });
+            });
+        </script>
+    @endpush
+
 @endsection
