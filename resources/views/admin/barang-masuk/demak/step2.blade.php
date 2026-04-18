@@ -56,6 +56,8 @@
                                 <th scope="col" class="py-3 px-4 text-left border-y border-gray-200">Data Keluar (Ref)</th>
                                 <th scope="col" class="py-3 px-4 text-left text-blue-600 border-y border-gray-200 bg-blue-50/30">Nama Barang Baru <span class="text-red-500">*</span></th>
                                 <th scope="col" class="py-3 px-4 text-left text-blue-600 border-y border-gray-200 bg-blue-50/30">Partai Baru <span class="text-red-500">*</span></th>
+                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-gray-200 bg-blue-50/30">Pcs <span class="text-red-500">*</span></th>
+                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-gray-200 bg-blue-50/30">Box <span class="text-red-500">*</span></th>
                                 <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-r border-gray-200 rounded-r-lg bg-blue-50/30">Gram Aktual Diterima <span class="text-red-500">*</span></th>
                             </tr>
                         </thead>
@@ -105,6 +107,20 @@
                                         placeholder="Ketik partai...">
                                 </td>
 
+                                <!-- New Pcs Column -->
+                                <td class="px-4 py-4 border-y border-gray-100 group-hover:border-blue-100 group-hover:bg-blue-50/10">
+                                    <input type="number" name="items[{{ $idx }}][pcs]" 
+                                        class="block w-full min-w-[80px] bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 transition duration-150 text-right" 
+                                        value="{{ $item->pcs }}">
+                                </td>
+
+                                <!-- New Box Column -->
+                                <td class="px-4 py-4 border-y border-gray-100 group-hover:border-blue-100 group-hover:bg-blue-50/10">
+                                    <input type="number" name="items[{{ $idx }}][box]" 
+                                        class="block w-full min-w-[80px] bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 transition duration-150 text-right" 
+                                        value="0" min="0">
+                                </td>
+
                                 <!-- Gram Diterima Column -->
                                 <td class="px-4 py-4 whitespace-nowrap border-y border-r border-gray-100 group-hover:border-blue-100 rounded-r-xl group-hover:bg-blue-50/10 text-right">
                                     <div class="flex items-center justify-end">
@@ -121,7 +137,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="py-12 px-4 text-center">
+                                <td colspan="7" class="py-12 px-4 text-center">
                                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
