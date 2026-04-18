@@ -54,7 +54,7 @@
                     <div class="md:col-span-2 mt-2 pt-2 border-t border-gray-100">
                         <dt class="text-sm font-medium text-gray-700">Jumlah Awal Sebelum Digrading</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            Pcs Awal Digrading: <span class="font-bold">{{ number_format($gradingBatch['pcs_awal'] ?? 0, 0, ',', '.') }}</span> Pcs
+                            Box Awal Digrading: <span class="font-bold">{{ number_format($gradingBatch['box_awal'] ?? 0, 0, ',', '.') }}</span> Box
                         </dd>
                     </div>
                 </div>

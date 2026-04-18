@@ -97,11 +97,7 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
-                                        @if($tab === 'global')
-                                            {{ number_format($item->total_gram_keseluruhan, 2, ',', '.') }}
-                                        @else
-                                            {{ number_format($item->details->sum('berat'), 2, ',', '.') }}
-                                        @endif
+                                        {{ number_format($item->details->sum('berat'), 2, ',', '.') }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <div class="flex items-center justify-center space-x-2">
@@ -109,9 +105,13 @@
                                                 <a href="{{ route('stok-grading.show', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">
                                                     Detail
                                                 </a>
-                                                <a href="{{ route('stok-grading.edit', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">
-                                                    Edit
-                                                </a>
+                                                <form action="{{ route('stok-grading.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data grading ini beserta semua isinya secara permanen? Aksi ini akan mengembalikan stok tersisa ke Gudang Demak/Jasa Cuci.');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
+                                                        Hapus
+                                                    </button>
+                                                </form>
                                             @else
                                                 <a href="{{ route('stok-barang-jadi.show', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">
                                                     Detail
@@ -217,15 +217,17 @@
                                     
                                     <div class="grid grid-cols-1 gap-6 mt-6 sm:grid-cols-2">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700">Jumlah (Pcs)</label>
-                                            <input type="number" name="jumlah" required min="1"
-                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="10">
+                                            <label class="block text-sm font-medium text-gray-700">Jenis Kemasan (Box)</label>
+                                            <select name="tipe_box" id="tipeBoxSelect" onchange="updateMinBerat()" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                                <option value="500">Box 500 gr</option>
+                                                <option value="475">Box 475 gr</option>
+                                            </select>
                                         </div>
 
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Berat (Gram)</label>
-                                            <input type="number" step="0.01" name="berat" required
-                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="50.00">
+                                            <input type="number" step="0.01" name="berat" id="beratInput" required min="500"
+                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Min 500 gr">
                                         </div>
                                     </div>
 
@@ -279,5 +281,19 @@
         document.getElementById('selectedGlobalName').innerText = '';
         document.getElementById('globalIdInput').value = '';
     }
+    
+    function updateMinBerat() {
+        const select = document.getElementById('tipeBoxSelect');
+        const input = document.getElementById('beratInput');
+        if(select && input) {
+            input.min = select.value;
+            input.placeholder = "Min " + select.value + " gr";
+        }
+    }
+    
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateMinBerat();
+    });
 </script>
 @endpush

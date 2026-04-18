@@ -67,9 +67,9 @@
                     </dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Pcs Dialokasikan (Awal)</dt>
+                    <dt class="text-sm font-medium text-gray-500">Box Dialokasikan (Awal)</dt>
                     <dd class="mt-1 text-sm text-gray-900 font-medium">
-                        {{ number_format($gradingBatch['pcs_awal'], 0, ',', '.') }} Pcs
+                        {{ number_format($gradingBatch['box_awal'], 0, ',', '.') }} Box
                     </dd>
                 </div>
                 <div>
@@ -116,7 +116,7 @@
                     <input type="number" id="inputBerat" step="0.01" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="0.00">
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Box (Opsional)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Box <span class="text-xs text-red-500 font-normal italic">*(Hanya Catatan)</span></label>
                     <input type="number" id="inputBox" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="0">
                 </div>
                 <div class="md:col-span-2">
@@ -128,11 +128,10 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('stok-grading.update', $gradingBatch['id']) }}" id="mainForm">
+        <form method="POST" action="{{ route('stok-grading.update', $gradingBatch['id']) }}" id="gradingForm">
             @csrf
             @method('PUT')
-            
-            <input type="hidden" name="pcs_awal" value="{{ $gradingBatch['pcs_awal'] }}">
+            <input type="hidden" name="box_awal" value="{{ $gradingBatch['box_awal'] }}">
             <input type="hidden" id="max_gram" value="{{ $gramAwal }}">
 
             <div class="bg-white border border-gray-200 rounded-lg shadow-sm">

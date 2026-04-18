@@ -22,7 +22,7 @@ class StokGrading extends Model
         'tanggal',
         'partai',
         'pekerja',
-        'pcs_awal',
+        'box_awal',
         'total_gram_lempeng_bersih',
         'total_pcs_lempeng_bersih',
         'total_box_lempeng_bersih',

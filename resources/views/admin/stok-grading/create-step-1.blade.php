@@ -51,7 +51,7 @@
         <form method="GET" action="{{ route('stok-grading.create.step2') }}" id="mainForm">
             <!-- Hidden inputs -->
             <input type="hidden" name="stok_id" id="stok_id" value="">
-            <input type="hidden" name="pcs_awal" id="pcs_awal_input" value="">
+            <input type="hidden" name="box_awal" id="box_awal_input" value="">
             <input type="hidden" name="sumber_stok" id="sumber_stok_input" value="">
 
             <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6">
@@ -95,9 +95,9 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_box }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                         <div class="flex items-center space-x-2">
-                                            <input type="number" id="input_pcs_demak_{{ $item->id }}" min="1" max="{{ $item->total_pcs }}" placeholder="Jml Pcs" 
+                                            <input type="number" id="input_box_demak_{{ $item->id }}" min="1" max="{{ $item->total_box }}" placeholder="Jml Box" 
                                                 class="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                            <button type="button" onclick="selectStok('{{ $item->id }}', 'demak', this, {{ $item->total_pcs }})" 
+                                            <button type="button" onclick="selectStok('{{ $item->id }}', 'demak', this, {{ $item->total_box }})" 
                                                 class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                                 Pilih
                                             </button>
@@ -143,9 +143,9 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_pcs }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                         <div class="flex items-center space-x-2">
-                                            <input type="number" id="input_pcs_jasacuci_{{ $item->id }}" min="1" max="{{ $item->total_pcs }}" placeholder="Jml Pcs" 
+                                            <input type="number" id="input_box_jasacuci_{{ $item->id }}" min="1" max="{{ $item->total_box }}" placeholder="Jml Box" 
                                                 class="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                            <button type="button" onclick="selectStok('{{ $item->id }}', 'jasa_cuci', this, {{ $item->total_pcs }})" 
+                                            <button type="button" onclick="selectStok('{{ $item->id }}', 'jasa_cuci', this, {{ $item->total_box }})" 
                                                 class="inline-flex items-center px-4 py-2 bg-purple-50 text-purple-600 border border-purple-200 rounded-md hover:bg-purple-100 hover:border-purple-300 transition duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
                                                 Pilih
                                             </button>
@@ -219,26 +219,26 @@
         btnJasaCuci.classList.add('border-gray-300', 'text-gray-500');
     });
 
-    function selectStok(stokId, sumberStok, btn, maxPcs) {
+    function selectStok(stokId, sumberStok, btn, maxBox) {
         // Build the correct ID based on source logic
         const inputIdText = sumberStok === 'demak' ? 'demak' : 'jasacuci';
-        const pcsInput = document.getElementById(`input_pcs_${inputIdText}_${stokId}`);
-        const pcsValue = parseInt(pcsInput.value);
+        const boxInput = document.getElementById(`input_box_${inputIdText}_${stokId}`);
+        const boxValue = parseInt(boxInput.value);
 
-        if (!pcsValue || pcsValue < 1) {
-            alert('Masukkan jumlah Pcs yang valid minimal 1.');
-            pcsInput.focus();
+        if (!boxValue || boxValue < 1) {
+            alert('Masukkan jumlah Box yang valid minimal 1.');
+            boxInput.focus();
             return;
         }
 
-        if (pcsValue > maxPcs) {
-            alert(`Jumlah Pcs tidak boleh lebih dari total stok yang tersedia (${maxPcs} Pcs).`);
-            pcsInput.focus();
+        if (boxValue > maxBox) {
+            alert(`Jumlah Box tidak boleh lebih dari total stok yang tersedia (${maxBox} Box).`);
+            boxInput.focus();
             return;
         }
 
         document.getElementById('stok_id').value = stokId;
-        document.getElementById('pcs_awal_input').value = pcsValue;
+        document.getElementById('box_awal_input').value = boxValue;
         document.getElementById('sumber_stok_input').value = sumberStok;
         
         // Remove active class from all rows in all tbodys
@@ -255,8 +255,8 @@
     }
 
     function checkSelection() {
-        if(!document.getElementById('stok_id').value || !document.getElementById('pcs_awal_input').value || !document.getElementById('sumber_stok_input').value) {
-            alert('Pilih sumber stok (Demak/Jasa Cuci) dan masukkan jumlah Pcs terlebih dahulu');
+        if(!document.getElementById('stok_id').value || !document.getElementById('box_awal_input').value || !document.getElementById('sumber_stok_input').value) {
+            alert('Pilih sumber stok (Demak/Jasa Cuci) dan masukkan jumlah Box terlebih dahulu');
             return false;
         }
         document.getElementById('mainForm').submit();
