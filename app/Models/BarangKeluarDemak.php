@@ -21,6 +21,7 @@ class BarangKeluarDemak extends Model
         'kadar_air',
         'timbangan_ulang',
         'keterangan',
+        'status_kembali',
     ];
 
     public function barangKeluar()

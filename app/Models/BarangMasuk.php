@@ -13,8 +13,15 @@ class BarangMasuk extends Model
 
     protected $fillable = [
         'jenis_barang_masuk_id',
+        'barang_keluar_id',
         'tanggal_terima',
+        'total_susut_batch',
     ];
+
+    public function barangKeluar()
+    {
+        return $this->belongsTo(BarangKeluar::class, 'barang_keluar_id');
+    }
 
     public function jenisBarangMasuk()
     {

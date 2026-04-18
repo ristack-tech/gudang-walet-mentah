@@ -15,6 +15,7 @@ class BarangKeluar extends Model
         'jenis_barang_keluar_id',
         'tanggal_kirim',
         'lokasi_id',
+        'status_lunas',
     ];
 
     public function jenisBarangKeluar()

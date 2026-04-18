@@ -13,13 +13,20 @@ class BarangMasukJasaCuci extends Model
 
     protected $fillable = [
         'barang_masuk_id',
+        'barang_keluar_jasa_cuci_id',
         'lokasi_jasa_cuci_id',
         'barang_id',
         'kode_bahan_id',
         'berat_per_pcs',
         'persentase_susut',
         'kadar_air',
+        'susut_per_item',
     ];
+
+    public function barangKeluarJasaCuci()
+    {
+        return $this->belongsTo(BarangKeluarJasaCuci::class, 'barang_keluar_jasa_cuci_id');
+    }
 
     public function barangMasuk()
     {

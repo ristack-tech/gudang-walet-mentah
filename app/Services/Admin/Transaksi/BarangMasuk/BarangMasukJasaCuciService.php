@@ -2,72 +2,65 @@
 
 namespace App\Services\Admin\Transaksi\BarangMasuk;
 
-
 use App\Models\BarangMasuk;
 use App\Models\BarangMasukJasaCuci;
 use App\Models\JenisBarangMasuk;
+use App\Models\BarangKeluar;
+use App\Models\BarangKeluarJasaCuci;
 use Illuminate\Support\Facades\DB;
 
 class BarangMasukJasaCuciService
 {
-    public function storeData(array $step1Data, array $items)
+    public function storeData(array $step1, array $selectedItems)
     {
-        return DB::transaction(function () use ($step1Data, $items) {
+        return DB::transaction(function () use ($step1, $selectedItems) {
             $jenisBarangMasuk = JenisBarangMasuk::firstOrCreate(['nama' => 'Jasa Cuci']);
 
             $barangMasuk = BarangMasuk::create([
                 'jenis_barang_masuk_id' => $jenisBarangMasuk->id,
-                'tanggal_terima' => $step1Data['tanggal_terima'],
+                'barang_keluar_id' => $step1['barang_keluar_id'],
+                'tanggal_terima' => $step1['tanggal_terima'],
             ]);
 
-            foreach ($items as $item) {
+            $totalSusut = 0;
+            $barangKeluar = BarangKeluar::findOrFail($step1['barang_keluar_id']);
+
+            foreach ($selectedItems as $item) {
+                $outItem = BarangKeluarJasaCuci::findOrFail($item['barang_keluar_jasa_cuci_id']);
+                
+                // Berat out is in berat_per_pcs apparently based on db schema naming convention used.
+                $susut = $outItem->berat_per_pcs - $item['gram_diterima'];
+                $totalSusut += $susut;
+
+                // Calculate persentase_susut
+                $persentase = $outItem->berat_per_pcs > 0 ? ($susut / $outItem->berat_per_pcs) * 100 : 0;
+
                 BarangMasukJasaCuci::create([
                     'barang_masuk_id' => $barangMasuk->id,
-                    'lokasi_jasa_cuci_id' => $step1Data['lokasi_jasa_cuci_id'],
+                    'barang_keluar_jasa_cuci_id' => $outItem->id,
+                    'lokasi_jasa_cuci_id' => $step1['lokasi_jasa_cuci_id'],
                     'barang_id' => $item['barang_id'],
-                    'kode_bahan_id' => $item['kode_bahan_id'],
-                    'berat_per_pcs' => $item['berat_per_pcs'],
-                    'persentase_susut' => $item['persentase_susut'],
+                    'kode_bahan_id' => $outItem->kode_bahan_id,
+                    'berat_per_pcs' => $item['gram_diterima'],
+                    'persentase_susut' => $persentase,
                     'kadar_air' => $item['kadar_air'],
+                    'susut_per_item' => $susut,
                 ]);
+
+                // Update original status
+                $outItem->update(['status_kembali' => true]);
+            }
+
+            // Update parent susut
+            $barangMasuk->update(['total_susut_batch' => $totalSusut]);
+
+            // Check completely returned
+            $remaining = $barangKeluar->barangKeluarJasaCuci()->where('status_kembali', false)->count();
+            if ($remaining === 0) {
+                $barangKeluar->update(['status_lunas' => true]);
             }
 
             return $barangMasuk;
-        });
-    }
-
-    public function updateData(\App\Models\BarangMasuk $barangMasukBatch, array $data)
-    {
-        return DB::transaction(function () use ($barangMasukBatch, $data) {
-            $barangMasukBatch->update([
-                'tanggal_terima' => $data['tanggal_terima'],
-            ]);
-
-            // Delete existing items
-            $barangMasukBatch->barangMasukJasaCuci()->delete();
-
-            // Recreate new items
-            foreach ($data['items'] as $item) {
-                BarangMasukJasaCuci::create([
-                    'barang_masuk_id' => $barangMasukBatch->id,
-                    'lokasi_jasa_cuci_id' => $data['lokasi_jasa_cuci_id'],
-                    'barang_id' => $item['barang_id'],
-                    'kode_bahan_id' => $item['kode_bahan_id'],
-                    'berat_per_pcs' => $item['berat_per_pcs'],
-                    'persentase_susut' => $item['persentase_susut'],
-                    'kadar_air' => $item['kadar_air'],
-                ]);
-            }
-
-            return $barangMasukBatch;
-        });
-    }
-
-    public function destroyData(\App\Models\BarangMasuk $barangMasukBatch)
-    {
-        return DB::transaction(function () use ($barangMasukBatch) {
-            $barangMasukBatch->delete();
-            return true;
         });
     }
 }

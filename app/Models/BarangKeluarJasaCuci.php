@@ -18,6 +18,7 @@ class BarangKeluarJasaCuci extends Model
         'keterangan_cetak',
         'berat_per_pcs',
         'kadar_air',
+        'status_kembali',
     ];
 
     public function barangKeluar()
