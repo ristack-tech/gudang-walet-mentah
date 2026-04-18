@@ -86,11 +86,7 @@
                 </div>
             </div>
             
-            <div class="mt-6 flex justify-end gap-3">
-                <a href="{{ route('barang-keluar.jasa-cuci.edit', $data->id) }}" class="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition duration-150">
-                    Edit Batch Data
-                </a>
-            </div>
+
         </div>
     </div>
 @endsection

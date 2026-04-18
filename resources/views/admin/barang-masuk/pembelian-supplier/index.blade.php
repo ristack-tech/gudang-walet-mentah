@@ -94,10 +94,7 @@
                                                     class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">
                                                     Detail Batch
                                                 </a>
-                                                <a href="{{ route('barang-masuk.pembelian-supplier.edit', $batch->id) }}"
-                                                    class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">
-                                                    Edit Batch
-                                                </a>
+
                                                 <button
                                                     onclick="confirmDelete({{ $batch->id }}, '{{ \Carbon\Carbon::parse($batch->tanggal_terima)->format('Ymd') . '-' . strtoupper(substr(md5($batch->id), 0, 3)) }}')"
                                                     class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">

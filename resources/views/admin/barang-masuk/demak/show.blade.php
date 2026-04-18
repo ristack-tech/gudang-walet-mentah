@@ -9,7 +9,7 @@
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h1 class="text-2xl font-semibold text-gray-900">Detail Batch Barang Masuk (Demak)</h1>
-                    <p class="text-sm text-gray-600">Batch ID: {{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}</p>
+                    <p class="text-sm text-gray-600">Terhubung dgn Referensi Batch Keluar: <span class="font-bold text-blue-600">{{ \Carbon\Carbon::parse($barangMasukBatch->barangKeluar->tanggal_kirim ?? $barangMasukBatch->tanggal_terima)->format('Ymd') . '-' . strtoupper(substr(md5($barangMasukBatch->barang_keluar_id ?? $barangMasukBatch->id), 0, 3)) }}</span></p>
                 </div>
                 <div class="flex gap-2">
                     <a href="{{ route('barang-masuk.demak.index') }}"
@@ -65,9 +65,9 @@
                                     <th class="px-4 py-3 rounded-tl-md">No</th>
                                     <th class="px-4 py-3 min-w-[200px]">Partai</th>
                                     <th class="px-4 py-3">Barang</th>
-                                    <th class="px-4 py-3 text-right">Gram</th>
                                     <th class="px-4 py-3 text-right">Pcs</th>
-                                    <th class="px-4 py-3 text-right">Box</th>
+                                    <th class="px-4 py-3 text-right">Gram Terima</th>
+                                    <th class="px-4 py-3 text-right text-red-600">Susut (gr)</th>
                                     <th class="px-4 py-3 rounded-tr-md">Keterangan</th>
                                 </tr>
                             </thead>
@@ -94,13 +94,13 @@
                                             {{ $item->barang->nama_barang ?? '-' }}
                                         </td>
                                         <td class="px-4 py-3 font-mono text-gray-700 text-right align-top text-sm">
-                                            {{ number_format($item->gram, 2, ',', '.') }}
-                                        </td>
-                                        <td class="px-4 py-3 font-mono text-gray-700 text-right align-top text-sm">
                                             {{ number_format($item->pcs, 0, ',', '.') }}
                                         </td>
                                         <td class="px-4 py-3 font-mono text-gray-700 text-right align-top text-sm">
-                                            {{ number_format($item->box, 0, ',', '.') }}
+                                            {{ number_format($item->gram, 2, ',', '.') }}
+                                        </td>
+                                        <td class="px-4 py-3 font-mono text-red-600 font-bold text-right align-top text-sm">
+                                            {{ number_format($item->susut_per_item, 2, ',', '.') }}
                                         </td>
                                         <td class="px-4 py-3 text-gray-600 align-top text-sm">
                                             {{ $item->keterangan ?? '-' }}

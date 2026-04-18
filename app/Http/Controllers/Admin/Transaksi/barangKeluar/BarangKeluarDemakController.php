@@ -183,6 +183,12 @@ class BarangKeluarDemakController extends Controller
     public function destroy($id)
     {
         try {
+            $batch = BarangKeluar::with('barangKeluarDemak')->findOrFail($id);
+            $hasReturned = $batch->barangKeluarDemak()->where('status_kembali', true)->exists();
+            if ($hasReturned) {
+                return back()->with('error', 'Gagal dihapus: Sebagian atau seluruh batch ini sudah diproses di Barang Masuk.');
+            }
+
             $this->service->delete($id);
             return redirect()->route('barang-keluar.demak.index')->with('success', 'Data Batch berhasil dihapus.');
         }
