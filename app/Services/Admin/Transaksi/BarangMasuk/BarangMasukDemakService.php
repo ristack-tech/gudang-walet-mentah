@@ -39,8 +39,8 @@ class BarangMasukDemakService
                     'transaksi_dari_id' => $step1['transaksi_dari_id'], 
                     'transaksi_ke_id' => 1, // Central Warehouse usually  
                     'gram' => $item['gram_diterima'],
-                    'pcs' => $outItem->pcs,
-                    'box' => 0, // default
+                    'pcs' => $item['pcs'],
+                    'box' => $item['box'],
                     'keterangan' => 'Retur dari batch BK-'.$barangKeluar->id,
                     'susut_per_item' => $susut,
                 ]);

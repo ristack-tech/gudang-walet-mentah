@@ -94,6 +94,8 @@ class BarangMasukDemakController extends Controller
             'items.*.gram_diterima' => 'nullable|numeric',
             'items.*.partai' => 'nullable|string|max:255',
             'items.*.barang_id' => 'nullable|exists:nama_barang,id',
+            'items.*.pcs' => 'nullable|integer|min:0',
+            'items.*.box' => 'nullable|integer|min:0',
         ]);
 
         $selectedItems = collect($request->items)->filter(function ($item) {
@@ -107,6 +109,12 @@ class BarangMasukDemakController extends Controller
             }
             if (empty($item['barang_id'])) {
                 throw new \Exception('Nama Barang tidak boleh kosong untuk item yang dicentang.');
+            }
+            if (!isset($item['pcs']) || $item['pcs'] === '') {
+                throw new \Exception('PCS tidak boleh kosong untuk item yang dicentang.');
+            }
+            if (!isset($item['box']) || $item['box'] === '') {
+                throw new \Exception('Box tidak boleh kosong untuk item yang dicentang.');
             }
             return $item;
         })->toArray();
