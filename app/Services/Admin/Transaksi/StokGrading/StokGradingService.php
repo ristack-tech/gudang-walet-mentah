@@ -54,7 +54,7 @@ class StokGradingService
                 'tanggal' => now()->toDateString(),
                 'partai' => $data['partai'] ?? '-',
                 'pekerja' => '-', // Default until workers are fully implemented
-                'pcs_awal' => $data['pcs_awal'] ?? 0,
+                'box_awal' => $data['box_awal'] ?? 0,
                 'total_gram_lempeng_bersih' => $totals['gram_lempeng_bersih'],
                 'total_pcs_lempeng_bersih' => 0,
                 'total_box_lempeng_bersih' => $totals['box_lempeng_bersih'],
@@ -122,7 +122,7 @@ class StokGradingService
             'tanggal' => $stokGrading->tanggal,
             'partai' => $stokGrading->partai,
             'pekerja' => $stokGrading->pekerja,
-            'pcs_awal' => $stokGrading->pcs_awal,
+            'box_awal' => $stokGrading->box_awal,
             'lempeng_bersih' => $lempengBersih,
             'lempeng_kotor' => $lempengKotor,
             'mangkok' => $mangkok,
@@ -158,9 +158,47 @@ class StokGradingService
     {
         return DB::transaction(function () use ($id) {
             $stokGrading = StokGrading::findOrFail($id);
-            // Optionally delete details if not using onDelete('cascade') or want soft deletes cascading
-            $stokGrading->details()->delete();
-            $stokGrading->delete();
+            
+            // Cek sisa saldo yang tertera (yang belum pernah ditarik ke Clop)
+            $totalSisaBerat = $stokGrading->details()->sum('berat');
+            
+            if ($totalSisaBerat == 0) {
+                 return true; 
+            }
+            
+            // Hitung gramasi yang SESUNGGUHNYA SUDAH pernah dipakai (sudah ditransfer)
+            $totalGramSistemOriginal = $stokGrading->total_gram_keseluruhan;
+            $gramSudahDigunakan = max(0, $totalGramSistemOriginal - $totalSisaBerat);
+
+            if ($gramSudahDigunakan == 0) {
+                // Semua barang masih UTUH (Belum ada satupun detail yang ditransfer Clop)
+                // Lakukan Full Delete fisik untuk mengeleminasi dokumen 100%
+                $stokGrading->details()->forceDelete();
+                $stokGrading->delete();
+            } else {
+                // Partial Rollback (Batal Sisa)
+                // Kita kurangi total_gram pada Induk berdasarkan Sisa Berat yang dibatalkan
+                $sisaBersih = 0;
+                $sisaKotor = 0;
+                $sisaMangkok = 0;
+                
+                foreach ($stokGrading->details as $detail) {
+                    if ($detail->type === 'lempeng_bersih') $sisaBersih += $detail->berat;
+                    elseif ($detail->type === 'lempeng_kotor') $sisaKotor += $detail->berat;
+                    elseif ($detail->type === 'mangkok') $sisaMangkok += $detail->berat;
+                    
+                    // Nolkan sisa saldo agar data bersih dari Tab Global (Global Mengakui Tidak Ada Sisa)
+                    $detail->update(['berat' => 0]);
+                }
+                
+                // Update parent master totals (ini akan otomatis me-refund Demak Raw Material sejumlah Sisa yg batal)
+                $stokGrading->update([
+                    'total_gram_lempeng_bersih' => max(0, $stokGrading->total_gram_lempeng_bersih - $sisaBersih),
+                    'total_gram_lempeng_kotor' => max(0, $stokGrading->total_gram_lempeng_kotor - $sisaKotor),
+                    'total_gram_mangkok' => max(0, $stokGrading->total_gram_mangkok - $sisaMangkok),
+                    'total_gram_keseluruhan' => max(0, $stokGrading->total_gram_keseluruhan - $totalSisaBerat),
+                ]);
+            }
             
             return true;
         });
@@ -209,7 +247,7 @@ class StokGradingService
             // Update parent record
             $stokGrading->update([
                 'sumber_stok' => $data['sumber_stok'] ?? $stokGrading->sumber_stok,
-                'pcs_awal' => $data['pcs_awal'] ?? $stokGrading->pcs_awal,
+                'box_awal' => $data['box_awal'] ?? $stokGrading->box_awal,
                 'total_gram_lempeng_bersih' => $totals['gram_lempeng_bersih'],
                 'total_pcs_lempeng_bersih' => 0,
                 'total_box_lempeng_bersih' => $totals['box_lempeng_bersih'],

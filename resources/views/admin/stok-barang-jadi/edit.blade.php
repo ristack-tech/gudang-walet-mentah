@@ -43,17 +43,15 @@
         @endphp
 
         @if($isTransferGlobal)
-            <div class="mb-6 p-4 rounded-md bg-yellow-50 border border-yellow-200">
+            <div class="mb-6 p-4 rounded-md bg-blue-50 border border-blue-200">
                 <div class="flex">
                     <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                           <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                        </svg>
+                        <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div class="ml-3">
-                        <h3 class="text-sm font-medium text-yellow-800">Perhatian: Data Hasil Transfer</h3>
-                        <div class="mt-2 text-sm text-yellow-700">
-                            <p>Kuantitas (Berat dan Pcs) pada stok hasil Transfer dari Global tidak dapat diedit secara manual demi menjaga integritas data lintas-tabel. Jika terdapat kesalahan pencatatan waktu transfer, silakan <strong>Hapus</strong> data ini dari tabel (untuk memulangkan angka stok), lalu buat Transfer ulang.</p>
+                        <h3 class="text-sm font-medium text-blue-800">Informasi: Mode Edit Transfer Global</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <p>Anda sedang mengubah data Clop yang berasal dari transfer stok Global. Apabila <strong>Berat</strong> diubah (ditambah/dikurangi), sistem akan otomatis melakukan perhitungan <em>Delta</em> dan menyesuaikan/mengatur ulang saldo pada Stok Global asalnya jika mencukupi.</p>
                         </div>
                     </div>
                 </div>
@@ -106,10 +104,16 @@
                                         <div class="font-medium text-gray-900 py-2">{{ $detail->nama_barang ?: ($detail->namaBarang->nama_barang ?? 'Unknown') }}</div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <input type="number" name="details[{{ $index }}][jumlah_pcs]" value="{{ old('details.'.$index.'.jumlah_pcs', $detail->jumlah_pcs) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border {{ $isTransferGlobal ? 'bg-gray-100 cursor-not-allowed text-gray-500' : '' }}" required min="0" {{ $isTransferGlobal ? 'readonly' : '' }}>
+                                        @if($isTransferGlobal)
+                                            <!-- Pcs is a note and transferred as 0 from global, so we hide it or show as read only 0 -->
+                                            <input type="hidden" name="details[{{ $index }}][jumlah_pcs]" value="{{ $detail->jumlah_pcs }}">
+                                            <span class="text-gray-500 italic text-sm">N/a (Hanya Berat)</span>
+                                        @else
+                                            <input type="number" name="details[{{ $index }}][jumlah_pcs]" value="{{ old('details.'.$index.'.jumlah_pcs', $detail->jumlah_pcs) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" required min="0">
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4">
-                                        <input type="number" step="0.01" name="details[{{ $index }}][berat]" value="{{ old('details.'.$index.'.berat', $detail->berat) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border font-mono weight-input {{ $isTransferGlobal ? 'bg-gray-100 cursor-not-allowed text-gray-500' : '' }}" required min="0.01" {{ $isTransferGlobal ? 'readonly' : '' }}>
+                                        <input type="number" step="0.01" name="details[{{ $index }}][berat]" value="{{ old('details.'.$index.'.berat', $detail->berat) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border font-mono weight-input" required min="0.01">
                                     </td>
                                 </tr>
                             @endforeach
