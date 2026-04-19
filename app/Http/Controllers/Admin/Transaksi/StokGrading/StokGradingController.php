@@ -73,10 +73,13 @@ class StokGradingController extends Controller
             'MK HC' => ['JUMBO', 'SUPER', 'SUPER G']
         ];
 
-        $stokSummary = $this->stokGudangService->getGlobalSummaryForBarang($stokId);
-        // Note: For display purposes on the overall stock limit, we still use the global summary or adapt to specific source summary
-        // Due to complexity of partial edits, keeping global validation is safer, but strictly we deduct per source later
-        $gramAwal = $stokSummary ? $stokSummary->total_gram : 0;
+        if ($sumberStok === 'demak') {
+            $stokSummary = $this->stokGudangService->getGlobalSummaryForBarang($stokId);
+            $gramAwal = $stokSummary ? $stokSummary->total_gram : 0;
+        } else {
+            // Untuk jasa cuci, parameter box_awal itu diisi dengan inputan Gram dari Step 1
+            $gramAwal = $boxAwal;
+        }
 
         return view('admin.stok-grading.create-step-2', compact('stokId', 'namaBarang', 'boxAwal', 'sumberStok', 'gramAwal', 'gradesLempengBersih', 'gradesLempengKotor', 'gradesMangkok'));
     }
@@ -86,7 +89,7 @@ class StokGradingController extends Controller
         $validatedData = $request->validate([
             'stok_id' => 'required|string',
             'sumber_stok' => 'required|string|in:demak,jasa_cuci',
-            'box_awal' => 'required|integer|min:1',
+            'box_awal' => 'required|numeric|min:0',
             'grades' => 'required|array',
             'grades.*.name' => 'required|string',
             'grades.*.type' => 'required|string',
