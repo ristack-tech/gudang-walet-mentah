@@ -33,9 +33,9 @@ class BarangMasukDemakController extends Controller
         $outstandingBatches = BarangKeluar::where('jenis_barang_keluar_id', $jenisDemakKeluar->id)
             ->where('status_lunas', false)
             ->get();
-        
-        $lokasiList = \App\Models\Lokasi::all();
-            
+
+        $lokasiList = \App\Models\Lokasi::where('is_jasa_cuci', false)->get();
+
         $step1Data = session('barang_masuk_demak_step1', []);
 
         return view('admin.barang-masuk.demak.step1', compact('outstandingBatches', 'lokasiList', 'step1Data'));
@@ -62,9 +62,9 @@ class BarangMasukDemakController extends Controller
         }
 
         $step1Data = session('barang_masuk_demak_step1');
-        
+
         $barangKeluar = BarangKeluar::with([
-            'barangKeluarDemak' => function($q) {
+            'barangKeluarDemak' => function ($q) {
                 // Hanya ambil yang belum kembali
                 $q->where('status_kembali', false);
             },
@@ -128,8 +128,7 @@ class BarangMasukDemakController extends Controller
             session()->forget('barang_masuk_demak_step1');
             return redirect()->route('barang-masuk.demak.index')
                 ->with('success', 'Data Barang Masuk Demak berhasil disimpan. Tidak bisa diedit.');
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
