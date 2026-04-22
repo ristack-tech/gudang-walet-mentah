@@ -73,13 +73,8 @@ class StokGradingController extends Controller
             'MK HC' => ['JUMBO', 'SUPER', 'SUPER G']
         ];
 
-        if ($sumberStok === 'demak') {
-            $stokSummary = $this->stokGudangService->getGlobalSummaryForBarang($stokId);
-            $gramAwal = $stokSummary ? $stokSummary->total_gram : 0;
-        } else {
-            // Untuk jasa cuci, parameter box_awal itu diisi dengan inputan Gram dari Step 1
-            $gramAwal = $boxAwal;
-        }
+        // box_awal parameter now represents true Gram amount inputted in Step 1 for both sources
+        $gramAwal = $boxAwal;
 
         return view('admin.stok-grading.create-step-2', compact('stokId', 'namaBarang', 'boxAwal', 'sumberStok', 'gramAwal', 'gradesLempengBersih', 'gradesLempengKotor', 'gradesMangkok'));
     }
@@ -127,7 +122,7 @@ class StokGradingController extends Controller
             'barang_id' => $stokId, // Stores the NamaBarang ID
             'sumber_stok' => $request->input('sumber_stok'),
             'partai' => $partai,
-            'box_awal' => $request->input('box_awal'),
+            'box_awal' => 0, // Sengaja di-0 kan untuk semua sumber karena sistem pindah sepenuhnya ke Gram
             'grades' => $request->input('grades'),
         ];
 

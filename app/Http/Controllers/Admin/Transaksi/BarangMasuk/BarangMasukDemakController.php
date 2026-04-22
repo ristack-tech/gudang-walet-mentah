@@ -34,7 +34,7 @@ class BarangMasukDemakController extends Controller
             ->where('status_lunas', false)
             ->get();
         
-        $lokasiList = \App\Models\Lokasi::where('nama_lokasi', 'like', '%Demak%')->get();
+        $lokasiList = \App\Models\Lokasi::all();
             
         $step1Data = session('barang_masuk_demak_step1', []);
 

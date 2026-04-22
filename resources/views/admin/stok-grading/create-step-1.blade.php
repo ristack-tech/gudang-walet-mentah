@@ -95,9 +95,9 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_box }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                         <div class="flex items-center space-x-2">
-                                            <input type="number" id="input_box_demak_{{ $item->id }}" min="1" max="{{ $item->total_box }}" placeholder="Jml Box" 
+                                            <input type="number" step="0.01" id="input_box_demak_{{ $item->id }}" min="0.01" max="{{ $item->total_gram }}" placeholder="Jml Gram" 
                                                 class="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                            <button type="button" onclick="selectStok('{{ $item->id }}', 'demak', this, {{ $item->total_box }})" 
+                                            <button type="button" onclick="selectStok('{{ $item->id }}', 'demak', this)" 
                                                 class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                                 Pilih
                                             </button>
@@ -146,7 +146,7 @@
                                             <!-- Untuk Jasa Cuci, input merupakan Gram -->
                                             <input type="number" step="0.01" id="input_box_jasacuci_{{ $item->id }}" min="0.01" max="{{ $item->total_gram }}" placeholder="Jml Gram" 
                                                 class="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                            <button type="button" onclick="selectStok('{{ $item->id }}', 'jasa_cuci', this, {{ $item->total_box }})" 
+                                            <button type="button" onclick="selectStok('{{ $item->id }}', 'jasa_cuci', this)" 
                                                 class="inline-flex items-center px-4 py-2 bg-purple-50 text-purple-600 border border-purple-200 rounded-md hover:bg-purple-100 hover:border-purple-300 transition duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
                                                 Pilih
                                             </button>
@@ -220,38 +220,23 @@
         btnJasaCuci.classList.add('border-gray-300', 'text-gray-500');
     });
 
-    function selectStok(stokId, sumberStok, btn, maxBox) {
+    function selectStok(stokId, sumberStok, btn) {
         // Build the correct ID based on source logic
         const inputIdText = sumberStok === 'demak' ? 'demak' : 'jasacuci';
         const boxInput = document.getElementById(`input_box_${inputIdText}_${stokId}`);
         const boxValue = parseFloat(boxInput.value);
 
-        if (sumberStok === 'demak') {
-            if (isNaN(boxValue) || boxValue < 1) {
-                alert('Masukkan jumlah Box yang valid minimal 1.');
-                boxInput.focus();
-                return;
-            }
-
-            if (boxValue > maxBox) {
-                alert(`Jumlah Box tidak boleh lebih dari total stok yang tersedia (${maxBox} Box).`);
-                boxInput.focus();
-                return;
-            }
-        } else {
-            // Untuk Jasa Cuci, maxBox yang dilempar aslinya adalah total_box (0). 
-            // Kita harus mengambil batas max dari atribut input-nya langsung (yaitu total_gram)
-            const maxGram = parseFloat(boxInput.getAttribute('max'));
-            if (isNaN(boxValue) || boxValue <= 0) {
-                alert('Masukkan jumlah Gram yang valid.');
-                boxInput.focus();
-                return;
-            }
-            if (boxValue > maxGram) {
-                alert(`Jumlah Gram tidak boleh lebih dari total stok yang tersedia (${maxGram} Gr).`);
-                boxInput.focus();
-                return;
-            }
+        // Kedua sumber sekarang murni berbasis Gram, ambil max batas gram dari atribut
+        const maxGram = parseFloat(boxInput.getAttribute('max'));
+        if (isNaN(boxValue) || boxValue <= 0) {
+            alert('Masukkan jumlah Gram yang valid.');
+            boxInput.focus();
+            return;
+        }
+        if (boxValue > maxGram) {
+            alert(`Jumlah Gram tidak boleh lebih dari total stok yang tersedia (${maxGram} Gr).`);
+            boxInput.focus();
+            return;
         }
 
         document.getElementById('stok_id').value = stokId;
