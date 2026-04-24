@@ -79,6 +79,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">NO</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Box</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Berat (Gram)</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Action</th>
                             </tr>
@@ -94,6 +95,13 @@
                                             {{ $item->namaBarang->nama_barang ?? 'Unknown' }} - {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
                                         @else
                                             {{ $item->details->first()->nama_barang ?: ($item->details->first()->namaBarang->nama_barang ?? 'Unknown') }} - {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        @if($tab === 'clop')
+                                            <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-bold">{{ $item->details->sum('jumlah_pcs') }} Box</span>
+                                        @else
+                                            -
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
@@ -183,10 +191,14 @@
                                         @endphp
                                         <tr class="hover:bg-gray-50 transition-colors">
                                             <td class="px-4 py-3 text-gray-500">{{ $idx + 1 }}</td>
-                                            <td class="px-4 py-3 font-medium text-gray-900">
+                                            <!-- <td class="px-4 py-3 font-medium text-gray-900">
                                                 {{ $namaBarangGlobal }} - {{ strtoupper(str_replace('_', ' ', $detailItem->type)) }} ({{ $detailItem->grade }})
                                                 <br><span class="text-xs text-gray-500 font-normal">Tersedia: {{ number_format($detailItem->berat, 2, ',', '.') }}gr / {{ $detailItem->box }} Pcs</span>
-                                            </td>
+                                            </td> Ini seng Sebelum e-->
+                                             <td class="px-4 py-3 font-medium text-gray-900">
+                                                {{ $namaBarangGlobal }} - {{ strtoupper(str_replace('_', ' ', $detailItem->type)) }} ({{ $detailItem->grade }})
+                                                <br><span class="text-xs text-gray-500 font-normal">Tersedia: {{ number_format($detailItem->berat, 2, ',', '.') }}gr / {{ $detailItem->box }} Box</span> // Harus e box ga sih, org dari Stok Grading aja Box
+                                            </td> 
                                             <td class="px-4 py-3 text-center">
                                                 <button type="button" 
                                                     onclick="selectGlobalItem({{ $detailItem->id }}, '{{ addslashes($namaBarangGlobal) }} - {{ $detailItem->grade }}')" 
@@ -223,7 +235,7 @@
                                                 <option value="475">Box 475 gr</option>
                                             </select>
                                         </div>
-
+// nah disini itu ketika create nanti akan create per box dan pasti per box
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Berat (Gram)</label>
                                             <input type="number" step="0.01" name="berat" id="beratInput" required min="500"

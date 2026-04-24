@@ -244,7 +244,7 @@ class StokBarangJadiService
             ->keyBy('id');
 
         // Get all exported stocks grouped by stok_barang_jadi_detail_id
-        $exportStocks = \App\Models\ExportBarang::select('stok_barang_jadi_detail_id', DB::raw('SUM(berat) as total_berat'), DB::raw('SUM(pcs) as total_pcs'))
+        $exportStocks = \App\Models\ExportDetail::select('stok_barang_jadi_detail_id', DB::raw('SUM(berat) as total_berat'), DB::raw('SUM(pcs) as total_pcs'))
             ->groupBy('stok_barang_jadi_detail_id')
             ->get()
             ->keyBy('stok_barang_jadi_detail_id');
