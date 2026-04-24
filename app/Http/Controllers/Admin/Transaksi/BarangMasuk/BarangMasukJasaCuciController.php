@@ -96,33 +96,32 @@ class BarangMasukJasaCuciController extends Controller
             'items.*.kadar_air' => 'nullable|numeric',
         ]);
 
-        $selectedItems = collect($request->items)->filter(function ($item) {
-            return isset($item['is_checked']) && $item['is_checked'] == '1';
-        })->map(function ($item) {
-            if (empty($item['gram_diterima']) || $item['gram_diterima'] <= 0) {
-                throw new \Exception('Gram diterima tidak boleh kosong atau <= 0 untuk item yang dicentang.');
-            }
-            if (empty($item['barang_id'])) {
-                throw new \Exception('Nama Barang tidak boleh kosong untuk item yang dicentang.');
-            }
-            if (empty($item['kadar_air']) && $item['kadar_air'] !== '0') {
-                throw new \Exception('Kadar Air tidak boleh kosong untuk item yang dicentang.');
-            }
-            return $item;
-        })->toArray();
-
-        if (empty($selectedItems)) {
-            return redirect()->back()->with('error', 'Anda harus mencentang minimal 1 barang yang dikembalikan.');
-        }
-
         try {
+            $selectedItems = collect($request->items)->filter(function ($item) {
+                return isset($item['is_checked']) && $item['is_checked'] == '1';
+            })->map(function ($item) {
+                if (empty($item['gram_diterima']) || $item['gram_diterima'] <= 0) {
+                    throw new \Exception('Gram diterima tidak boleh kosong atau <= 0 untuk item yang dicentang.');
+                }
+                if (empty($item['barang_id'])) {
+                    throw new \Exception('Nama Barang tidak boleh kosong untuk item yang dicentang.');
+                }
+                if (empty($item['kadar_air']) && $item['kadar_air'] !== '0') {
+                    throw new \Exception('Kadar Air tidak boleh kosong untuk item yang dicentang.');
+                }
+                return $item;
+            })->toArray();
+
+            if (empty($selectedItems)) {
+                return redirect()->back()->with('error', 'Anda harus mencentang minimal 1 barang yang dikembalikan.');
+            }
+
             $service->storeData($step1Data, $selectedItems);
             session()->forget('barang_masuk_jasa_cuci_step1');
             return redirect()->route('barang-masuk.jasa-cuci.index')
                 ->with('success', 'Data Barang Masuk Jasa Cuci berhasil disimpan. Tidak bisa diedit.');
-        }
-        catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
     }
 

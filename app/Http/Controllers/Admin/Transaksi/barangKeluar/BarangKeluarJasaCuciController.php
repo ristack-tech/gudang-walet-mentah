@@ -24,11 +24,13 @@ class BarangKeluarJasaCuciController extends Controller
         $jenisJasaCuci = \App\Models\JenisBarangKeluar::firstOrCreate(['nama' => 'Jasa Cuci']);
 
         $query = BarangKeluar::where('jenis_barang_keluar_id', $jenisJasaCuci->id)
-            ->with(['lokasi', 'barangKeluarJasaCuci.kodeBahan']);
+            ->with(['lokasi', 'barangKeluarJasaCuci']);
 
         if ($request->has('search') && $request->search != '') {
-            $query->whereHas('barangKeluarJasaCuci.kodeBahan', function ($q) use ($request) {
-                $q->where('nama', 'like', '%' . $request->search . '%');
+            $query->whereHas('barangKeluarJasaCuci', function ($q) use ($request) {
+                $q->whereHas('kodeBahan', function ($qb) use ($request) {
+                    $qb->where('nama', 'like', '%' . $request->search . '%');
+                });
             });
         }
 
@@ -77,15 +79,13 @@ class BarangKeluarJasaCuciController extends Controller
     public function addStep2Item(Request $request)
     {
         $validated = $request->validate([
-            'kode_bahan_id' => 'required|exists:kode_bahan,id',
+            'kode_bahan' => 'required|string',
             'keterangan_cetak' => 'nullable|string',
             'berat_per_pcs' => 'required|numeric',
             'kadar_air' => 'nullable|numeric',
         ]);
 
         $items = session('jasa_cuci_items', []);
-
-        $validated['kode_bahan_nama'] = KodeBahan::find($validated['kode_bahan_id'])->nama ?? '-';
 
         $items[] = $validated;
         session(['jasa_cuci_items' => $items]);
@@ -125,15 +125,14 @@ class BarangKeluarJasaCuciController extends Controller
             session()->forget('jasa_cuci_step1');
             session()->forget('jasa_cuci_items');
             return redirect()->route('barang-keluar.jasa-cuci.index')->with('success', 'Data Batch berhasil ditambahkan.');
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
     public function show($id)
     {
-        $data = BarangKeluar::with(['lokasi', 'barangKeluarJasaCuci.kodeBahan'])->findOrFail($id);
+        $data = BarangKeluar::with(['lokasi', 'barangKeluarJasaCuci'])->findOrFail($id);
         return view('admin.barang-keluar.jasa-cuci.show', compact('data'));
     }
 
@@ -151,7 +150,7 @@ class BarangKeluarJasaCuciController extends Controller
             'tanggal_kirim' => 'required|date',
             'lokasi_id' => 'required|exists:lokasi,id',
             'items' => 'required|array|min:1',
-            'items.*.kode_bahan_id' => 'required|exists:kode_bahan,id',
+            'items.*.kode_bahan' => 'required|string',
             'items.*.keterangan_cetak' => 'nullable|string',
             'items.*.berat_per_pcs' => 'required|numeric',
             'items.*.kadar_air' => 'nullable|numeric',
@@ -160,8 +159,7 @@ class BarangKeluarJasaCuciController extends Controller
         try {
             $this->service->update($id, $request->all());
             return redirect()->route('barang-keluar.jasa-cuci.index')->with('success', 'Data Batch berhasil diperbarui.');
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
@@ -177,8 +175,7 @@ class BarangKeluarJasaCuciController extends Controller
 
             $this->service->delete($id);
             return redirect()->route('barang-keluar.jasa-cuci.index')->with('success', 'Data Batch berhasil dihapus beserta seluruh isinya.');
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
