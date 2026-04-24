@@ -17,7 +17,10 @@ class SupplierService
         $query = Supplier::query();
 
         if ($search) {
-            $query->where('nama', 'like', '%' . $search . '%');
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', '%' . $search . '%')
+                  ->orWhere('keterangan', 'like', '%' . $search . '%');
+            });
         }
 
         return $query->paginate($perPage);

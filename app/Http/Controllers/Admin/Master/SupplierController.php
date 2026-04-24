@@ -31,6 +31,7 @@ class SupplierController extends Controller
     {
         $validatedData = $request->validate([
             'nama' => 'required|string|max:255',
+            'keterangan' => 'nullable|string',
         ]);
 
         $this->supplierService->createSupplier($validatedData);
@@ -48,6 +49,7 @@ class SupplierController extends Controller
     {
         $validatedData = $request->validate([
             'nama' => 'required|string|max:255',
+            'keterangan' => 'nullable|string',
         ]);
 
         $this->supplierService->updateSupplier($id, $validatedData);

@@ -151,7 +151,9 @@ Route::middleware('auth')->group(function () {
         // Master Data
         Route::resource('lokasi', LokasiController::class);
         Route::resource('nama-barang', NamaBarangController::class)->parameters(['nama-barang' => 'nama_barang']);
-        Route::resource('kode-bahan', KodeBahanController::class)->parameters(['kode-bahan' => 'kode_bahan']);
+        /**
+         * Route::resource('kode-bahan', KodeBahanController::class)->parameters(['kode-bahan' => 'kode_bahan']); Merubah Kode Bahan tidak memiliki data master, file COntroller dan service di rubah file nya menjadi .md 
+         * */
         Route::resource('partai', PartaiController::class);
         Route::resource('supplier', SupplierController::class);
         Route::resource('warna', WarnaController::class);

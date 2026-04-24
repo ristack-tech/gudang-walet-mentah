@@ -98,38 +98,38 @@ class BarangMasukDemakController extends Controller
             'items.*.box' => 'nullable|integer|min:0',
         ]);
 
-        $selectedItems = collect($request->items)->filter(function ($item) {
-            return isset($item['is_checked']) && $item['is_checked'] == '1';
-        })->map(function ($item) {
-            if (empty($item['gram_diterima']) || $item['gram_diterima'] <= 0) {
-                throw new \Exception('Gram diterima tidak boleh kosong atau <= 0 untuk item yang dicentang.');
-            }
-            if (empty($item['partai'])) {
-                throw new \Exception('Partai Khusus tidak boleh kosong untuk item yang dicentang.');
-            }
-            if (empty($item['barang_id'])) {
-                throw new \Exception('Nama Barang tidak boleh kosong untuk item yang dicentang.');
-            }
-            if (!isset($item['pcs']) || $item['pcs'] === '') {
-                throw new \Exception('PCS tidak boleh kosong untuk item yang dicentang.');
-            }
-            if (!isset($item['box']) || $item['box'] === '') {
-                throw new \Exception('Box tidak boleh kosong untuk item yang dicentang.');
-            }
-            return $item;
-        })->toArray();
-
-        if (empty($selectedItems)) {
-            return redirect()->back()->with('error', 'Anda harus mencentang minimal 1 barang yang dikembalikan.');
-        }
-
         try {
+            $selectedItems = collect($request->items)->filter(function ($item) {
+                return isset($item['is_checked']) && $item['is_checked'] == '1';
+            })->map(function ($item) {
+                if (empty($item['gram_diterima']) || $item['gram_diterima'] <= 0) {
+                    throw new \Exception('Gram diterima tidak boleh kosong atau <= 0 untuk item yang dicentang.');
+                }
+                if (empty($item['partai'])) {
+                    throw new \Exception('Partai Khusus tidak boleh kosong untuk item yang dicentang.');
+                }
+                if (empty($item['barang_id'])) {
+                    throw new \Exception('Nama Barang tidak boleh kosong untuk item yang dicentang.');
+                }
+                if (!isset($item['pcs']) || $item['pcs'] === '') {
+                    throw new \Exception('PCS tidak boleh kosong untuk item yang dicentang.');
+                }
+                if (!isset($item['box']) || $item['box'] === '') {
+                    throw new \Exception('Box tidak boleh kosong untuk item yang dicentang.');
+                }
+                return $item;
+            })->toArray();
+
+            if (empty($selectedItems)) {
+                return redirect()->back()->with('error', 'Anda harus mencentang minimal 1 barang yang dikembalikan.');
+            }
+
             $service->storeData($step1Data, $selectedItems);
             session()->forget('barang_masuk_demak_step1');
             return redirect()->route('barang-masuk.demak.index')
                 ->with('success', 'Data Barang Masuk Demak berhasil disimpan. Tidak bisa diedit.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+            return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
     }
 

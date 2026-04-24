@@ -37,6 +37,19 @@
                         @enderror
                     </div>
 
+                    <!-- Keterangan -->
+                    <div class="mb-6">
+                        <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-2">
+                            Keterangan
+                        </label>
+                        <textarea name="keterangan" id="keterangan" rows="3"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('keterangan') border-red-500 @enderror"
+                            placeholder="Masukkan keterangan (opsional)">{{ old('keterangan') }}</textarea>
+                        @error('keterangan')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Buttons -->
                     <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
                         <a href="{{ route('supplier.index') }}"

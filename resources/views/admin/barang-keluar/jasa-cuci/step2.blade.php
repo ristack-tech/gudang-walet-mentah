@@ -61,14 +61,11 @@
                             <!-- First Row -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="kode_bahan_id" class="block text-sm font-medium text-gray-700 mb-1">Kode Bahan <span class="text-red-500">*</span></label>
-                                    <select name="kode_bahan_id" id="kode_bahan_id" required class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('kode_bahan_id') border-red-500 @enderror">
-                                        <option value="">-- Pilih Kode Bahan --</option>
-                                        @foreach($kodeBahans as $kode)
-                                            <option value="{{ $kode->id }}" {{ old('kode_bahan_id') == $kode->id ? 'selected' : '' }}>{{ $kode->nama }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('kode_bahan_id')
+                                    <label for="kode_bahan" class="block text-sm font-medium text-gray-700 mb-1">Kode Bahan <span class="text-red-500">*</span></label>
+                                    <input type="text" name="kode_bahan" id="kode_bahan" required value="{{ old('kode_bahan') }}"
+                                        class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('kode_bahan') border-red-500 @enderror"
+                                        placeholder="Masukkan kode bahan">
+                                    @error('kode_bahan')
                                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                                     @enderror
                                 </div>
@@ -132,7 +129,7 @@
                                 @foreach($items as $index => $item)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">{{ $item['kode_bahan_nama'] }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">{{ $item['kode_bahan'] }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
                                             <span class="font-bold text-gray-800">{{ number_format($item['berat_per_pcs'], 2, ',', '.') }}</span>
                                         </td>

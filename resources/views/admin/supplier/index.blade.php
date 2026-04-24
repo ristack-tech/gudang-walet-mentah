@@ -51,6 +51,9 @@
                                     Nama Supplier
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Keterangan
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Tanggal Dibuat
                                 </th>
                                 <th
@@ -67,6 +70,9 @@
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900">
                                         {{ $item->nama }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                        {{ $item->keterangan ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                         {{ $item->created_at ? $item->created_at->format('d M Y') : '-' }}
