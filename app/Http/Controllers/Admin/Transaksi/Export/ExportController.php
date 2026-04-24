@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Admin\Transaksi\Export;
 
 use App\Http\Controllers\Controller;
-use App\Models\NamaBarang;
-use App\Models\ExportBarang;
+use App\Models\Export;
 use App\Services\Admin\Transaksi\Export\ExportService;
 use App\Services\Admin\Transaksi\StokBarangJadi\StokBarangJadiService;
 use Illuminate\Http\Request;
@@ -26,109 +25,71 @@ class ExportController extends Controller
         return view('admin.export.index', compact('exports'));
     }
 
-    public function create()
+    public function createStep1(Request $request)
     {
-        $availableStocks = collect($this->stokBarangJadiService->getAvailableClopStocks());
-        return view('admin.export.create', compact('availableStocks'));
+        return view('admin.export.create-step-1');
+    }
+
+    public function createStep2(Request $request)
+    {
+        if (!$request->has('tanggal_transfer')) {
+            return redirect()->route('export.create.step1')->with('error', 'Silahkan tentukan tanggal pengeluaran export terlebih dahulu.');
+        }
+
+        $tanggalTransfer = $request->query('tanggal_transfer');
+        $keterangan = $request->query('keterangan');
+
+        $availableStocks = $this->stokBarangJadiService->getAvailableClopStocks();
+
+        return view('admin.export.create-step-2', compact('tanggalTransfer', 'keterangan', 'availableStocks'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'tanggal_transfer' => 'required|date',
-            'stok_barang_jadi_detail_id' => 'required|exists:stok_barang_jadi_details,id',
-            'berat' => 'required|numeric',
-            'pcs' => 'required|integer',
-            'box' => 'required|integer',
-            'harga' => 'required|numeric',
+            'keterangan' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.stok_id' => 'required|exists:stok_barang_jadi_details,id',
+            'items.*.box' => 'required|integer|min:0',
+            'items.*.pcs' => 'nullable|integer|min:0',
+            'items.*.berat' => 'required|numeric|min:0.01',
+            'items.*.harga' => 'nullable|numeric|min:0',
         ]);
 
+        // Re-validate against available stock
         $availableStocks = $this->stokBarangJadiService->getAvailableClopStocks();
-        if (!isset($availableStocks[$validated['stok_barang_jadi_detail_id']])) {
-            return redirect()->back()->withInput()->with('error', 'Stok Clop untuk barang ini tidak tersedia.');
-        }
-
-        $stock = $availableStocks[$validated['stok_barang_jadi_detail_id']];
-        if ($validated['berat'] > $stock['available_berat']) {
-            return redirect()->back()->withInput()->with('error', "Berat yang diminta ({$validated['berat']}g) melebihi stok Clop yang tersedia ({$stock['available_berat']}g).");
-        }
-        if ($validated['pcs'] > $stock['available_pcs']) {
-            return redirect()->back()->withInput()->with('error', "Pcs yang diminta ({$validated['pcs']}) melebihi stok Clop yang tersedia ({$stock['available_pcs']} pcs).");
-        }
-
-        $this->exportService->create($validated);
-
-        return redirect()->route('export.index')->with('success', 'Data export berhasil ditambahkan.');
-    }
-
-    public function edit($id)
-    {
-        $export = ExportBarang::findOrFail($id);
-        $availableStocks = collect($this->stokBarangJadiService->getAvailableClopStocks());
         
-        // Add current export amount back to available for editing
-        if ($availableStocks->has($export->stok_barang_jadi_detail_id)) {
-            $stock = $availableStocks[$export->stok_barang_jadi_detail_id];
-            $stock['available_berat'] += $export->berat;
-            $stock['available_pcs'] += $export->pcs;
-            $availableStocks[$export->stok_barang_jadi_detail_id] = $stock;
-        } else {
-            // If it wasn't available at all, recreate it with just this export's amount
-            $availableStocks[$export->stok_barang_jadi_detail_id] = [
-                'id' => $export->stok_barang_jadi_detail_id,
-                'nama_barang' => $export->stokBarangJadiDetail->nama_barang ?? 'Unknown',
-                'available_berat' => $export->berat,
-                'available_pcs' => $export->pcs,
-            ];
+        foreach ($validated['items'] as $index => $item) {
+            $stokId = $item['stok_id'];
+            if (!isset($availableStocks[$stokId])) {
+                return redirect()->back()->withInput()->with('error', "Stok untuk barang baris ke-" . ($index + 1) . " tidak tersedia.");
+            }
+
+            $currentStock = $availableStocks[$stokId];
+            if ($item['berat'] > $currentStock['available_berat']) {
+                return redirect()->back()->withInput()->with('error', "Berat yang diminta pada {$currentStock['nama_barang']} ({$item['berat']}g) melebihi stok yang tersedia ({$currentStock['available_berat']}g).");
+            }
+            if (isset($item['pcs']) && $item['pcs'] > $currentStock['available_pcs']) {
+                return redirect()->back()->withInput()->with('error', "Pcs yang diminta pada {$currentStock['nama_barang']} ({$item['pcs']}) melebihi stok yang tersedia ({$currentStock['available_pcs']} pcs).");
+            }
         }
 
-        return view('admin.export.edit', compact('export', 'availableStocks'));
+        $export = $this->exportService->create($validated);
+
+        return redirect()->route('export.index')->with('success', "Data export {$export->batch} berhasil ditambahkan secara batch.");
     }
 
-    public function update(Request $request, $id)
+    public function show($id)
     {
-        $export = ExportBarang::findOrFail($id);
-
-        $validated = $request->validate([
-            'tanggal_transfer' => 'required|date',
-            'stok_barang_jadi_detail_id' => 'required|exists:stok_barang_jadi_details,id',
-            'berat' => 'required|numeric',
-            'pcs' => 'required|integer',
-            'box' => 'required|integer',
-            'harga' => 'required|numeric',
-        ]);
-
-        $availableStocks = collect($this->stokBarangJadiService->getAvailableClopStocks());
-        $currentAvailableBerat = 0;
-        $currentAvailablePcs = 0;
-
-        if ($availableStocks->has($validated['stok_barang_jadi_detail_id'])) {
-            $currentAvailableBerat = $availableStocks[$validated['stok_barang_jadi_detail_id']]['available_berat'];
-            $currentAvailablePcs = $availableStocks[$validated['stok_barang_jadi_detail_id']]['available_pcs'];
-        }
-
-        // if editing same barang, add current amounts back to available limits
-        if ($export->stok_barang_jadi_detail_id == $validated['stok_barang_jadi_detail_id']) {
-            $currentAvailableBerat += $export->berat;
-            $currentAvailablePcs += $export->pcs;
-        }
-
-        if ($validated['berat'] > $currentAvailableBerat) {
-            return redirect()->back()->withInput()->with('error', "Berat yang diminta ({$validated['berat']}g) melebihi stok Clop yang tersedia ({$currentAvailableBerat}g).");
-        }
-        if ($validated['pcs'] > $currentAvailablePcs) {
-            return redirect()->back()->withInput()->with('error', "Pcs yang diminta ({$validated['pcs']}) melebihi stok Clop yang tersedia ({$currentAvailablePcs} pcs).");
-        }
-
-        $this->exportService->update($id, $validated);
-
-        return redirect()->route('export.index')->with('success', 'Data export berhasil diperbarui.');
+        $export = Export::with('exportDetails.stokBarangJadiDetail')->findOrFail($id);
+        return view('admin.export.show', compact('export'));
     }
 
     public function destroy($id)
     {
         $this->exportService->delete($id);
 
-        return redirect()->route('export.index')->with('success', 'Data export berhasil dihapus.');
+        return redirect()->route('export.index')->with('success', 'Data export berhasil dibatalkan (void). Stok gudang telah kembali secara otomatis.');
     }
 }

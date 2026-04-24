@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800 mb-4">Export Barang</h1>
+        <h1 class="text-2xl font-semibold text-gray-800 mb-4">Export Barang (Batch)</h1>
 
         <div class="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4">
             <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -12,7 +12,7 @@
                 <form action="{{ route('export.index') }}" method="GET" class="flex w-full sm:w-auto">
                     <div class="relative flex-grow sm:flex-grow-0">
                         <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Cari Barang..."
+                            placeholder="Cari Batch / Nama Barang..."
                             class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,12 +25,12 @@
                     </button>
                 </form>
 
-                <a href="{{ route('export.create') }}"
+                <a href="{{ route('export.create.step1') }}"
                     class="flex justify-center items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 whitespace-nowrap">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    Tambah Export
+                    Tambah Export Baru
                 </a>
             </div>
         </div>
@@ -50,22 +50,19 @@
                         No
                     </th>
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Tgl
+                        Tgl Transfer
                     </th>
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Nama Barang
+                        Batch
                     </th>
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Berat (gr)
+                        Item Dikeluarkan
                     </th>
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Pcs
+                        Total Berat (gr)
                     </th>
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Box
-                    </th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Harga
+                        Keterangan
                     </th>
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Aksi
@@ -82,30 +79,27 @@
                         <p class="text-gray-900 whitespace-no-wrap">{{ \Carbon\Carbon::parse($export->tanggal_transfer)->format('d/m/Y') }}</p>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">{{ $export->stokBarangJadiDetail->nama_barang ?? '-' }}</p>
+                        <p class="text-gray-900 whitespace-no-wrap font-bold">{{ $export->batch }}</p>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">{{ $export->berat }}</p>
+                        <p class="text-gray-900 whitespace-no-wrap">{{ $export->exportDetails->count() }} Jenis Item</p>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">{{ $export->pcs }}</p>
+                        <p class="text-gray-900 whitespace-no-wrap font-medium">{{ $export->exportDetails->sum('berat') }}</p>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">{{ $export->box }}</p>
-                    </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">{{ number_format($export->harga, 2) }}</p>
+                        <p class="text-gray-900 whitespace-no-wrap">{{ Str::limit($export->keterangan, 30) ?: '-' }}</p>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center font-medium">
                         <div class="flex items-center justify-center space-x-2">
-                            <a href="{{ route('export.edit', $export->id) }}" class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">
-                                Edit
+                            <a href="{{ route('export.show', $export->id) }}" class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">
+                                Detail Item
                             </a>
-                            <form action="{{ route('export.destroy', $export->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                            <form action="{{ route('export.destroy', $export->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin MEMBATALKAN/VOID batch ini?? Data export akan dihapus secara sistem dan Stok akan OTOMATIS dikembalikan ke gudang!');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
-                                    Hapus
+                                <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200" title="Void / Batalkan">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Batalkan
                                 </button>
                             </form>
                         </div>
@@ -113,8 +107,8 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
-                        Tidak ada data export.
+                    <td colspan="7" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
+                        Tidak ada data export batch.
                     </td>
                 </tr>
                 @endforelse

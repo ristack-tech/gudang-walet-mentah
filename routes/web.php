@@ -141,10 +141,10 @@ Route::middleware('auth')->group(function () {
 
         Route::prefix('export')->name('export.')->controller(ExportController::class)->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
+            Route::get('/create/step-1', 'createStep1')->name('create.step1');
+            Route::get('/create/step-2', 'createStep2')->name('create.step2');
             Route::post('/store', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
+            Route::get('/{id}', 'show')->name('show');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
