@@ -51,33 +51,46 @@ class ExportController extends Controller
             'keterangan' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.stok_id' => 'required|exists:stok_barang_jadi_details,id',
-            'items.*.box' => 'required|integer|min:0',
-            'items.*.pcs' => 'nullable|integer|min:0',
-            'items.*.berat' => 'required|numeric|min:0.01',
             'items.*.harga' => 'nullable|numeric|min:0',
         ]);
 
         // Re-validate against available stock
         $availableStocks = $this->stokBarangJadiService->getAvailableClopStocks();
         
-        foreach ($validated['items'] as $index => $item) {
-            $stokId = $item['stok_id'];
+        $processedItems = [];
+        foreach ($validated['items'] as $stokId => $item) {
             if (!isset($availableStocks[$stokId])) {
-                return redirect()->back()->withInput()->with('error', "Stok untuk barang baris ke-" . ($index + 1) . " tidak tersedia.");
+                return redirect()->back()->withInput()->with('error', "Stok untuk barang berisikan ID {$stokId} sudah tidak tersedia.");
             }
 
             $currentStock = $availableStocks[$stokId];
-            if ($item['berat'] > $currentStock['available_berat']) {
-                return redirect()->back()->withInput()->with('error', "Berat yang diminta pada {$currentStock['nama_barang']} ({$item['berat']}g) melebihi stok yang tersedia ({$currentStock['available_berat']}g).");
+            $availableBox = (int) $currentStock['available_pcs']; // for clop stocks, available_pcs represents Box count
+            $availableBerat = (float) $currentStock['available_berat'];
+
+            if ($availableBox < 1) {
+                return redirect()->back()->withInput()->with('error', "Box pada {$currentStock['nama_barang']} sudah tidak tersedia.");
             }
-            if (isset($item['pcs']) && $item['pcs'] > $currentStock['available_pcs']) {
-                return redirect()->back()->withInput()->with('error', "Pcs yang diminta pada {$currentStock['nama_barang']} ({$item['pcs']}) melebihi stok yang tersedia ({$currentStock['available_pcs']} pcs).");
-            }
+
+            // Since we are exporting exactly 1 box per selected card
+            $processedItems[] = [
+                'stok_id' => $stokId,
+                'box' => 1,
+                'pcs' => 1, // Store 1 to reduce available_pcs record correctly
+                'berat' => round($availableBerat, 2),
+                'harga' => $item['harga'] ?? 0,
+            ];
         }
 
-        $export = $this->exportService->create($validated);
+        // Use transaction via Service
+        $saveData = [
+            'tanggal_transfer' => $validated['tanggal_transfer'],
+            'keterangan' => $validated['keterangan'],
+            'items' => $processedItems
+        ];
+        
+        $this->exportService->storeExport($saveData);
 
-        return redirect()->route('export.index')->with('success', "Data export {$export->batch} berhasil ditambahkan secara batch.");
+        return redirect()->route('export.index')->with('success', 'Transaksi Export Berhasil Disimpan.');
     }
 
     public function show($id)

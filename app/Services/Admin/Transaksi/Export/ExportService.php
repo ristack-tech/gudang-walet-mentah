@@ -22,7 +22,7 @@ class ExportService
         return $query->paginate(10);
     }
 
-    public function create(array $data)
+    public function storeExport(array $data)
     {
         return DB::transaction(function () use ($data) {
             // Generate batch number EX-YYYYMMDD-His

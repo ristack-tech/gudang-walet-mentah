@@ -37,7 +37,6 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang (Sisa Stok Awal)</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Box</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Pcs</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Berat (gr)</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Harga (Rp)</th>
                     </tr>
@@ -54,9 +53,6 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                             {{ $detail->box }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                            {{ $detail->pcs }}
-                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium text-red-600">
                             -{{ $detail->berat }}g
                         </td>
@@ -66,7 +62,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                        <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                             Data rincian tidak ditemukan.
                         </td>
                     </tr>
@@ -76,7 +72,6 @@
                     <tr>
                         <td colspan="2" class="px-6 py-4 text-right text-sm text-gray-700 uppercase">Total Keseluruhan:</td>
                         <td class="px-6 py-4 text-right text-sm text-gray-900">{{ $export->exportDetails->sum('box') }}</td>
-                        <td class="px-6 py-4 text-right text-sm text-gray-900">{{ $export->exportDetails->sum('pcs') }}</td>
                         <td class="px-6 py-4 text-right text-sm text-red-600">-{{ $export->exportDetails->sum('berat') }}g</td>
                         <td class="px-6 py-4 text-right text-sm text-gray-900">{{ number_format($export->exportDetails->sum('harga'), 2, ',', '.') }}</td>
                     </tr>
