@@ -13,6 +13,7 @@ class Supplier extends Model
 
     protected $fillable = [
         'nama',
+        'keterangan',
     ];
 
     public function barangMasukSupplier()

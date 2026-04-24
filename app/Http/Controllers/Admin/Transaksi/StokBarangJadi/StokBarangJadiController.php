@@ -28,8 +28,10 @@ class StokBarangJadiController extends Controller
         if ($tab === 'global') {
             // Global items listed in the table comes from completed Stok Grading batches
             // Only show those that still have remaining stock
-            $items = \App\Models\StokGrading::with('details')
-                ->where('total_gram_keseluruhan', '>', 0)
+            $items = \App\Models\StokGrading::with(['details', 'namaBarang'])
+                ->whereHas('details', function ($query) {
+                    $query->where('berat', '>', 0);
+                })
                 ->orderBy('tanggal', 'desc')
                 ->paginate(10);
         } else {
@@ -42,18 +44,25 @@ class StokBarangJadiController extends Controller
 
     public function transfer(Request $request)
     {
+        $tipeBox = $request->input('tipe_box');
         $request->validate([
             'global_id' => 'required|exists:stok_grading_details,id',
-            'jumlah' => 'required|integer|min:1',
-            'berat' => 'required|numeric|min:0.1',
+            'tipe_box' => 'required|integer|in:500,475',
+            'berat' => 'required|numeric|min:' . ($tipeBox == 475 ? 475 : 500),
+        ], [
+            'berat.min' => 'Berat minimal untuk transfer jenis kemasan (Box ' . $tipeBox . 'gr) adalah ' . $tipeBox . ' gram.'
         ]);
 
         $stokGradingDetailId = $request->input('global_id');
-        $jumlah = $request->input('jumlah');
+        $tipeBox = $request->input('tipe_box');
         $berat = $request->input('berat');
         
         try {
-            $this->stokBarangJadiService->transferToClop($stokGradingDetailId, $jumlah, $berat);
+            $stok = $this->stokBarangJadiService->transferToClop(
+                $request->global_id,
+                $request->tipe_box,
+                $request->berat
+            );
             return redirect()->route('stok-barang-jadi.index', ['tab' => 'clop'])->with('success', 'Transfer ke IDM berhasil diproses.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());

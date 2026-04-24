@@ -47,13 +47,13 @@ class StokGradingController extends Controller
 
     public function createStep2(Request $request)
     {
-        // Require stok_id, pcs_awal, and sumber_stok from step 1
-        if (!$request->has('stok_id') || !$request->has('pcs_awal') || !$request->has('sumber_stok')) {
-            return redirect()->route('stok-grading.create.step1')->with('error', 'Silahkan pilih stok, cantumkan jumlah Pcs, dan sumber stok terlebih dahulu.');
+        // Require stok_id, box_awal, and sumber_stok from step 1
+        if (!$request->has('stok_id') || (!$request->has('box_awal')) || !$request->has('sumber_stok')) {
+            return redirect()->route('stok-grading.create.step1')->with('error', 'Silahkan pilih stok, cantumkan jumlah Box, dan sumber stok terlebih dahulu.');
         }
 
         $stokId = $request->query('stok_id');
-        $pcsAwal = $request->query('pcs_awal');
+        $boxAwal = $request->query('box_awal');
         $sumberStok = $request->query('sumber_stok');
         
         $namaBarangModel = \App\Models\NamaBarang::find($stokId);
@@ -73,12 +73,10 @@ class StokGradingController extends Controller
             'MK HC' => ['JUMBO', 'SUPER', 'SUPER G']
         ];
 
-        $stokSummary = $this->stokGudangService->getGlobalSummaryForBarang($stokId);
-        // Note: For display purposes on the overall stock limit, we still use the global summary or adapt to specific source summary
-        // Due to complexity of partial edits, keeping global validation is safer, but strictly we deduct per source later
-        $gramAwal = $stokSummary ? $stokSummary->total_gram : 0;
+        // box_awal parameter now represents true Gram amount inputted in Step 1 for both sources
+        $gramAwal = $boxAwal;
 
-        return view('admin.stok-grading.create-step-2', compact('stokId', 'namaBarang', 'pcsAwal', 'sumberStok', 'gramAwal', 'gradesLempengBersih', 'gradesLempengKotor', 'gradesMangkok'));
+        return view('admin.stok-grading.create-step-2', compact('stokId', 'namaBarang', 'boxAwal', 'sumberStok', 'gramAwal', 'gradesLempengBersih', 'gradesLempengKotor', 'gradesMangkok'));
     }
 
     public function store(Request $request)
@@ -86,7 +84,7 @@ class StokGradingController extends Controller
         $validatedData = $request->validate([
             'stok_id' => 'required|string',
             'sumber_stok' => 'required|string|in:demak,jasa_cuci',
-            'pcs_awal' => 'required|integer|min:1',
+            'box_awal' => 'required|numeric|min:0',
             'grades' => 'required|array',
             'grades.*.name' => 'required|string',
             'grades.*.type' => 'required|string',
@@ -124,7 +122,7 @@ class StokGradingController extends Controller
             'barang_id' => $stokId, // Stores the NamaBarang ID
             'sumber_stok' => $request->input('sumber_stok'),
             'partai' => $partai,
-            'pcs_awal' => $request->input('pcs_awal'),
+            'box_awal' => 0, // Sengaja di-0 kan untuk semua sumber karena sistem pindah sepenuhnya ke Gram
             'grades' => $request->input('grades'),
         ];
 
@@ -180,7 +178,7 @@ class StokGradingController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'pcs_awal' => 'required|integer|min:1',
+            'box_awal' => 'required|integer|min:1',
             'grades' => 'required|array',
             'grades.*.name' => 'required|string',
             'grades.*.type' => 'required|string',
@@ -211,7 +209,7 @@ class StokGradingController extends Controller
         }
 
         $data = [
-            'pcs_awal' => $request->input('pcs_awal'),
+            'box_awal' => $request->input('box_awal'),
             'grades' => $request->input('grades'),
         ];
 
@@ -222,8 +220,9 @@ class StokGradingController extends Controller
 
     public function destroy($id)
     {
+        // Penghapusan kini diserahkan sepenuhnya ke Service untuk Smart Delete / Partial Rollback
         $this->stokGradingService->deleteGrading($id);
 
-        return redirect()->route('stok-grading.index')->with('success', 'Data grading berhasil dihapus.');
+        return redirect()->route('stok-grading.index')->with('success', 'Sisa Stok Grading berhasil dikerjakan (dihapus/dikembalikan) dan bahan mentahnya sukses membal mundur ke Gudang Awal.');
     }
 }

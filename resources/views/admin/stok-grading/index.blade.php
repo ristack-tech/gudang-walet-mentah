@@ -66,7 +66,6 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <div class="flex items-center justify-center space-x-2">
                                             <a href="{{ route('stok-grading.show', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">Detail Grading</a>
-                                            <a href="{{ route('stok-grading.edit', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">Edit Grading</a>
                                             <form action="{{ route('stok-grading.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data grading ini?');">
                                                 @csrf
                                                 @method('DELETE')

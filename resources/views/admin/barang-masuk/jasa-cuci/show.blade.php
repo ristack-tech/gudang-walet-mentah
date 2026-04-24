@@ -11,8 +11,8 @@
                 <div>
                     <h1 class="text-2xl font-semibold text-gray-900">Detail Batch Jasa Cuci</h1>
                     <p class="text-sm text-gray-600 mt-1">
-                        Batch ID: <span
-                            class="font-medium text-blue-600">{{ str_pad($barangMasukBatch->id, 5, '0', STR_PAD_LEFT) }}</span>
+                        Terhubung Referensi Batch Keluar: <span
+                            class="font-medium text-blue-600">{{ \Carbon\Carbon::parse($barangMasukBatch->barangKeluar->tanggal_kirim ?? $barangMasukBatch->tanggal_terima)->format('Ymd') . '-' . strtoupper(substr(md5($barangMasukBatch->barang_keluar_id ?? $barangMasukBatch->id), 0, 3)) }}</span>
                     </p>
                 </div>
                 <div class="flex gap-2">
@@ -69,14 +69,6 @@
                             {{ $barangMasukBatch->barangMasukJasaCuci->count() }} item
                         </span>
                     </div>
-                    <a href="{{ route('barang-masuk.jasa-cuci.edit', $barangMasukBatch->id) }}"
-                        class="inline-flex items-center px-3 py-1.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-md hover:bg-yellow-100 transition-colors text-sm font-medium">
-                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Edit Batch
-                    </a>
                 </div>
 
                 <div class="p-6">
@@ -86,8 +78,8 @@
                                 <tr>
                                     <th class="px-4 py-3 w-12 text-center">No</th>
                                     <th class="px-4 py-3">Barang & Kode Bahan</th>
-                                    <th class="px-4 py-3 text-right">Berat/Pcs</th>
-                                    <th class="px-4 py-3 text-right">Susut</th>
+                                    <th class="px-4 py-3 text-right">Berat Diterima</th>
+                                    <th class="px-4 py-3 text-right">Susut (gr)</th>
                                     <th class="px-4 py-3 text-right">Kadar Air</th>
                                 </tr>
                             </thead>
@@ -116,9 +108,9 @@
                                             {{ number_format($item->berat_per_pcs, 2, ',', '.') }} <span
                                                 class="text-[10px] text-gray-400">gr</span>
                                         </td>
-                                        <td class="px-4 py-3 text-right font-mono text-gray-700">
-                                            {{ number_format($item->persentase_susut, 2, ',', '.') }} <span
-                                                class="text-[10px] text-gray-400">%</span>
+                                        <td class="px-4 py-3 text-right font-mono text-red-600">
+                                            {{ number_format($item->susut_per_item, 2, ',', '.') }} <span
+                                                class="text-[10px] text-gray-400">gr</span>
                                         </td>
                                         <td class="px-4 py-3 text-right font-mono text-gray-700">
                                             {{ number_format($item->kadar_air, 2, ',', '.') }} <span

@@ -18,7 +18,7 @@ class StokGudangService
             ->select(
                 'barang_id',
                 DB::raw('SUM(total_gram_keseluruhan) as used_gram'),
-                DB::raw('SUM(pcs_awal) as used_pcs')
+                DB::raw('SUM(box_awal) as used_box')
             )
             ->where('sumber_stok', 'demak')
             ->whereNull('deleted_at')
@@ -33,8 +33,8 @@ class StokGudangService
                 'nama_barang.id',
                 'nama_barang.nama_barang',
                 DB::raw('SUM(barang_masuk_demak.gram) - COALESCE(MAX(graded.used_gram), 0) as total_gram'),
-                DB::raw('SUM(barang_masuk_demak.pcs) - COALESCE(MAX(graded.used_pcs), 0) as total_pcs'),
-                DB::raw('SUM(barang_masuk_demak.box) as total_box') // Assuming box isn't deducted per source directly or keep consistent
+                DB::raw('SUM(barang_masuk_demak.pcs) as total_pcs'),
+                DB::raw('SUM(barang_masuk_demak.box) - COALESCE(MAX(graded.used_box), 0) as total_box')
             )
             ->groupBy('nama_barang.id', 'nama_barang.nama_barang')
             ->having(DB::raw('SUM(barang_masuk_demak.gram) - COALESCE(MAX(graded.used_gram), 0)'), '>', 0);
@@ -58,7 +58,7 @@ class StokGudangService
             ->select(
                 'barang_id',
                 DB::raw('SUM(total_gram_keseluruhan) as used_gram'),
-                DB::raw('SUM(pcs_awal) as used_pcs')
+                DB::raw('SUM(box_awal) as used_box')
             )
             ->where('sumber_stok', 'jasa_cuci')
             ->whereNull('deleted_at')
@@ -73,8 +73,8 @@ class StokGudangService
                 'nama_barang.id',
                 'nama_barang.nama_barang',
                 DB::raw('SUM(barang_masuk_jasa_cuci.berat_per_pcs) - COALESCE(MAX(graded.used_gram), 0) as total_gram'),
-                DB::raw('COUNT(barang_masuk_jasa_cuci.id) - COALESCE(MAX(graded.used_pcs), 0) as total_pcs'),
-                DB::raw('0 as total_box')
+                DB::raw('COUNT(barang_masuk_jasa_cuci.id) as total_pcs'),
+                DB::raw('0 - COALESCE(MAX(graded.used_box), 0) as total_box')
             )
             ->groupBy('nama_barang.id', 'nama_barang.nama_barang')
             ->having(DB::raw('SUM(barang_masuk_jasa_cuci.berat_per_pcs) - COALESCE(MAX(graded.used_gram), 0)'), '>', 0);
@@ -164,8 +164,7 @@ class StokGudangService
             ->select(
                 'barang_id',
                 DB::raw('SUM(total_gram_keseluruhan) as used_gram'),
-                DB::raw('SUM(pcs_awal) as used_pcs'),
-                DB::raw('SUM(total_box_keseluruhan) as used_box')
+                DB::raw('SUM(box_awal) as used_box')
             )
             ->whereNull('deleted_at')
             ->groupBy('barang_id');
@@ -180,7 +179,7 @@ class StokGudangService
                 'combined.barang_id as id',
                 'nama_barang.nama_barang',
                 DB::raw('SUM(combined.total_gram) - COALESCE(MAX(graded.used_gram), 0) as total_gram'),
-                DB::raw('SUM(combined.total_pcs) - COALESCE(MAX(graded.used_pcs), 0) as total_pcs'),
+                DB::raw('SUM(combined.total_pcs) as total_pcs'),
                 DB::raw('SUM(combined.total_box) - COALESCE(MAX(graded.used_box), 0) as total_box')
             )
             ->groupBy('combined.barang_id', 'nama_barang.nama_barang')
@@ -223,15 +222,13 @@ class StokGudangService
         $graded = DB::table('stok_gradings')
             ->select(
                 DB::raw('SUM(total_gram_keseluruhan) as used_gram'),
-                DB::raw('SUM(pcs_awal) as used_pcs'),
-                DB::raw('SUM(total_box_keseluruhan) as used_box')
+                DB::raw('SUM(box_awal) as used_box')
             )
             ->where('barang_id', $barangId)
             ->whereNull('deleted_at')
             ->first();
             
         $usedGram = $graded->used_gram ?? 0;
-        $usedPcs = $graded->used_pcs ?? 0;
         $usedBox = $graded->used_box ?? 0;
 
         $result = DB::query()
@@ -245,7 +242,6 @@ class StokGudangService
             
         if ($result) {
             $result->total_gram -= $usedGram;
-            $result->total_pcs -= $usedPcs;
             $result->total_box -= $usedBox;
             
             $result->total_gram = max(0, $result->total_gram);

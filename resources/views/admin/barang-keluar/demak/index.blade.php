@@ -92,14 +92,18 @@
                                                 class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">
                                                 Detail Batch
                                             </a>
-                                            <a href="{{ route('barang-keluar.demak.edit', $item->id) }}"
-                                                class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition duration-200">
-                                                Edit Batch
-                                            </a>
-                                            <button onclick="confirmDelete({!! $item->id !!}, 'BKD-{{ \Carbon\Carbon::parse($item->tanggal_kirim)->format('Ymd') . '-' . strtoupper(substr(md5($item->id), 0, 3)) }}')"
-                                                class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
-                                                Hapus Batch
-                                            </button>
+
+                                            @php $hasReturned = $item->barangKeluarDemak->where('status_kembali', true)->isNotEmpty(); @endphp
+                                            @if($hasReturned)
+                                                <span class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed" title="Tidak dapat dihapus karena sebagian atau seluruh item telah diproses di Barang Masuk">
+                                                    Hapus Batch
+                                                </span>
+                                            @else
+                                                <button onclick="confirmDelete({!! $item->id !!}, 'BKD-{{ \Carbon\Carbon::parse($item->tanggal_kirim)->format('Ymd') . '-' . strtoupper(substr(md5($item->id), 0, 3)) }}')"
+                                                    class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
+                                                    Hapus Batch
+                                                </button>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

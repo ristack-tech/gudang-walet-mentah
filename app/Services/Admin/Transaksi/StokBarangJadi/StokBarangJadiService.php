@@ -52,29 +52,28 @@ class StokBarangJadiService
     /**
      * Transfer stock from global to clop. 
      */
-    public function transferToClop($stokGradingDetailId, $jumlah, $berat)
+    public function transferToClop($stokGradingDetailId, $tipeBox, $berat)
     {
-        return DB::transaction(function () use ($stokGradingDetailId, $jumlah, $berat) {
+        return DB::transaction(function () use ($stokGradingDetailId, $tipeBox, $berat) {
             
             // Find the specific graded detail
             $stokGradingDetail = \App\Models\StokGradingDetail::with('stokGrading')->findOrFail($stokGradingDetailId);
             
-            if ($stokGradingDetail->berat < $berat || $stokGradingDetail->box < $jumlah) {
-                throw new \Exception("Stok tidak mencukupi. Tersedia: {$stokGradingDetail->berat}g, {$stokGradingDetail->box} pcs.");
+            if ($stokGradingDetail->berat < $berat) {
+                throw new \Exception("Stok tidak mencukupi. Tersedia: {$stokGradingDetail->berat}g.");
             }
 
             // Deduct from the detail record
             $stokGradingDetail->update([
                 'berat' => $stokGradingDetail->berat - $berat,
-                'box' => $stokGradingDetail->box - $jumlah,
             ]);
 
-            // Deduct from the overall global parent record
             $stokGrading = $stokGradingDetail->stokGrading;
-            $stokGrading->update([
-                'total_gram_keseluruhan' => max(0, $stokGrading->total_gram_keseluruhan - $berat),
-                'total_box_keseluruhan' => max(0, $stokGrading->total_box_keseluruhan - $jumlah),
-            ]);
+            
+            // HAPUS PENGURANGAN total_gram_keseluruhan! 
+            // Jika total_gram_keseluruhan dikurangi di sini saat transfer (padahal barangnya sukses masuk Clop), 
+            // maka Sistem akan otomatis membal-kan saldo bahan Mentah ke Demak, sehingga stok Clop menjadi fiktif.
+            // Biarkan total_gram_keseluruhan utuh mencatat histori keberhasilan Grading.
 
             // Add new "clop" record 
             $clopStok = StokBarangJadi::create([
@@ -90,11 +89,18 @@ class StokBarangJadiService
             
             $fullNamaBarang = "{$itemName} - {$gradeType} ({$gradeName})";
             
+            // Calculate jumlah box based on Kapasitas Tipe Box
+            $jumlahBox = 0;
+            if ($tipeBox > 1) { // 1 was marked as 'Lainnya/Non-Kapasitas' in view
+                // We use floor to get the full boxes. 
+                $jumlahBox = floor($berat / $tipeBox);
+            }
+            
             StokBarangJadiDetail::create([
                 'stok_barang_jadi_id' => $clopStok->id,
                 'barang_id' => $stokGrading->barang_id,
                 'nama_barang' => $fullNamaBarang,
-                'jumlah_pcs' => $jumlah,
+                'jumlah_pcs' => $jumlahBox, // Now acts as full Box count
                 'berat' => $berat,
             ]);
 
@@ -119,15 +125,62 @@ class StokBarangJadiService
             // If we are modifying details heavily (or just updating their weight/pcs)
             // The request validations ensures we receive 'details' array with IDs
             if (!empty($data['details'])) {
+                $isTransferFromGlobal = ($stok->type === 'clop' && str_starts_with($stok->keterangan, 'Transfer dari Global Stok Grading'));
+                $stokGrading = null;
+                $stokGradingDetail = null;
+
+                if ($isTransferFromGlobal) {
+                    if (preg_match('/No Kartu: (.*) \/ (.*)$/', $stok->keterangan, $matches)) {
+                        $noKartu = trim($matches[1]);
+                        $grade = trim($matches[2]);
+                        
+                        $stokGrading = \App\Models\StokGrading::where('no_kartu', $noKartu)->first();
+                        if ($stokGrading) {
+                            $stokGradingDetail = \App\Models\StokGradingDetail::where('stok_grading_id', $stokGrading->id)
+                                ->where('grade', $grade)
+                                ->first();
+                        }
+                    }
+                }
+
                 foreach ($data['details'] as $detailData) {
                     $detailRow = StokBarangJadiDetail::where('stok_barang_jadi_id', $stok->id)
                                 ->where('id', $detailData['id'])
                                 ->first();
 
                     if ($detailRow) {
+                        $newBerat = (float) $detailData['berat'];
+                        
+                        if ($isTransferFromGlobal && $stokGradingDetail) {
+                            $deltaBerat = $newBerat - $detailRow->berat;
+                            
+                            if ($deltaBerat > 0) {
+                                // We are increasing CLOP. Need to deduct from parent.
+                                if ($stokGradingDetail->berat < $deltaBerat) {
+                                    throw new \Exception("Stok Global tidak mencukupi untuk penambahan. Hanya tersedia: {$stokGradingDetail->berat}g di Global.");
+                                }
+                                
+                                $stokGradingDetail->update([
+                                    'berat' => $stokGradingDetail->berat - $deltaBerat,
+                                ]);
+                                
+                                // HAPUS pemotongan total_gram_keseluruhan agar stok mentah tidak refund ke Demak
+                            } elseif ($deltaBerat < 0) {
+                                // We are returning to CLOP. Add abs difference to parent.
+                                $returnGram = abs($deltaBerat);
+                                
+                                $stokGradingDetail->update([
+                                    'berat' => $stokGradingDetail->berat + $returnGram,
+                                ]);
+                                
+                                // HAPUS penambahan total_gram_keseluruhan agar stok mentah tidak tercatat ulang
+                            }
+                        }
+
                         $detailRow->update([
-                            'jumlah_pcs' => $detailData['jumlah_pcs'],
-                            'berat' => $detailData['berat'],
+                            // If PCS wasn't submitted (e.g. we removed it), preserve old value
+                            'jumlah_pcs' => $detailData['jumlah_pcs'] ?? $detailRow->jumlah_pcs,
+                            'berat' => $newBerat,
                         ]);
                     }
                 }
@@ -162,19 +215,13 @@ class StokBarangJadiService
                             
                         if ($detail) {
                             $totalBeratTransfer = $stok->details->sum('berat');
-                            $totalBoxTransfer = $stok->details->sum('jumlah_pcs');
                             
                             // Restore StokGradingDetail
                             $detail->update([
                                 'berat' => $detail->berat + $totalBeratTransfer,
-                                'box' => $detail->box + $totalBoxTransfer,
                             ]);
-                            
-                            // Restore parent StokGrading overall amount
-                            $stokGrading->update([
-                                'total_gram_keseluruhan' => $stokGrading->total_gram_keseluruhan + $totalBeratTransfer,
-                                'total_box_keseluruhan' => $stokGrading->total_box_keseluruhan + $totalBoxTransfer,
-                            ]);
+                            // HAPUS penambahan total_gram_keseluruhan agar selaras dengan fix phantom stock
+                            // Total_gram_keseluruhan Induk harus dibiarkan stabil murni sesuai hasil grading.
                         }
                     }
                 }

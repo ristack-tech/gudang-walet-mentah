@@ -23,9 +23,11 @@ class BarangKeluarJasaCuciService
             ]);
 
             foreach ($items as $item) {
+                $kodeBahan = KodeBahan::firstOrCreate(['nama' => $item['kode_bahan']]);
+
                 BarangKeluarJasaCuci::create([
                     'barang_keluar_id' => $barangKeluar->id,
-                    'kode_bahan_id' => $item['kode_bahan_id'],
+                    'kode_bahan_id' => $kodeBahan->id,
                     'keterangan_cetak' => $item['keterangan_cetak'] ?? null,
                     'berat_per_pcs' => $item['berat_per_pcs'],
                     'kadar_air' => $item['kadar_air'] ?? null,
@@ -51,9 +53,11 @@ class BarangKeluarJasaCuciService
 
             // Insert new ones
             foreach ($data['items'] as $item) {
+                $kodeBahan = KodeBahan::firstOrCreate(['nama' => $item['kode_bahan']]);
+
                 BarangKeluarJasaCuci::create([
                     'barang_keluar_id' => $barangKeluar->id,
-                    'kode_bahan_id' => $item['kode_bahan_id'],
+                    'kode_bahan_id' => $kodeBahan->id,
                     'keterangan_cetak' => $item['keterangan_cetak'] ?? null,
                     'berat_per_pcs' => $item['berat_per_pcs'],
                     'kadar_air' => $item['kadar_air'] ?? null,

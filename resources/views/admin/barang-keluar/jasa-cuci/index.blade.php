@@ -95,14 +95,18 @@
                                                 class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 rounded-md border border-green-200 hover:bg-green-100 transition duration-200 font-medium">
                                                 Detail Batch
                                             </a>
-                                            <a href="{{ route('barang-keluar.jasa-cuci.edit', $item->id) }}"
-                                                class="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200 hover:bg-blue-100 transition duration-200 font-medium">
-                                                Edit Batch
-                                            </a>
-                                            <button onclick="confirmDelete({{ $item->id }}, '{{ $batchStr }}')"
-                                                class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 rounded-md border border-red-200 hover:bg-red-100 transition duration-200 font-medium">
-                                                Hapus Batch
-                                            </button>
+
+                                            @php $hasReturned = $item->barangKeluarJasaCuci->where('status_kembali', true)->isNotEmpty(); @endphp
+                                            @if($hasReturned)
+                                                <span class="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-400 rounded-md border border-gray-200 cursor-not-allowed font-medium" title="Tidak dapat dihapus karena sebagian atau seluruh item telah diproses di Barang Masuk">
+                                                    Hapus Batch
+                                                </span>
+                                            @else
+                                                <button onclick="confirmDelete({{ $item->id }}, '{{ $batchStr }}')"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 rounded-md border border-red-200 hover:bg-red-100 transition duration-200 font-medium">
+                                                    Hapus Batch
+                                                </button>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

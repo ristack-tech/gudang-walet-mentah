@@ -13,6 +13,7 @@ class BarangMasukDemak extends Model
 
     protected $fillable = [
         'barang_masuk_id',
+        'barang_keluar_demak_id',
         'barang_id',
         'partai',
         'gram',
@@ -21,7 +22,13 @@ class BarangMasukDemak extends Model
         'transaksi_dari_id',
         'transaksi_ke_id',
         'keterangan',
+        'susut_per_item',
     ];
+
+    public function barangKeluarDemak()
+    {
+        return $this->belongsTo(BarangKeluarDemak::class, 'barang_keluar_demak_id');
+    }
 
     public function barangMasuk()
     {

@@ -3,264 +3,217 @@
 @section('title', 'Tambah Data Demak - Step 2')
 
 @section('content')
-<div class="bg-white min-h-screen">
-    <div class="w-full px-4 sm:px-6 lg:px-8 py-8">
+<div class="bg-gray-50 min-h-screen">
+    <div class="w-full px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto">
 
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h1 class="text-2xl font-semibold text-gray-900">Tambah Data Demak - Step 2</h1>
-                <p class="mt-1 text-sm text-gray-600">Lengkapi detail barang yang akan masuk ke dalam batch ini.</p>
+        <!-- Header Start -->
+        <div class="flex flex-col md:flex-row items-center justify-between mb-8">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Form Retur Barang Demak</h1>
+                <p class="mt-2 text-sm text-gray-500">Centang barang yang kembali dan masukkan data aktual yang diterima dari proses Demak.</p>
             </div>
-            <a href="{{ route('barang-masuk.demak.create.step1') }}"
-                class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium">
+            <a href="{{ route('barang-masuk.demak.create.step1') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 ease-in-out focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                 Kembali
             </a>
         </div>
+        <!-- Header End -->
 
-        <!-- Progress Steps -->
-        <div class="mb-8 bg-white rounded-lg shadow-sm border p-6">
-            <div class="flex items-center justify-between max-w-xl mx-auto">
-                <div class="flex flex-col items-center flex-1">
-                    <div
-                        class="w-10 h-10 flex items-center justify-center rounded-full bg-green-100 text-green-600 font-semibold text-sm">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <span class="mt-2 text-xs sm:text-sm font-medium text-green-600">Data Awal</span>
-                </div>
-                <div class="flex-1 h-0.5 bg-blue-200 mx-2 sm:mx-4 -mt-6"></div>
-                <div class="flex flex-col items-center flex-1">
-                    <div
-                        class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 text-white font-semibold text-sm shadow-sm">
-                        2</div>
-                    <span class="mt-2 text-xs sm:text-sm font-medium text-blue-600">Detail Barang</span>
-                </div>
-            </div>
-        </div>
-
-        @if(session('error'))
-            <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-                <div class="text-red-700 text-sm">{{ session('error') }}</div>
-            </div>
-        @endif
-        @if(session('success'))
-            <div id="alert-success" class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-md">
-                <div class="text-green-700 text-sm">{{ session('success') }}</div>
-            </div>
-        @endif
-
-        <!-- Item Info (Step 1 Summary) -->
-        <div class="bg-gray-50 shadow-sm border rounded-lg p-6 mb-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Transaksi</h3>
-            <dl class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Tanggal Terima</dt>
-                    <dd class="mt-1 text-sm text-gray-900 font-medium">
-                        {{ \Carbon\Carbon::parse($step1Data['tanggal_terima'])->format('d/m/Y') }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Transaksi Dari</dt>
-                    <dd class="mt-1 text-sm text-gray-900 font-medium text-blue-600">
-                        {{ $transaksiDari->nama_lokasi ?? '-' }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Transaksi Ke</dt>
-                    <dd class="mt-1 text-sm text-gray-900 font-medium text-blue-600">
-                        {{ $transaksiKe->nama_lokasi ?? '-' }}
-                    </dd>
-                </div>
-            </dl>
-        </div>
-
-        <!-- Add Item Form and Cart -->
-        <div class="bg-white shadow-sm border rounded-lg p-6">
+        <!-- Highlight Card / Informasi Batch -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg rounded-2xl p-6 mb-8 text-white relative overflow-hidden">
+            <!-- Decorative background shape -->
+            <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10"></div>
             
-            <!-- ADD ITEM SECTION -->
-            <div class="mb-8 border border-gray-200 rounded-lg p-5">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">Tambah Detail Barang</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                <div>
+                    <h3 class="text-blue-100 text-sm font-medium uppercase tracking-wider mb-1">Tanggal Terima Aktual</h3>
+                    <p class="text-2xl font-bold">{{ \Carbon\Carbon::parse($step1Data['tanggal_terima'])->format('d F Y') }}</p>
                 </div>
-                
-                <form action="{{ route('barang-masuk.demak.add.step2.item') }}" method="POST">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Partai -->
-                        <div class="md:col-span-3">
-                            <label for="partai" class="block text-sm font-medium text-gray-700 mb-1">Partai Khusus <span class="text-red-500">*</span></label>
-                            <textarea id="partai" name="partai" rows="2"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm @error('partai') border-red-500 @enderror" 
-                                placeholder="Masukkan detail partai (bisa sangat panjang)..." required>{{ old('partai') }}</textarea>
-                            @error('partai')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Barang -->
-                        <div class="md:col-span-1">
-                            <label for="barang_id" class="block text-sm font-medium text-gray-700 mb-1">Nama Barang <span class="text-red-500">*</span></label>
-                            <select id="barang_id" name="barang_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white @error('barang_id') border-red-500 @enderror" required>
-                                <option value="">-- Pilih Barang --</option>
-                                @foreach($barang as $b)
-                                    <option value="{{ $b->id }}" {{ old('barang_id') == $b->id ? 'selected' : '' }}>
-                                        {{ $b->nama_barang }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('barang_id')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        
-                        <!-- Gram -->
-                        <div class="md:col-span-1">
-                            <label for="gram" class="block text-sm font-medium text-gray-700 mb-1">Gram <span class="text-red-500">*</span></label>
-                            <input type="number" step="0.01" id="gram" name="gram" value="{{ old('gram') }}"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm @error('gram') border-red-500 @enderror" 
-                                required>
-                            @error('gram')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Pcs -->
-                        <div class="md:col-span-1">
-                            <label for="pcs" class="block text-sm font-medium text-gray-700 mb-1">Pcs <span class="text-red-500">*</span></label>
-                            <input type="number" id="pcs" name="pcs" value="{{ old('pcs') }}"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm @error('pcs') border-red-500 @enderror" 
-                                required>
-                            @error('pcs')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Box -->
-                        <div class="md:col-span-1">
-                            <label for="box" class="block text-sm font-medium text-gray-700 mb-1">Box <span class="text-red-500">*</span></label>
-                            <input type="number" id="box" name="box" value="{{ old('box', 1) }}"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm @error('box') border-red-500 @enderror" 
-                                required>
-                        </div>
-                        
-                        <!-- Keterangan -->
-                        <div class="md:col-span-2">
-                            <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan (Opsional)</label>
-                            <input type="text" id="keterangan" name="keterangan" value="{{ old('keterangan') }}"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Catatan operasional jika ada">
-                        </div>
-                    </div>
-
-                    <div class="mt-4 flex justify-end">
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 shadow-sm">
-                            + Tambahkan ke Daftar
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- CART TABLE -->
-            <div id="gradesContainer" class="mb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-3">Daftar Barang (Dalam Batch)</h3>
-                
-                @if(count($items) > 0)
-                    <div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]">Partai</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Barang</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty (Gr/Pcs/Bx)</th>
-                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($items as $index => $item)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 align-top">{{ $index + 1 }}</td>
-                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 align-top break-words whitespace-normal">
-                                            <div class="line-clamp-3 hover:line-clamp-none cursor-pointer" title="{{ $item['partai'] }}">{{ $item['partai'] }}</div>
-                                        </td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 align-top">{{ $item['nama_barang'] ?? '-' }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right align-top">
-                                            <span class="font-bold text-gray-800">{{ number_format($item['gram'], 2, ',', '.') }}</span> gram / 
-                                            {{ number_format($item['pcs'], 0, ',', '.') }} pcs / 
-                                            {{ number_format($item['box'], 0, ',', '.') }} bx
-                                        </td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-center text-sm align-top">
-                                            <form action="{{ route('barang-masuk.demak.remove.step2.item', $index) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">Hapus</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="text-center py-8 border border-gray-200 border-dashed rounded-lg bg-gray-50">
-                        <p class="text-sm text-gray-500">Belum ada barang di dalam daftar. Silakan tambahkan barang melalui form di atas.</p>
-                    </div>
-                @endif
-            </div>
-
-            <!-- Total Quantities Display -->
-            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-medium text-gray-700">Total Berat Keseluruhan:</span>
-                    <span class="text-lg font-bold text-blue-600">{{ number_format(array_sum(array_column($items, 'gram')), 2, ',', '.') }} gram</span>
-                </div>
-                <div class="mt-2 text-xs text-gray-500">
-                    Total Qty: <span class="font-medium text-gray-700">{{ number_format(array_sum(array_column($items, 'pcs')), 0, ',', '.') }} pcs</span>
-                    | Total Kemasan: <span class="font-medium text-gray-700">{{ number_format(array_sum(array_column($items, 'box')), 0, ',', '.') }} box</span>
+                <div>
+                    <h3 class="text-blue-100 text-sm font-medium uppercase tracking-wider mb-1">Referensi Batch Keluar</h3>
+                    <p class="text-2xl font-bold flex items-center">
+                        <svg class="w-6 h-6 mr-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        {{ \Carbon\Carbon::parse($barangKeluar->tanggal_kirim)->format('Ymd') . '-' . strtoupper(substr(md5($barangKeluar->id), 0, 3)) }}
+                    </p>
                 </div>
             </div>
+        </div>
 
-            <!-- Submit Button Form -->
-            <div class="mt-6 pt-6 border-t border-gray-200">
-                <div class="flex justify-between items-center">
-                    <div class="text-sm text-gray-600">
-                        <span class="font-medium" id="gradeCountDisplay">{{ count($items) }}</span> item barang dalam antrian batch
-                    </div>
-                    
-                    <form action="{{ route('barang-masuk.demak.store.step2') }}" method="POST">
-                        @csrf
-                        <button type="submit" 
-                            class="inline-flex items-center px-6 py-2.5 bg-blue-500 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm transition-colors duration-150 disabled:bg-gray-400 disabled:cursor-not-allowed" 
-                            {{ empty($items) ? 'disabled' : '' }}>
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Simpan Hasil Batch
-                        </button>
-                    </form>
-                </div>
+        <!-- Form Items -->
+        <div class="bg-white shadow-xl shadow-gray-200/50 border border-gray-100 rounded-2xl">
+            <div class="px-6 py-5 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900">Daftar Barang Belum Kembali</h3>
+                <p class="text-sm text-gray-500 mt-1">Hanya barang yang dicentang yang akan diproses masuk ke dalam gudang.</p>
             </div>
 
+            <form id="receiveForm" action="{{ route('barang-masuk.demak.store.step2') }}" method="POST">
+                @csrf
+                <div class="overflow-x-auto p-4">
+                    <table class="min-w-full border-separate border-spacing-0" style="border-spacing: 0 8px;">
+                        <thead>
+                            <tr class="text-xs font-semibold tracking-wide text-gray-500 uppercase border-b border-gray-200 bg-gray-50/50">
+                                <th scope="col" class="py-3 px-4 text-center rounded-l-lg border-y border-l border-gray-200">#</th>
+                                <th scope="col" class="py-3 px-4 text-left border-y border-gray-200">Data Keluar (Ref)</th>
+                                <th scope="col" class="py-3 px-4 text-left text-blue-600 border-y border-gray-200 bg-blue-50/30">Nama Barang Baru <span class="text-red-500">*</span></th>
+                                <th scope="col" class="py-3 px-4 text-left text-blue-600 border-y border-gray-200 bg-blue-50/30">Partai Baru <span class="text-red-500">*</span></th>
+                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-gray-200 bg-blue-50/30">Pcs <span class="text-red-500">*</span></th>
+                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-gray-200 bg-blue-50/30">Box <span class="text-red-500">*</span></th>
+                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-r border-gray-200 rounded-r-lg bg-blue-50/30">Gram Aktual Diterima <span class="text-red-500">*</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($pendingItems as $idx => $item)
+                            <tr class="bg-white hover:bg-blue-50/20 transition duration-150 ease-in-out group">
+                                
+                                <!-- Checkbox Column -->
+                                <td class="px-4 py-4 whitespace-nowrap border-y border-l border-gray-100 group-hover:border-blue-100 rounded-l-xl text-center relative">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-blue-500 rounded-l-full transition-colors"></div>
+                                    <div class="flex items-center justify-center">
+                                        <input type="checkbox" name="items[{{ $idx }}][is_checked]" value="1" class="h-5 w-5 rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition duration-150 ease-in-out hover:scale-110">
+                                        <input type="hidden" name="items[{{ $idx }}][barang_keluar_demak_id]" value="{{ $item->id }}">
+                                    </div>
+                                </td>
+                                
+                                <!-- Keluar Data Reference Column -->
+                                <td class="px-4 py-4 whitespace-nowrap border-y border-gray-100 group-hover:border-blue-100">
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-semibold text-gray-900">{{ $item->partai->nama_partai ?? '-' }}</span>
+                                        <div class="text-xs text-gray-500 flex items-center mt-1 space-x-2">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ $item->pcs }} pcs
+                                            </span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ number_format($item->gram, 2, ',', '.') }} gr
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- New Nama Barang Column -->
+                                <td class="px-4 py-4 border-y border-gray-100 group-hover:border-blue-100 group-hover:bg-blue-50/10">
+                                    <select name="items[{{ $idx }}][barang_id]" class="block w-full min-w-[150px] bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 transition duration-150">
+                                        <option value="">Pilih Barang...</option>
+                                        @foreach($barangList as $b)
+                                            <option value="{{ $b->id }}">{{ $b->nama_barang }}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
+
+                                <!-- New Partai Column -->
+                                <td class="px-4 py-4 border-y border-gray-100 group-hover:border-blue-100 group-hover:bg-blue-50/10">
+                                    <input type="text" name="items[{{ $idx }}][partai]" 
+                                        class="block w-full min-w-[140px] bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 transition duration-150" 
+                                        value="{{ $item->partai->nama_partai ?? '' }}"
+                                        placeholder="Ketik partai...">
+                                </td>
+
+                                <!-- New Pcs Column -->
+                                <td class="px-4 py-4 border-y border-gray-100 group-hover:border-blue-100 group-hover:bg-blue-50/10">
+                                    <input type="number" name="items[{{ $idx }}][pcs]" 
+                                        class="block w-full min-w-[80px] bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 transition duration-150 text-right" 
+                                        value="{{ $item->pcs }}">
+                                </td>
+
+                                <!-- New Box Column -->
+                                <td class="px-4 py-4 border-y border-gray-100 group-hover:border-blue-100 group-hover:bg-blue-50/10">
+                                    <input type="number" name="items[{{ $idx }}][box]" 
+                                        class="block w-full min-w-[80px] bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 transition duration-150 text-right" 
+                                        value="0" min="0">
+                                </td>
+
+                                <!-- Gram Diterima Column -->
+                                <td class="px-4 py-4 whitespace-nowrap border-y border-r border-gray-100 group-hover:border-blue-100 rounded-r-xl group-hover:bg-blue-50/10 text-right">
+                                    <div class="flex items-center justify-end">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <input type="number" step="0.01" name="items[{{ $idx }}][gram_diterima]" 
+                                                class="form-input block w-32 sm:text-sm sm:leading-6 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-right pr-8" 
+                                                placeholder="0.00">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-xs">gr</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="py-12 px-4 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Tidak ada barang yang tertunda untuk dikembalikan pada batch ini.</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer Summary/Action -->
+                <div class="bg-gray-50 px-6 py-5 rounded-b-2xl border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between">
+                    <div class="flex items-center mb-4 sm:mb-0 text-sm text-gray-500">
+                        <svg class="w-5 h-5 text-amber-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Pastikan data input sudah tepat sebelum menyimpan karena bersifat permanen.
+                    </div>
+                    <button type="button" onclick="openConfirmModal()" class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                        <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        Simpan Penerimaan
+                    </button>
+                </div>
+            </form>
         </div>
 
     </div>
 </div>
 
-@push('scripts')
+<!-- Modal Konfirmasi -->
+<div id="confirmModal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm"></div>
+
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <!-- Modal panel -->
+            <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b border-gray-100">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <h3 class="text-xl font-bold leading-6 text-gray-900" id="modal-title">Konfirmasi Simpan Permanen</h3>
+                            <div class="mt-3">
+                                <p class="text-sm text-gray-600 leading-relaxed">
+                                    Apakah Anda yakin ingin menyimpan data penerimaan ini? Data yang sudah tersimpan <strong class="text-red-600">bersifat permanen</strong> dan <strong>tidak dapat di-edit atau dihapus kembali</strong> demi menjaga integritas perhitungan susut. <br><br>
+                                    Harap periksa kembali angka <span class="font-semibold text-blue-600">Gram Aktual</span> dan <span class="font-semibold text-blue-600">Partai Khusus</span> sebelum melanjutkan!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-4 sm:flex sm:flex-row-reverse sm:px-6 gap-2">
+                    <button type="button" onclick="submitForm()" class="inline-flex w-full justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:w-auto transition-colors">Ya, Simpan Permanen</button>
+                    <button type="button" onclick="closeConfirmModal()" class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-colors">Batal, Cek Lagi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    setTimeout(() => {
-        const alerts = document.querySelectorAll('[id^="alert-"]');
-        alerts.forEach(alert => {
-            if (alert) {
-                alert.style.transition = 'opacity 0.5s ease-out';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
-            }
-        });
-    }, 3000);
+    function openConfirmModal() {
+        document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.add('hidden');
+    }
+
+    function submitForm() {
+        document.getElementById('receiveForm').submit();
+    }
 </script>
-@endpush
 @endsection
