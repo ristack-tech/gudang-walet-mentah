@@ -39,7 +39,7 @@ class StokBarangJadiService
                     StokBarangJadiDetail::create([
                         'stok_barang_jadi_id' => $stok->id,
                         'nama_barang' => $item['nama_barang'],
-                        'jumlah_pcs' => $item['jumlah_pcs'] ?? 0,
+                        'jumlah_box' => $item['jumlah_box'] ?? 0,
                         'berat' => $item['berat'] ?? 0,
                     ]);
                 }
@@ -100,7 +100,7 @@ class StokBarangJadiService
                 'stok_barang_jadi_id' => $clopStok->id,
                 'barang_id' => $stokGrading->barang_id,
                 'nama_barang' => $fullNamaBarang,
-                'jumlah_pcs' => $jumlahBox, // Now acts as full Box count
+                'jumlah_box' => $jumlahBox, // Now acts as full Box count
                 'berat' => $berat,
             ]);
 
@@ -179,7 +179,7 @@ class StokBarangJadiService
 
                         $detailRow->update([
                             // If PCS wasn't submitted (e.g. we removed it), preserve old value
-                            'jumlah_pcs' => $detailData['jumlah_pcs'] ?? $detailRow->jumlah_pcs,
+                            'jumlah_box' => $detailData['jumlah_box'] ?? $detailRow->jumlah_box,
                             'berat' => $newBerat,
                         ]);
                     }
@@ -239,7 +239,7 @@ class StokBarangJadiService
         $clopStocks = StokBarangJadiDetail::whereHas('stokBarangJadi', function ($query) {
                 $query->where('type', 'clop');
             })
-            ->select('id', 'nama_barang', 'berat as total_berat', 'jumlah_pcs as total_pcs')
+            ->select('id', 'nama_barang', 'berat as total_berat', 'jumlah_box as total_pcs')
             ->get()
             ->keyBy('id');
 

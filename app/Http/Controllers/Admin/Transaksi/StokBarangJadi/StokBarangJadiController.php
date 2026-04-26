@@ -88,7 +88,7 @@ class StokBarangJadiController extends Controller
             'keterangan' => 'nullable|string',
             'details' => 'required|array',
             'details.*.id' => 'required|exists:stok_barang_jadi_details,id',
-            'details.*.jumlah_pcs' => 'required|integer|min:0',
+            'details.*.jumlah_box' => 'required|integer|min:0',
             'details.*.berat' => 'required|numeric|min:0',
         ]);
 
