@@ -14,7 +14,7 @@ class StokBarangJadiDetail extends Model
         'stok_barang_jadi_id',
         'barang_id',
         'nama_barang',
-        'jumlah_pcs',
+        'jumlah_box',
         'berat',
     ];
 

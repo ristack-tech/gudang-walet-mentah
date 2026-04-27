@@ -99,7 +99,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         @if($tab === 'clop')
-                                            <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-bold">{{ $item->details->sum('jumlah_pcs') }} Box</span>
+                                            <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-bold">{{ $item->details->sum('jumlah_box') }} Box</span>
                                         @else
                                             -
                                         @endif

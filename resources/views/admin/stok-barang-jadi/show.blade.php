@@ -57,7 +57,7 @@
                                     <div class="font-medium text-gray-900">{{ $detail->nama_barang ?: ($detail->namaBarang->nama_barang ?? 'Unknown') }}</div>
                                 </td>
                                 <td class="px-6 py-4 text-center font-medium text-gray-600">
-                                    {{ number_format($detail->jumlah_pcs, 0, ',', '.') }}
+                                    {{ number_format($detail->jumlah_box, 0, ',', '.') }}
                                 </td>
                                 <td class="px-6 py-4 text-right font-mono font-medium text-gray-900">
                                     {{ number_format($detail->berat, 2, ',', '.') }}

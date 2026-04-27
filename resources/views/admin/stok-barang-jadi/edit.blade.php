@@ -106,10 +106,10 @@
                                     <td class="px-6 py-4">
                                         @if($isTransferGlobal)
                                             <!-- Pcs is a note and transferred as 0 from global, so we hide it or show as read only 0 -->
-                                            <input type="hidden" name="details[{{ $index }}][jumlah_pcs]" value="{{ $detail->jumlah_pcs }}">
+                                            <input type="hidden" name="details[{{ $index }}][jumlah_box]" value="{{ $detail->jumlah_box }}">
                                             <span class="text-gray-500 italic text-sm">N/a (Hanya Berat)</span>
                                         @else
-                                            <input type="number" name="details[{{ $index }}][jumlah_pcs]" value="{{ old('details.'.$index.'.jumlah_pcs', $detail->jumlah_pcs) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" required min="0">
+                                            <input type="number" name="details[{{ $index }}][jumlah_box]" value="{{ old('details.'.$index.'.jumlah_box', $detail->jumlah_box) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" required min="0">
                                         @endif
                                     </td>
                                     <td class="px-6 py-4">

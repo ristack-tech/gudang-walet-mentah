@@ -50,35 +50,29 @@ class ExportController extends Controller
             'tanggal_transfer' => 'required|date',
             'keterangan' => 'nullable|string',
             'items' => 'required|array|min:1',
-            'items.*.stok_id' => 'required|exists:stok_barang_jadi_details,id',
+            'items.*.is_checked' => 'nullable',
+            'items.*.stok_id' => 'required_with:items.*.is_checked|exists:stok_barang_jadi_details,id',
+            'items.*.box' => 'required_with:items.*.is_checked|integer',
+            'items.*.berat' => 'required_with:items.*.is_checked|numeric',
             'items.*.harga' => 'nullable|numeric|min:0',
         ]);
 
-        // Re-validate against available stock
-        $availableStocks = $this->stokBarangJadiService->getAvailableClopStocks();
-        
         $processedItems = [];
-        foreach ($validated['items'] as $stokId => $item) {
-            if (!isset($availableStocks[$stokId])) {
-                return redirect()->back()->withInput()->with('error', "Stok untuk barang berisikan ID {$stokId} sudah tidak tersedia.");
+        foreach ($validated['items'] as $item) {
+            if (!isset($item['is_checked']) || $item['is_checked'] != '1') {
+                continue;
             }
 
-            $currentStock = $availableStocks[$stokId];
-            $availableBox = (int) $currentStock['available_pcs']; // for clop stocks, available_pcs represents Box count
-            $availableBerat = (float) $currentStock['available_berat'];
-
-            if ($availableBox < 1) {
-                return redirect()->back()->withInput()->with('error', "Box pada {$currentStock['nama_barang']} sudah tidak tersedia.");
-            }
-
-            // Since we are exporting exactly 1 box per selected card
             $processedItems[] = [
-                'stok_id' => $stokId,
-                'box' => 1,
-                'pcs' => 1, // Store 1 to reduce available_pcs record correctly
-                'berat' => round($availableBerat, 2),
+                'stok_id' => $item['stok_id'],
+                'box' => $item['box'],
+                'berat' => $item['berat'],
                 'harga' => $item['harga'] ?? 0,
             ];
+        }
+
+        if (empty($processedItems)) {
+            return redirect()->back()->withInput()->with('error', 'Silakan pilih minimal 1 box untuk diekspor.');
         }
 
         // Use transaction via Service
@@ -88,9 +82,12 @@ class ExportController extends Controller
             'items' => $processedItems
         ];
         
-        $this->exportService->storeExport($saveData);
-
-        return redirect()->route('export.index')->with('success', 'Transaksi Export Berhasil Disimpan.');
+        try {
+            $this->exportService->storeExport($saveData);
+            return redirect()->route('export.index')->with('success', 'Transaksi Export Berhasil Disimpan.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
     }
 
     public function show($id)
@@ -101,8 +98,11 @@ class ExportController extends Controller
 
     public function destroy($id)
     {
-        $this->exportService->delete($id);
-
-        return redirect()->route('export.index')->with('success', 'Data export berhasil dibatalkan (void). Stok gudang telah kembali secara otomatis.');
+        try {
+            $this->exportService->delete($id);
+            return redirect()->route('export.index')->with('success', 'Data export berhasil dibatalkan (void). Stok gudang telah kembali secara otomatis.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal membatalkan transaksi: ' . $e->getMessage());
+        }
     }
 }
