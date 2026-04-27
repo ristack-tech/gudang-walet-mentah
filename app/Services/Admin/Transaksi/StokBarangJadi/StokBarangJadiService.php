@@ -235,38 +235,24 @@ class StokBarangJadiService
     }
     public function getAvailableClopStocks()
     {
-        // Get all details that belong to clop stocks
+        // Get all details that belong to clop stocks and have available boxes
         $clopStocks = StokBarangJadiDetail::whereHas('stokBarangJadi', function ($query) {
                 $query->where('type', 'clop');
             })
+            ->where('jumlah_box', '>', 0)
+            ->where('berat', '>', 0)
             ->select('id', 'nama_barang', 'berat as total_berat', 'jumlah_box as total_pcs')
-            ->get()
-            ->keyBy('id');
-
-        // Get all exported stocks grouped by stok_barang_jadi_detail_id
-        $exportStocks = \App\Models\ExportDetail::select('stok_barang_jadi_detail_id', DB::raw('SUM(berat) as total_berat'), DB::raw('SUM(pcs) as total_pcs'))
-            ->groupBy('stok_barang_jadi_detail_id')
-            ->get()
-            ->keyBy('stok_barang_jadi_detail_id');
+            ->get();
 
         $availableStocks = [];
 
-        foreach ($clopStocks as $detailId => $clop) {
-            $export = $exportStocks->get($detailId);
-            $exportedBerat = $export ? $export->total_berat : 0;
-            $exportedPcs = $export ? $export->total_pcs : 0;
-
-            $availableBerat = max(0, $clop->total_berat - $exportedBerat);
-            $availablePcs = max(0, $clop->total_pcs - $exportedPcs);
-
-            if ($availableBerat > 0) {
-                $availableStocks[$detailId] = [
-                    'id' => $detailId,
-                    'nama_barang' => $clop->nama_barang,
-                    'available_berat' => $availableBerat,
-                    'available_pcs' => $availablePcs,
-                ];
-            }
+        foreach ($clopStocks as $clop) {
+            $availableStocks[$clop->id] = [
+                'id' => $clop->id,
+                'nama_barang' => $clop->nama_barang,
+                'available_berat' => $clop->total_berat,
+                'available_pcs' => $clop->total_pcs,
+            ];
         }
 
         return $availableStocks;

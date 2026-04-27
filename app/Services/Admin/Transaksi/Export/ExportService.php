@@ -26,7 +26,7 @@ class ExportService
     {
         return DB::transaction(function () use ($data) {
             // Generate batch number EX-YYYYMMDD-His
-            $batch = 'EXP-' . date('Ymd-His');
+            $batch = 'EXP-' . date('Ymd-His') . '-' . \Illuminate\Support\Str::random(4);
             
             $export = Export::create([
                 'batch' => $batch,
@@ -35,11 +35,26 @@ class ExportService
             ]);
 
             foreach ($data['items'] as $item) {
+                $stokDetail = \App\Models\StokBarangJadiDetail::where('id', $item['stok_id'])->lockForUpdate()->first();
+                if (!$stokDetail) {
+                    throw new \Exception("Stok dengan ID {$item['stok_id']} tidak ditemukan.");
+                }
+                // Check sufficiency
+                if ($stokDetail->jumlah_box < 1 || $stokDetail->berat < $item['berat']) {
+                    throw new \Exception("Ketersediaan Stok Box atau Berat untuk {$stokDetail->nama_barang} tidak mencukupi.");
+                }
+
+                // Reduce stock
+                $stokDetail->update([
+                    'jumlah_box' => max(0, $stokDetail->jumlah_box - 1),
+                    'berat' => max(0, $stokDetail->berat - $item['berat'])
+                ]);
+
                 ExportDetail::create([
                     'export_id' => $export->id,
                     'stok_barang_jadi_detail_id' => $item['stok_id'],
                     'box' => $item['box'],
-                    'pcs' => $item['pcs'] ?? 0,
+                    'pcs' => 1,
                     'berat' => $item['berat'],
                     'harga' => $item['harga'] ?? 0,
                 ]);
@@ -52,7 +67,22 @@ class ExportService
     public function delete($id)
     {
         return DB::transaction(function () use ($id) {
-            $export = Export::findOrFail($id);
+            $export = Export::with('exportDetails')->where('id', $id)->first();
+            if (!$export) {
+                throw new \Illuminate\Database\Eloquent\ModelNotFoundException("Data Export tidak ditemukan.");
+            }
+
+            // Restore stock
+            foreach ($export->exportDetails as $detail) {
+                $stokDetail = \App\Models\StokBarangJadiDetail::where('id', $detail->stok_barang_jadi_detail_id)->lockForUpdate()->first();
+                if ($stokDetail) {
+                    $stokDetail->update([
+                        'jumlah_box' => $stokDetail->jumlah_box + 1,
+                        'berat' => $stokDetail->berat + $detail->berat
+                    ]);
+                }
+            }
+
             // This will cascade soft deletes to details due to Model events if setup, 
             // but in Laravel we need to do it explicitly unless we use packages or DB onDelete cascade handles hard deletes.
             // Since we use soft deletes, let's explicitly soft delete children.

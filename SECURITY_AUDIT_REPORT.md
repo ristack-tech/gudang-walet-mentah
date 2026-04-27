@@ -68,7 +68,7 @@
 
 ### CRITICAL (Security) {#critical-security}
 
-#### SEC-1. Race Condition pada Validasi Stok Export
+#### ~~SEC-1. Race Condition pada Validasi Stok Export~~ [FIXED]
 
 **Lokasi:** `ExportController.php:58-82`
 
@@ -309,7 +309,7 @@ Ketika `warna_id` tidak disediakan, ini melanggar constraint NOT NULL.
 
 ---
 
-#### BUG-03. Race Condition — Export Bersamaan
+#### ~~BUG-03. Race Condition — Export Bersamaan~~ [FIXED]
 
 **File:** `app/Http/Controllers/Admin/Transaksi/Export/ExportController.php:46-49`
 
@@ -520,7 +520,7 @@ protected $fillable = [
 
 ---
 
-#### BUG-18. Export Tidak Mengurangi Stok Clop (Logical Bug)
+#### ~~BUG-18. Export Tidak Mengurangi Stok Clop (Logical Bug)~~ [FIXED]
 
 **Lokasi:** `ExportService.php:25-49`
 
@@ -532,7 +532,7 @@ protected $fillable = [
 
 ### Race Conditions (dari Bug Analysis)
 
-#### BUG-19. Concurrent Export — ExportController
+#### ~~BUG-19. Concurrent Export — ExportController~~ [FIXED]
 
 **File:** `app/Http/Controllers/Admin/Transaksi/Export/ExportController.php:36-59`
 
@@ -569,7 +569,7 @@ $barangMasukSupplier::create([...]); // Baris 50-57
 
 ---
 
-#### BUG-23. Race Condition di getAvailableClopStocks (Phantom Read)
+#### ~~BUG-23. Race Condition di getAvailableClopStocks (Phantom Read)~~ [FIXED]
 
 **Lokasi:** `StokBarangJadiService.php:236-273`
 
@@ -579,7 +579,7 @@ $barangMasukSupplier::create([...]); // Baris 50-57
 
 ---
 
-#### BUG-24. Export Delete Tidak Restore Stok
+#### ~~BUG-24. Export Delete Tidak Restore Stok~~ [FIXED]
 
 **Lokasi:** `ExportService.php:52-62`
 
@@ -620,7 +620,7 @@ catch (\Exception $e) {
 
 ---
 
-#### BUG-27. Unhandled ModelNotFoundException — ExportService
+#### ~~BUG-27. Unhandled ModelNotFoundException — ExportService~~ [FIXED]
 
 **File:** `app/Services/Admin/Transaksi/Export/ExportService.php:34-38`
 
