@@ -201,7 +201,7 @@
                                             </td> 
                                             <td class="px-4 py-3 text-center">
                                                 <button type="button" 
-                                                    onclick="selectGlobalItem({{ $detailItem->id }}, '{{ addslashes($namaBarangGlobal) }} - {{ $detailItem->grade }}')" 
+                                                    onclick="selectGlobalItem({{ $detailItem->id }}, '{{ addslashes($namaBarangGlobal) }} - {{ $detailItem->grade }}', {{ $detailItem->berat }}, {{ $detailItem->box }})" 
                                                     class="inline-flex justify-center items-center px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors duration-200">
                                                     Pilih
                                                 </button>
@@ -219,6 +219,7 @@
                                     <div>
                                         <span class="text-xs text-blue-600 font-bold uppercase tracking-wider block mb-1">Terpilih:</span>
                                         <span class="font-medium text-blue-900 text-lg" id="selectedGlobalName"></span>
+                                        <div id="selectedGlobalStock" class="text-sm text-blue-700 mt-1 font-medium"></div>
                                     </div>
                                     <button type="button" onclick="resetSelection()" class="text-sm text-blue-600 hover:text-blue-800 underline">Ganti Barang</button>
                                 </div>
@@ -278,11 +279,16 @@
         resetSelection(); // Reset form state when closing
     }
 
-    function selectGlobalItem(id, name) {
+    function selectGlobalItem(id, name, berat, box) {
         document.getElementById('selectionTable').classList.add('hidden');
         document.getElementById('transferFormBox').classList.remove('hidden');
         
         document.getElementById('selectedGlobalName').innerText = name;
+        
+        // Format berat ke format desimal Indonesia
+        let formattedBerat = parseFloat(berat).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('selectedGlobalStock').innerText = `Tersedia: ${formattedBerat} gr / ${box} Box`;
+        
         document.getElementById('globalIdInput').value = id;
     }
 
@@ -291,6 +297,7 @@
         document.getElementById('transferFormBox').classList.add('hidden');
         
         document.getElementById('selectedGlobalName').innerText = '';
+        document.getElementById('selectedGlobalStock').innerText = '';
         document.getElementById('globalIdInput').value = '';
     }
     
