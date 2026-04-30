@@ -27,7 +27,7 @@ class ExportService
         return DB::transaction(function () use ($data) {
             // Generate batch number EX-YYYYMMDD-His
             $batch = 'EXP-' . date('Ymd-His') . '-' . \Illuminate\Support\Str::random(4);
-            
+
             $export = Export::create([
                 'batch' => $batch,
                 'tanggal_transfer' => $data['tanggal_transfer'],
@@ -39,23 +39,27 @@ class ExportService
                 if (!$stokDetail) {
                     throw new \Exception("Stok dengan ID {$item['stok_id']} tidak ditemukan.");
                 }
+
+                $jumlahBox = intval($item['jumlah_box'] ?? 0);
+                $totalBerat = floatval($item['berat'] ?? 0);
+
                 // Check sufficiency
-                if ($stokDetail->jumlah_box < 1 || $stokDetail->berat < $item['berat']) {
+                if ($stokDetail->jumlah_box < $jumlahBox || $stokDetail->berat < $totalBerat) {
                     throw new \Exception("Ketersediaan Stok Box atau Berat untuk {$stokDetail->nama_barang} tidak mencukupi.");
                 }
 
                 // Reduce stock
                 $stokDetail->update([
-                    'jumlah_box' => max(0, $stokDetail->jumlah_box - 1),
-                    'berat' => max(0, $stokDetail->berat - $item['berat'])
+                    'jumlah_box' => max(0, $stokDetail->jumlah_box - $jumlahBox),
+                    'berat' => max(0, $stokDetail->berat - $totalBerat)
                 ]);
 
                 ExportDetail::create([
                     'export_id' => $export->id,
                     'stok_barang_jadi_detail_id' => $item['stok_id'],
-                    'box' => $item['box'],
-                    'pcs' => 1,
-                    'berat' => $item['berat'],
+                    'box' => $jumlahBox,
+                    'pcs' => $jumlahBox,
+                    'berat' => $totalBerat,
                     'harga' => $item['harga'] ?? 0,
                 ]);
             }
@@ -77,7 +81,7 @@ class ExportService
                 $stokDetail = \App\Models\StokBarangJadiDetail::where('id', $detail->stok_barang_jadi_detail_id)->lockForUpdate()->first();
                 if ($stokDetail) {
                     $stokDetail->update([
-                        'jumlah_box' => $stokDetail->jumlah_box + 1,
+                        'jumlah_box' => $stokDetail->jumlah_box + $detail->pcs,
                         'berat' => $stokDetail->berat + $detail->berat
                     ]);
                 }

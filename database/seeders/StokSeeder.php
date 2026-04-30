@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Models\Stok;
+use App\Models\StokGudang; // BUG-4: Use correct model name
 use App\Models\Lokasi;
 
 class StokSeeder extends Seeder
@@ -14,8 +14,10 @@ class StokSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Kosongkan tabel stoks
-        Stok::truncate();
+        // BUG-4: Use correct model name instead of non-existent Stok
+        if (class_exists(StokGudang::class)) {
+            StokGudang::truncate();
+        }
 
         // Cari ID lokasi untuk Demak dan Jasa Cuci
         $lokasiDemak = Lokasi::where('nama_lokasi', 'like', '%Demak%')->first();
@@ -120,8 +122,9 @@ class StokSeeder extends Seeder
             }
         }
 
-        Stok::insert($inserts);
-        
+        // BUG-4: Use correct model name
+        StokGudang::insert($inserts);
+
         $this->command->info("Seed Stok berhasil dijalankan. Total saldo akhir dimasukkan: " . count($inserts) . " record.");
     }
 }

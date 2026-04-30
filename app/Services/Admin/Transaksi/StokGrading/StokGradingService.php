@@ -157,13 +157,22 @@ class StokGradingService
     public function deleteGrading($id)
     {
         return DB::transaction(function () use ($id) {
-            $stokGrading = StokGrading::findOrFail($id);
-            
+            // BUG-20, BUG-22: Lock parent record to prevent race condition
+            $stokGrading = StokGrading::lockForUpdate()->findOrFail($id);
+
             // Cek sisa saldo yang tertera (yang belum pernah ditarik ke Clop)
             $totalSisaBerat = $stokGrading->details()->sum('berat');
-            
+
+            // BUG-25: Fixed - return proper message when nothing to delete
             if ($totalSisaBerat == 0) {
-                 return true; 
+                // Delete the empty grading record since there's no stock left
+                $stokGrading->details()->delete();
+                $stokGrading->delete();
+                return [
+                    'success' => true,
+                    'message' => 'Grading berhasil dihapus karena semua stok sudah dipindahkan.',
+                    'restored_gram' => 0,
+                ];
             }
             
             // Hitung gramasi yang SESUNGGUHNYA SUDAH pernah dipakai (sudah ditransfer)

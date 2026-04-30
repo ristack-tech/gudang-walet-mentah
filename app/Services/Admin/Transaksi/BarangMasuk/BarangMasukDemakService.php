@@ -25,19 +25,28 @@ class BarangMasukDemakService
             $totalSusut = 0;
             $barangKeluar = BarangKeluar::findOrFail($step1['barang_keluar_id']);
 
+            // BUG-1: Ambil lokasi ID "Gudang Utama" secara dinamis
+            $lokasiPusat = \App\Models\Lokasi::where('nama_lokasi', 'like', '%Gudang Utama%')->first();
+            if (!$lokasiPusat) {
+                $lokasiPusat = \App\Models\Lokasi::first();
+            }
+            if (!$lokasiPusat) {
+                throw new \Exception('Lokasi Gudang Utama tidak ditemukan. Harap setup master data lokasi terlebih dahulu.');
+            }
+
             foreach ($selectedItems as $item) {
                 $outItem = BarangKeluarDemak::with('partai')->findOrFail($item['barang_keluar_demak_id']);
-                
+
                 $susut = $outItem->gram - $item['gram_diterima'];
                 $totalSusut += $susut;
-                
+
                 BarangMasukDemak::create([
                     'barang_masuk_id' => $barangMasuk->id,
                     'barang_keluar_demak_id' => $outItem->id,
-                    'barang_id' => $item['barang_id'], 
+                    'barang_id' => $item['barang_id'],
                     'partai' => $item['partai'],
-                    'transaksi_dari_id' => $step1['transaksi_dari_id'], 
-                    'transaksi_ke_id' => 1, // Central Warehouse usually  
+                    'transaksi_dari_id' => $step1['transaksi_dari_id'],
+                    'transaksi_ke_id' => $lokasiPusat->id, // BUG-1: Dynamic lookup instead of hardcoded 1  
                     'gram' => $item['gram_diterima'],
                     'pcs' => $item['pcs'],
                     'box' => $item['box'],
