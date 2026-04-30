@@ -91,8 +91,11 @@ class StokBarangJadiService
             
             // Calculate jumlah box based on Kapasitas Tipe Box
             $jumlahBox = 0;
+            if ($tipeBox <= 0) {
+                throw new \InvalidArgumentException('Tipe box harus bernilai positif');
+            }
             if ($tipeBox > 1) { // 1 was marked as 'Lainnya/Non-Kapasitas' in view
-                // We use floor to get the full boxes. 
+                // We use floor to get the full boxes.
                 $jumlahBox = floor($berat / $tipeBox);
             }
             
@@ -214,12 +217,19 @@ class StokBarangJadiService
                             ->first();
                             
                         if ($detail) {
-                            $totalBeratTransfer = $stok->details->sum('berat');
-                            
-                            // Restore StokGradingDetail
-                            $detail->update([
-                                'berat' => $detail->berat + $totalBeratTransfer,
-                            ]);
+                            // Ensure details relationship is loaded before accessing
+                            if ($stok->relationLoaded('details') && $stok->details->isNotEmpty()) {
+                                $totalBeratTransfer = $stok->details->sum('berat');
+                            } else {
+                                // Fallback: recalculate from database
+                                $totalBeratTransfer = StokBarangJadiDetail::where('stok_barang_jadi_id', $stok->id)->sum('berat');
+                            }
+
+                            if ($totalBeratTransfer > 0) {
+                                $detail->update([
+                                    'berat' => $detail->berat + $totalBeratTransfer,
+                                ]);
+                            }
                             // HAPUS penambahan total_gram_keseluruhan agar selaras dengan fix phantom stock
                             // Total_gram_keseluruhan Induk harus dibiarkan stabil murni sesuai hasil grading.
                         }
@@ -235,26 +245,29 @@ class StokBarangJadiService
     }
     public function getAvailableClopStocks()
     {
-        // Get all details that belong to clop stocks and have available boxes
-        $clopStocks = StokBarangJadiDetail::whereHas('stokBarangJadi', function ($query) {
-                $query->where('type', 'clop');
-            })
-            ->where('jumlah_box', '>', 0)
-            ->where('berat', '>', 0)
-            ->select('id', 'nama_barang', 'berat as total_berat', 'jumlah_box as total_pcs')
-            ->get();
+        return DB::transaction(function () {
+            // Get all details that belong to clop stocks and have available boxes
+            $clopStocks = StokBarangJadiDetail::whereHas('stokBarangJadi', function ($query) {
+                    $query->where('type', 'clop');
+                })
+                ->where('jumlah_box', '>', 0)
+                ->where('berat', '>', 0)
+                ->select('id', 'nama_barang', 'berat as total_berat', 'jumlah_box as total_pcs')
+                ->lockForUpdate()
+                ->get();
 
-        $availableStocks = [];
+            $availableStocks = [];
 
-        foreach ($clopStocks as $clop) {
-            $availableStocks[$clop->id] = [
-                'id' => $clop->id,
-                'nama_barang' => $clop->nama_barang,
-                'available_berat' => $clop->total_berat,
-                'available_pcs' => $clop->total_pcs,
-            ];
-        }
+            foreach ($clopStocks as $clop) {
+                $availableStocks[$clop->id] = [
+                    'id' => $clop->id,
+                    'nama_barang' => $clop->nama_barang,
+                    'available_berat' => $clop->total_berat,
+                    'available_pcs' => $clop->total_pcs,
+                ];
+            }
 
-        return $availableStocks;
+            return $availableStocks;
+        });
     }
 }
