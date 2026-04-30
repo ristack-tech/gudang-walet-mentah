@@ -24,7 +24,23 @@ class StokBarangJadiService
      */
     public function storeStok(array $data)
     {
-        return DB::transaction(function () use ($data) { // Keep data if making a manual generic form
+        // BUG-13: Validate items not empty
+        if (empty($data['items']) || !is_array($data['items'])) {
+            throw new \InvalidArgumentException('Items tidak boleh kosong. Minimal 1 item diperlukan.');
+        }
+
+        // Filter valid items (must have nama_barang and berat > 0)
+        $validItems = array_filter($data['items'], function ($item) {
+            return isset($item['nama_barang']) &&
+                   !empty(trim($item['nama_barang'])) &&
+                   (($item['berat'] ?? 0) > 0);
+        });
+
+        if (empty($validItems)) {
+            throw new \InvalidArgumentException('Minimal harus ada 1 item dengan nama barang dan berat yang valid.');
+        }
+
+        return DB::transaction(function () use ($data, $validItems) {
             // Save parent record
             $stok = StokBarangJadi::create([
                 'batch' => $data['batch'] ?? 'SBJ-' . time(),
@@ -33,16 +49,13 @@ class StokBarangJadiService
                 'keterangan' => $data['keterangan'] ?? null,
             ]);
 
-            // Save details
-            if (!empty($data['items'])) {
-                foreach ($data['items'] as $item) {
-                    StokBarangJadiDetail::create([
-                        'stok_barang_jadi_id' => $stok->id,
-                        'nama_barang' => $item['nama_barang'],
-                        'jumlah_box' => $item['jumlah_box'] ?? 0,
-                        'berat' => $item['berat'] ?? 0,
-                    ]);
-                }
+            // Save details with mass assignment protection (SEC-2)
+            $allowedKeys = ['nama_barang', 'jumlah_box', 'berat'];
+            foreach ($validItems as $item) {
+                // Filter only allowed keys to prevent mass assignment
+                $filtered = array_intersect_key($item, array_flip($allowedKeys));
+                $filtered['stok_barang_jadi_id'] = $stok->id;
+                StokBarangJadiDetail::create($filtered);
             }
 
             return $stok;
@@ -50,15 +63,23 @@ class StokBarangJadiService
     }
 
     /**
-     * Transfer stock from global to clop. 
+     * Transfer stock from global to clop.
+     * Uses lockForUpdate to prevent race conditions (SEC-4, SEC-5).
      */
     public function transferToClop($stokGradingDetailId, $tipeBox, $berat)
     {
         return DB::transaction(function () use ($stokGradingDetailId, $tipeBox, $berat) {
-            
-            // Find the specific graded detail
-            $stokGradingDetail = \App\Models\StokGradingDetail::with('stokGrading')->findOrFail($stokGradingDetailId);
-            
+
+            // Use lockForUpdate to prevent race condition (SEC-4, SEC-5)
+            $stokGradingDetail = \App\Models\StokGradingDetail::where('id', $stokGradingDetailId)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            // Validate stock availability
+            if ($stokGradingDetail->berat <= 0) {
+                throw new \Exception("Stok sudah habis atau tidak valid.");
+            }
+
             if ($stokGradingDetail->berat < $berat) {
                 throw new \Exception("Stok tidak mencukupi. Tersedia: {$stokGradingDetail->berat}g.");
             }
@@ -92,7 +113,11 @@ class StokBarangJadiService
             // Calculate jumlah box based on Kapasitas Tipe Box
             $jumlahBox = 0;
             if ($tipeBox > 1) { // 1 was marked as 'Lainnya/Non-Kapasitas' in view
-                // We use floor to get the full boxes. 
+                // Validate tipeBox to prevent division by zero
+                if ($tipeBox <= 0) {
+                    throw new \InvalidArgumentException('Tipe Box harus bernilai positif.');
+                }
+                // We use floor to get the full boxes.
                 $jumlahBox = floor($berat / $tipeBox);
             }
             
@@ -133,11 +158,13 @@ class StokBarangJadiService
                     if (preg_match('/No Kartu: (.*) \/ (.*)$/', $stok->keterangan, $matches)) {
                         $noKartu = trim($matches[1]);
                         $grade = trim($matches[2]);
-                        
+
                         $stokGrading = \App\Models\StokGrading::where('no_kartu', $noKartu)->first();
                         if ($stokGrading) {
+                            // Use lockForUpdate to prevent race condition (SEC-5, BUG-6)
                             $stokGradingDetail = \App\Models\StokGradingDetail::where('stok_grading_id', $stokGrading->id)
                                 ->where('grade', $grade)
+                                ->lockForUpdate()
                                 ->first();
                         }
                     }
@@ -150,29 +177,29 @@ class StokBarangJadiService
 
                     if ($detailRow) {
                         $newBerat = (float) $detailData['berat'];
-                        
+
                         if ($isTransferFromGlobal && $stokGradingDetail) {
                             $deltaBerat = $newBerat - $detailRow->berat;
-                            
+
                             if ($deltaBerat > 0) {
                                 // We are increasing CLOP. Need to deduct from parent.
                                 if ($stokGradingDetail->berat < $deltaBerat) {
                                     throw new \Exception("Stok Global tidak mencukupi untuk penambahan. Hanya tersedia: {$stokGradingDetail->berat}g di Global.");
                                 }
-                                
+
                                 $stokGradingDetail->update([
                                     'berat' => $stokGradingDetail->berat - $deltaBerat,
                                 ]);
-                                
+
                                 // HAPUS pemotongan total_gram_keseluruhan agar stok mentah tidak refund ke Demak
                             } elseif ($deltaBerat < 0) {
                                 // We are returning to CLOP. Add abs difference to parent.
                                 $returnGram = abs($deltaBerat);
-                                
+
                                 $stokGradingDetail->update([
                                     'berat' => $stokGradingDetail->berat + $returnGram,
                                 ]);
-                                
+
                                 // HAPUS penambahan total_gram_keseluruhan agar stok mentah tidak tercatat ulang
                             }
                         }

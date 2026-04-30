@@ -48,9 +48,10 @@ class StokBarangJadiController extends Controller
         $request->validate([
             'global_id' => 'required|exists:stok_grading_details,id',
             'tipe_box' => 'required|integer|in:500,475',
-            'berat' => 'required|numeric|min:' . ($tipeBox == 475 ? 475 : 500),
+            'berat' => 'required|numeric|min:' . ($tipeBox == 475 ? 475 : 500) . '|max:100000', // SEC-7: Add max validation
         ], [
-            'berat.min' => 'Berat minimal untuk transfer jenis kemasan (Box ' . $tipeBox . 'gr) adalah ' . $tipeBox . ' gram.'
+            'berat.min' => 'Berat minimal untuk transfer jenis kemasan (Box ' . $tipeBox . 'gr) adalah ' . $tipeBox . ' gram.',
+            'berat.max' => 'Berat maksimal per transfer adalah 100,000 gram.'
         ]);
 
         $stokGradingDetailId = $request->input('global_id');
