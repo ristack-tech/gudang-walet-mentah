@@ -52,8 +52,8 @@ class ExportController extends Controller
             'items' => 'required|array|min:1',
             'items.*.is_checked' => 'nullable',
             'items.*.stok_id' => 'required_with:items.*.is_checked|exists:stok_barang_jadi_details,id',
-            'items.*.box' => 'required_with:items.*.is_checked|integer',
-            'items.*.berat' => 'required_with:items.*.is_checked|numeric',
+            'items.*.jumlah_box' => 'required_with:items.*.is_checked|integer|min:1',
+            'items.*.berat' => 'required_with:items.*.is_checked|numeric|min:0',
             'items.*.harga' => 'nullable|numeric|min:0',
         ]);
 
@@ -63,11 +63,20 @@ class ExportController extends Controller
                 continue;
             }
 
+            $jumlahBox = intval($item['jumlah_box'] ?? 0);
+            if ($jumlahBox <= 0) {
+                continue;
+            }
+
+            $beratPerBox = floatval($item['berat'] ?? 0);
+            $totalBerat = $jumlahBox * $beratPerBox;
+
             $processedItems[] = [
                 'stok_id' => $item['stok_id'],
-                'box' => $item['box'],
-                'berat' => $item['berat'],
-                'harga' => $item['harga'] ?? 0,
+                'jumlah_box' => $jumlahBox,
+                'berat' => $totalBerat,
+                'berat_per_box' => $beratPerBox,
+                'harga' => floatval($item['harga'] ?? 0),
             ];
         }
 
@@ -81,7 +90,7 @@ class ExportController extends Controller
             'keterangan' => $validated['keterangan'],
             'items' => $processedItems
         ];
-        
+
         try {
             $this->exportService->storeExport($saveData);
             return redirect()->route('export.index')->with('success', 'Transaksi Export Berhasil Disimpan.');

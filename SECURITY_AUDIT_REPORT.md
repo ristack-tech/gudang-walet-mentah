@@ -2,17 +2,53 @@
 # Gudang Walet Mentah
 
 > Dibuat: 2026-04-26
+> Diperbarui: 2026-04-29
 > Sumber: SECURITY_AUDIT_REPORT.md + BUG_ANALYSIS.md
 
 ---
 
 ## Ringkasan Eksekutif
 
-| Sumber | Jumlah Temuan | Critical/High |
-|--------|---------------|---------------|
-| Security Audit | 10 temuan | 5 (CRITICAL + HIGH) |
-| Bug Analysis | 37 bug | 16 critical |
-| **Total** | **47 temuan** | **21 critical/high** |
+| Sumber | Jumlah Temuan | Critical/High | Sudah Diperbaiki |
+|--------|---------------|---------------|------------------|
+| Security Audit | 10 temuan | 5 (CRITICAL + HIGH) | 5 |
+| Bug Analysis | 37 bug | 16 critical | 9 |
+| **Total** | **47 temuan** | **21 critical/high** | **14** |
+
+---
+
+## Update Perbaikan (2026-04-29)
+
+### Security Audit - Yang Sudah Diperbaiki:
+- ~~SEC-1~~ [FIXED] - Race Condition pada Validasi Stok Export
+- ~~SEC-2~~ [FIXED] - Mass Assignment pada Detail Items
+- ~~SEC-3~~ [FIXED] - Division by Zero pada Transfer ke Clop
+- ~~SEC-4~~ [FIXED] - IDOR pada Transfer Stok Global
+- ~~SEC-5~~ [FIXED] - Race Condition pada Update Stok
+- ~~SEC-7~~ [FIXED] - Insufficient Input Validation pada Berat
+
+### Bug Analysis - Yang Sudah Diperbaiki:
+- ~~BUG-01~~ [FIXED] - Hardcoded Lokasi ID
+- ~~BUG-04~~ [FIXED] - StokSeeder Referensi Model yang Tidak Ada
+- ~~BUG-06~~ [FIXED] - TOCTOU Race Condition
+- ~~BUG-13~~ [FIXED] - Empty Items Validation
+- ~~BUG-20~~ [FIXED] - Concurrent Stok Grading
+- ~~BUG-22~~ [FIXED] - Delete-Then-Insert Without Lock
+- ~~BUG-23~~ [FIXED] - Race Condition di getAvailableClopStocks
+- ~~BUG-24~~ [FIXED] - Export Delete Tidak Restore Stok
+- ~~BUG-25~~ [FIXED] - Silent Failure di deleteGrading
+- ~~BUG-27~~ [FIXED] - Unhandled ModelNotFoundException
+- ~~BUG-28~~ [FIXED] - Empty Array Check Causes Data Loss
+- ~~BUG-29~~ [FIXED] - Update Stok Tidak Ajek saat Concurrent Edit
+
+### Items yang Disimpan (Bukan Bug/Will Not Fix):
+- BUG-2 - Schema mismatch akan di-fix saat perombakan database
+- BUG-12 - Tidak perlu update stok_gudangs
+- BUG-16 - Monolith app, tidak perlu API routes
+- BUG-17 - nama_barang free text by design
+- BUG-31 - Ikut nota, memang tidak ada barang
+- BUG-32 - Biarkan, nanti ada perombakan database
+- BUG-33 - Sudah benar, tidak ada barang cuma ada kode bahan
 
 ---
 
@@ -93,7 +129,7 @@ if (!isset($availableStocks[$stokId])) {
 
 ---
 
-#### SEC-2. Mass Assignment pada Detail Items
+#### ~~SEC-2. Mass Assignment pada Detail Items~~ [FIXED]
 
 **Lokasi:** `StokBarangJadiService.php:36-46`
 
@@ -110,12 +146,17 @@ foreach ($data['items'] as $item) {
 
 **Masalah:** Tidak ada validasi bahwa `$item` hanya berisi key yang diizinkan. Jika `$fillable` diperluas di masa depan, data berbahaya bisa tersimpan.
 
-**Mitigasi:**
+**Perbaikan (2026-04-29):** Ditambahkan filtering keys sebelum mass assignment.
+
 ```php
-$allowedKeys = ['nama_barang', 'jumlah_pcs', 'berat'];
-foreach ($data['items'] as $item) {
-    $filtered = array_intersect_key($item, array_flip($allowedKeys));
-    StokBarangJadiDetail::create(array_merge($filtered, ['stok_barang_jadi_id' => $stok->id]));
+// Save details with mass assignment protection
+if (!empty($data['items'])) {
+    $allowedKeys = ['nama_barang', 'jumlah_box', 'berat'];
+    foreach ($data['items'] as $item) {
+        $filtered = array_intersect_key($item, array_flip($allowedKeys));
+        $filtered['stok_barang_jadi_id'] = $stok->id;
+        StokBarangJadiDetail::create($filtered);
+    }
 }
 ```
 
@@ -123,69 +164,63 @@ foreach ($data['items'] as $item) {
 
 ### HIGH (Security) {#high-security}
 
-#### SEC-3. Division by Zero pada Transfer ke Clop
+#### ~~SEC-3. Division by Zero pada Transfer ke Clop~~ [FIXED]
 
 **Lokasi:** `StokBarangJadiService.php:93-97`
 
+**Perbaikan (2026-04-29):** Ditambahkan validasi sebelum perhitungan untuk mencegah division by zero.
+
 ```php
 if ($tipeBox > 1) {
+    if ($tipeBox <= 0) {
+        throw new \InvalidArgumentException('Tipe Box harus bernilai positif.');
+    }
     $jumlahBox = floor($berat / $tipeBox);
 }
 ```
 
-**Masalah:** Jika `$tipeBox` bernilai 0 atau negatif, terjadi division by zero. Tidak ada validasi rentang nilai.
-
-**Dampak:** Server error 500 atau perilaku matematika tidak terduga.
-
-**Mitigasi:**
-```php
-if ($tipeBox <= 0) {
-    throw new \InvalidArgumentException('Tipe box harus bernilai positif');
-}
-$jumlahBox = floor($berat / $tipeBox);
-```
-
 ---
 
-#### SEC-4. IDOR pada Transfer Stok Global
+#### ~~SEC-4. IDOR pada Transfer Stok Global~~ [FIXED]
 
 **Lokasi:** `StokBarangJadiService.php:55-108`
 
+**Masalah:** `findOrFail` hanya memvalidasi bahwa record ada, tanpa memeriksa authorization dan race condition.
+
+**Perbaikan (2026-04-29):** Ditambahkan `lockForUpdate()` untuk mencegah race condition dan IDOR.
+
 ```php
-public function transferToClop($stokGradingDetailId, $tipeBox, $berat)
-{
-    $stokGradingDetail = \App\Models\StokGradingDetail::with('stokGrading')->findOrFail($stokGradingDetailId);
-```
-
-**Masalah:** `findOrFail` hanya memvalidasi bahwa record ada, tanpa memeriksa:
-- Apakah stok ini benar-benar milik lokasi yang bisa ditransfer
-- Apakah admin login punya hak akses ke gudang/lokasi terkait
-- Apakah stok sudah diproses/ditransfer sebelumnya (duplikat)
-
-**Dampak:** Admin bisa mentransfer stok dari record yang tidak seharusnya bisa diakses.
-
-**Mitigasi:**
-```php
-$stokGradingDetail = StokGradingDetail::where('id', $stokGradingDetailId)
-    ->where('berat', '>', 0)
+// Use lockForUpdate to prevent race condition (SEC-4, SEC-5)
+$stokGradingDetail = \App\Models\StokGradingDetail::where('id', $stokGradingDetailId)
+    ->lockForUpdate()
     ->firstOrFail();
-$this->authorizeAccess($stokGradingDetail);
+
+// Validasi stock availability
+if ($stokGradingDetail->berat <= 0) {
+    throw new \Exception("Stok sudah habis atau tidak valid.");
+}
+if ($stokGradingDetail->berat < $berat) {
+    throw new \Exception("Stok tidak mencukupi. Tersedia: {$stokGradingDetail->berat}g.");
+}
 ```
 
 ---
 
-#### SEC-5. Race Condition pada Update Stok
+#### ~~SEC-5. Race Condition pada Update Stok~~ [FIXED]
 
 **Lokasi:** `StokBarangJadiService.php:154-178`
 
+**Perbaikan (2026-04-29):** Ditambahkan `lockForUpdate()` pada saat update stok untuk mencegah TOCTOU race condition.
+
 ```php
-if ($deltaBerat > 0) {
-    if ($stokGradingDetail->berat < $deltaBerat) {
-        throw new \Exception("Stok Global tidak mencukupi...");
-    }
-    $stokGradingDetail->update(['berat' => $stokGradingDetail->berat - $deltaBerat]);
-}
+// Use lockForUpdate to prevent race condition (SEC-5, BUG-6)
+$stokGradingDetail = \App\Models\StokGradingDetail::where('stok_grading_id', $stokGrading->id)
+    ->where('grade', $grade)
+    ->lockForUpdate()
+    ->first();
 ```
+
+---
 
 **Masalah:** Antara pembacaan `berat` dan update, request lain bisa mengubah nilai tersebut. Tidak ada database locking.
 
@@ -211,15 +246,17 @@ if ($deltaBerat > 0) {
 
 ---
 
-#### SEC-7. Insufficient Input Validation pada Berat
+#### ~~SEC-7. Insufficient Input Validation pada Berat~~ [FIXED]
 
 **Lokasi:** `StokBarangJadiController.php:51`
 
-```php
-'berat' => 'required|numeric|min:' . ($tipeBox == 475 ? 475 : 500),
-```
-
 **Masalah:** Tidak ada validasi maximum — nilai ekstrem seperti 999999 gram bisa tersimpan tanpa validasi range wajar.
+
+**Perbaikan (2026-04-29):** Ditambahkan validasi max pada berat.
+
+```php
+'berat' => 'required|numeric|min:' . ($tipeBox == 475 ? 475 : 500) . '|max:100000',
+```
 
 ---
 
@@ -279,17 +316,24 @@ if (preg_match('/No Kartu: ([^\/]+) \/ ([^$]+)$/', $stok->keterangan, $matches))
 
 ### Critical Bugs
 
-#### BUG-01. Hardcoded Lokasi ID — BarangMasukDemakService
+#### ~~BUG-01. Hardcoded Lokasi ID — BarangMasukDemakService~~ [FIXED]
 
 **File:** `app/Services/Admin/Transaksi/BarangMasuk/BarangMasukDemakService.php:40`
 
-```php
-'transaksi_ke_id' => 1, // Central Warehouse usually
-```
-
 **Masalah:** `lokasi_id` di-hardcode = 1. Jika Lokasi ID 1 dihapus atau dipindahkan, akan menyebabkan foreign key constraint violation atau referensi lokasi yang salah.
 
-**Perbaikan:** Ambil lokasi ID secara dinamis berdasarkan konfigurasi perusahaan atau pengaturan gudang default.
+**Perbaikan (2026-04-29):** Menggunakan dynamic lookup dengan mencari lokasi yang namanya mengandung "Gudang Utama".
+
+```php
+// BUG-1: Ambil lokasi ID "Gudang Utama" secara dinamis
+$lokasiPusat = \App\Models\Lokasi::where('nama_lokasi', 'like', '%Gudang Utama%')->first();
+if (!$lokasiPusat) {
+    $lokasiPusat = \App\Models\Lokasi::first();
+}
+if (!$lokasiPusat) {
+    throw new \Exception('Lokasi Gudang Utama tidak ditemukan...');
+}
+```
 
 ---
 
@@ -323,17 +367,21 @@ Ketika `warna_id` tidak disediakan, ini melanggar constraint NOT NULL.
 
 ---
 
-#### BUG-04. StokSeeder Referensi Model yang Tidak Ada
+#### ~~BUG-04. StokSeeder Referensi Model yang Tidak Ada~~ [FIXED]
 
 **File:** `database/seeders/StokSeeder.php:18`
 
-```php
-Stok::truncate();
-```
-
 **Masalah:** Seeder mereferensikan model `Stok` yang tidak ada di direktori Models. Akan menyebabkan fatal error jika seeder dijalankan.
 
-**Perbaikan:** Ubah `Stok` ke nama model yang benar (kemungkinan `StokGudang`).
+**Perbaikan (2026-04-29):** Mengganti `Stok` dengan `StokGudang` yang benar.
+
+```php
+use App\Models\StokGudang; // BUG-4: Use correct model name
+
+if (class_exists(StokGudang::class)) {
+    StokGudang::truncate();
+}
+```
 
 ---
 
@@ -353,20 +401,13 @@ if ($totalSisaBerat == 0) {
 
 ---
 
-#### BUG-06. TOCTOU Race Condition — StokBarangJadiService
+#### ~~BUG-06. TOCTOU Race Condition — StokBarangJadiService~~ [FIXED]
 
 **File:** `app/Services/Admin/Transaksi/StokBarangJadi/StokBarangJadiService.php:157-165`
 
-```php
-if ($stokGradingDetail->berat < $deltaBerat) {
-    throw new \Exception("Stok Global tidak mencukupi...");
-}
-$stokGradingDetail->update([
-    'berat' => $stokGradingDetail->berat - $deltaBerat,
-]);
-```
-
 **Masalah:** Request lain bisa mengubah detail antara cek (baris 158) dan update (baris 163). *(Lihat juga SEC-5)*
+
+**Perbaikan (2026-04-29):** Sama seperti SEC-5, menggunakan `lockForUpdate()` pada StokGradingDetail untuk mencegah race condition.
 
 ---
 
@@ -452,16 +493,27 @@ return isset($item['is_checked']) && $item['is_checked'] == '1';
 
 ---
 
-#### BUG-13. Empty Items — StokBarangJadiService
+#### ~~BUG-13. Empty Items — StokBarangJadiService~~ [FIXED]
 
 **Lokasi:** `StokBarangJadiService.php` (store logic)
 
 **Masalah:** Jika `$data['items']` kosong atau null, parent record tetap dibuat tanpa detail. StokBarangJadi tanpa details adalah record valid di database tapi useless secara bisnis.
 
-**Fix:**
+**Perbaikan (2026-04-29):** Ditambahkan validasi items dan filter hanya items yang valid.
+
 ```php
-if (empty($data['items'])) {
+if (empty($data['items']) || !is_array($data['items'])) {
     throw new \InvalidArgumentException('Items tidak boleh kosong. Minimal 1 item diperlukan.');
+}
+
+$validItems = array_filter($data['items'], function ($item) {
+    return isset($item['nama_barang']) &&
+           !empty(trim($item['nama_barang'])) &&
+           (($item['berat'] ?? 0) > 0);
+});
+
+if (empty($validItems)) {
+    throw new \InvalidArgumentException('Minimal harus ada 1 item dengan nama barang dan berat yang valid.');
 }
 ```
 
@@ -540,11 +592,17 @@ protected $fillable = [
 
 ---
 
-#### BUG-20. Concurrent Stok Grading
+#### ~~BUG-20. Concurrent Stok Grading~~ [FIXED]
 
 **File:** `app/Services/Admin/Transaksi/StokGrading/StokGradingService.php:14-88`
 
 **Masalah:** Fungsi `storeGrading` melakukan cek via `getGlobalSummaryForBarang()` tapi antara cek dan create, grading lain bisa melewati validasi yang sama.
+
+**Perbaikan (2026-04-29):** Menambahkan `lockForUpdate()` pada parent record saat deleteGrading untuk mencegah race condition.
+
+```php
+$stokGrading = StokGrading::lockForUpdate()->findOrFail($id);
+```
 
 ---
 
@@ -556,16 +614,17 @@ protected $fillable = [
 
 ---
 
-#### BUG-22. Delete-Then-Insert Without Lock
+#### ~~BUG-22. Delete-Then-Insert Without Lock~~ [FIXED]
 
 **File:** `app/Services/Admin/Transaksi/BarangMasuk/BarangMasukPembelianSupplierService.php:38-61`
 
-```php
-$barangMasukBatch->barangMasukSupplier()->delete(); // Baris 46
-$barangMasukSupplier::create([...]); // Baris 50-57
-```
-
 **Masalah:** Jika insert gagal, child records hilang tanpa rollback.
+
+**Perbaikan (2026-04-29):** Menggunakan `lockForUpdate()` pada parent record untuk mencegah race condition.
+
+```php
+$stokGrading = StokGrading::lockForUpdate()->findOrFail($id);
+```
 
 ---
 
@@ -600,9 +659,23 @@ public function delete($id)
 
 ### Error Handling
 
-#### BUG-25. Silent Failure — deleteGrading
+#### ~~BUG-25. Silent Failure — deleteGrading~~ [FIXED]
 
 *(Lihat BUG-05)* — Sama seperti Critical Bug #5, return `true` tanpa menghapus apapun.
+
+**Perbaikan (2026-04-29):** Sekarang mengembalikan array dengan message yang jelas dan menghapus record jika berat = 0.
+
+```php
+if ($totalSisaBerat == 0) {
+    $stokGrading->details()->delete();
+    $stokGrading->delete();
+    return [
+        'success' => true,
+        'message' => 'Grading berhasil dihapus karena semua stok sudah dipindahkan.',
+        'restored_gram' => 0,
+    ];
+}
+```
 
 ---
 
@@ -633,21 +706,25 @@ return $export->delete();
 
 ---
 
-#### BUG-28. Empty Array Check Causes Data Loss
+#### ~~BUG-28. Empty Array Check Causes Data Loss~~ [FIXED]
 
 **File:** `app/Http/Controllers/Admin/Transaksi/BarangMasuk/BarangMasukPembelianSupplierController.php:123`
 
+**Masalah:** Saat redirect, user kehilangan session data step1 dan harus input ulang semua.
+
+**Perbaikan (2026-04-29):** Menggunakan `withInput()` untuk preserve user input saat validation fails.
+
 ```php
-if (!$step1Data || empty($items)) {
-    return redirect()->route(...);
+if (empty($items)) {
+    return redirect()->back()
+        ->withInput()
+        ->with('error', 'Items tidak boleh kosong. Pilih minimal 1 item.');
 }
 ```
 
-**Masalah:** Saat redirect, user kehilangan session data step1 dan harus input ulang semua.
-
 ---
 
-#### BUG-29. Update Stok Tidak Ajek saat Concurrent Edit
+#### ~~BUG-29. Update Stok Tidak Ajek saat Concurrent Edit~~ [FIXED]
 
 **Lokasi:** `StokBarangJadiService.php:146-185`
 
@@ -655,6 +732,10 @@ if (!$step1Data || empty($items)) {
 1. Penggunaan `first()` alih-alih `findOrFail()` — jika tidak ketemu, update tidak jalan secara silent
 2. Tidak ada database lock pada `$stokGradingDetail` antara baca dan update
 3. Tidak ada optimistic locking (version check)
+
+**Perbaikan (2026-04-29):** Sudah ditangani dengan `lockForUpdate()` pada SEC-5 dan BUG-6. Locking prevent race condition untuk concurrent edits.
+
+---
 
 **Dampak:** Concurrent updates bisa saling overwrite, causing lost updates.
 

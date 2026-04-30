@@ -120,9 +120,16 @@ class BarangMasukPembelianSupplierController extends Controller
         $step1Data = session('barang_masuk_supplier_step1');
         $items = session('barang_masuk_supplier_items', []);
 
-        if (!$step1Data || empty($items)) {
+        // BUG-28: Fixed - preserve input when validation fails
+        if (!$step1Data) {
             return redirect()->route('barang-masuk.pembelian-supplier.create.step1')
-                ->with('error', 'Data tidak lengkap atau sesi telah habis.');
+                ->with('error', 'Sesi telah habis. Silakan ulangi dari awal.');
+        }
+
+        if (empty($items)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Items tidak boleh kosong. Pilih minimal 1 item.');
         }
 
         try {
