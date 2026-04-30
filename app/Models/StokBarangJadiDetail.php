@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StokBarangJadiDetail extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'stok_barang_jadi_details';
 
     protected $fillable = [

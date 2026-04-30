@@ -14,6 +14,8 @@ class StokGradingService
     public function storeGrading(array $data)
     {
         return DB::transaction(function () use ($data) {
+            $stokId = $data['barang_id'] ?? null;
+
             // Calculate totals
             $totals = [
                 'gram_lempeng_bersih' => 0,
@@ -43,6 +45,30 @@ class StokGradingService
             }
 
             $totalGramKeseluruhan = $totals['gram_lempeng_bersih'] + $totals['gram_lempeng_kotor'] + $totals['gram_mangkok'];
+
+            // Lock source stock rows for update to prevent race condition
+            if ($stokId && $totalGramKeseluruhan > 0) {
+                $sumberStok = $data['sumber_stok'] ?? null;
+
+                if ($sumberStok === 'demak') {
+                    DB::table('barang_masuk_demak')
+                        ->where('barang_id', $stokId)
+                        ->lockForUpdate()
+                        ->get();
+                } elseif ($sumberStok === 'jasa_cuci') {
+                    DB::table('barang_masuk_jasa_cuci')
+                        ->where('barang_id', $stokId)
+                        ->lockForUpdate()
+                        ->get();
+                }
+
+                DB::table('stok_gradings')
+                    ->where('barang_id', $stokId)
+                    ->whereNull('deleted_at')
+                    ->lockForUpdate()
+                    ->get();
+            }
+
             $totalPcsKeseluruhan = 0;
             $totalBoxKeseluruhan = $totals['box_lempeng_bersih'] + $totals['box_lempeng_kotor'] + $totals['box_mangkok'];
 

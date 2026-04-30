@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Transaksi\barangKeluar;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\BarangKeluarDemak;
 use App\Models\BarangKeluar;
 use App\Models\Partai;
@@ -176,7 +177,14 @@ class BarangKeluarDemakController extends Controller
             return redirect()->route('barang-keluar.demak.index')->with('success', 'Data Batch berhasil diperbarui.');
         }
         catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            Log::error('BarangKeluarDemak update error', [
+                'user_id' => auth()->id(),
+                'batch_id' => $id,
+                'request' => $request->except('_token'),
+                'exception' => $e->getMessage(),
+            ]);
+            $message = config('app.debug') ? $e->getMessage() : 'Terjadi kesalahan sistem';
+            return back()->with('error', $message)->withInput();
         }
     }
 
@@ -193,7 +201,13 @@ class BarangKeluarDemakController extends Controller
             return redirect()->route('barang-keluar.demak.index')->with('success', 'Data Batch berhasil dihapus.');
         }
         catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            Log::error('BarangKeluarDemak delete error', [
+                'user_id' => auth()->id(),
+                'batch_id' => $id,
+                'exception' => $e->getMessage(),
+            ]);
+            $message = config('app.debug') ? $e->getMessage() : 'Terjadi kesalahan sistem';
+            return back()->with('error', $message);
         }
     }
 }
