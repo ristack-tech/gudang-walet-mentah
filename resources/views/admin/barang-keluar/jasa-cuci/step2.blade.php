@@ -70,16 +70,25 @@
                                     @enderror
                                 </div>
                                 <div>
-                                    <label for="berat_per_pcs" class="block text-sm font-medium text-gray-700 mb-1">Berat Per Pcs (Gram/Pcs) <span class="text-red-500">*</span></label>
-                                    <input type="number" step="0.01" min="0" name="berat_per_pcs" id="berat_per_pcs" required value="{{ old('berat_per_pcs') }}"
-                                        class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('berat_per_pcs') border-red-500 @enderror">
-                                    @error('berat_per_pcs')
+                                    <label for="pcs" class="block text-sm font-medium text-gray-700 mb-1">Pcs</label>
+                                    <input type="number" step="0.01" min="0" name="pcs" id="pcs" value="{{ old('pcs') }}"
+                                        class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('pcs') border-red-500 @enderror"
+                                        placeholder="Jumlah pcs (opsional)">
+                                    @error('pcs')
                                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                                     @enderror
                                 </div>
                             </div>
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="berat" class="block text-sm font-medium text-gray-700 mb-1">Berat (Gram) <span class="text-red-500">*</span></label>
+                                    <input type="number" step="0.01" min="0" name="berat" id="berat" required value="{{ old('berat') }}"
+                                        class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-200 @error('berat') border-red-500 @enderror">
+                                    @error('berat')
+                                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                                    @enderror
+                                </div>
                                 <div>
                                     <label for="kadar_air" class="block text-sm font-medium text-gray-700 mb-1">Kadar Air (%)</label>
                                     <input type="number" step="0.01" min="0" max="100" name="kadar_air" id="kadar_air" value="{{ old('kadar_air') }}"
@@ -120,7 +129,8 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Bahan</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Berat (Gram/Pcs)</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Pcs</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Berat (Gram)</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
                                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
@@ -131,7 +141,10 @@
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">{{ $item['kode_bahan'] }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
-                                            <span class="font-bold text-gray-800">{{ number_format($item['berat_per_pcs'], 2, ',', '.') }}</span>
+                                            {{ $item['pcs'] ? number_format($item['pcs'], 2, ',', '.') : '-' }}
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                                            <span class="font-bold text-gray-800">{{ number_format($item['berat'], 2, ',', '.') }}</span>
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                                             {{ $item['keterangan_cetak'] ?? '-' }}

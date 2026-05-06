@@ -79,7 +79,7 @@
                                     <th class="px-4 py-3 w-12 text-center">No</th>
                                     <th class="px-4 py-3">Barang & Kode Bahan</th>
                                     <th class="px-4 py-3 text-right">Berat Diterima</th>
-                                    <th class="px-4 py-3 text-right">Susut (gr)</th>
+                                    <th class="px-4 py-3 text-right">Susut (%)</th>
                                     <th class="px-4 py-3 text-right">Kadar Air</th>
                                 </tr>
                             </thead>
@@ -109,8 +109,8 @@
                                                 class="text-[10px] text-gray-400">gr</span>
                                         </td>
                                         <td class="px-4 py-3 text-right font-mono text-red-600">
-                                            {{ number_format($item->susut_per_item, 2, ',', '.') }} <span
-                                                class="text-[10px] text-gray-400">gr</span>
+                                            {{ number_format($item->persentase_susut, 2, ',', '.') }} <span
+                                                class="text-[10px] text-gray-400">%</span>
                                         </td>
                                         <td class="px-4 py-3 text-right font-mono text-gray-700">
                                             {{ number_format($item->kadar_air, 2, ',', '.') }} <span

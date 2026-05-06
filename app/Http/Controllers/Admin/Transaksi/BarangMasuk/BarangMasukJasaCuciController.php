@@ -106,9 +106,6 @@ class BarangMasukJasaCuciController extends Controller
                 if (empty($item['barang_id'])) {
                     throw new \Exception('Nama Barang tidak boleh kosong untuk item yang dicentang.');
                 }
-                if (empty($item['kadar_air']) && $item['kadar_air'] !== '0') {
-                    throw new \Exception('Kadar Air tidak boleh kosong untuk item yang dicentang.');
-                }
                 return $item;
             })->toArray();
 
