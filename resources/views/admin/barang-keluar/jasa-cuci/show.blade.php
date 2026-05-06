@@ -49,7 +49,8 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Bahan</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Berat per Pcs (Gr)</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Pcs</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Berat (Gr)</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kadar Air</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan Cetak</th>
                             </tr>
@@ -63,8 +64,9 @@
                                             {{ $item->kodeBahan->nama ?? '-' }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">{{ number_format($item->berat_per_pcs, 2, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->kadar_air ?? '0' }} %</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">{{ $item->pcs ? number_format($item->pcs, 2, ',', '.') : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">{{ number_format($item->berat, 2, ',', '.') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->kadar_air ? $item->kadar_air . ' %' : '-' }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500">{{ $item->keterangan_cetak ?? '-' }}</td>
                                 </tr>
                             @empty
@@ -76,9 +78,9 @@
                         @if($data->barangKeluarJasaCuci->count() > 0)
                             <tfoot class="bg-gray-50 font-bold text-gray-900 border-t border-gray-200">
                                 <tr>
-                                    <td colspan="2" class="px-6 py-4 text-right text-sm">Total Berat Pcs:</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">{{ number_format($data->barangKeluarJasaCuci->sum('berat_per_pcs'), 2, ',', '.') }}</td>
-                                    <td colspan="2"></td>
+                                    <td colspan="2" class="px-6 py-4 text-right text-sm">Total Berat:</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">{{ number_format($data->barangKeluarJasaCuci->sum('berat'), 2, ',', '.') }}</td>
+                                    <td colspan="3"></td>
                                 </tr>
                             </tfoot>
                         @endif

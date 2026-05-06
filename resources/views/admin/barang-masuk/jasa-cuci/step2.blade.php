@@ -56,7 +56,7 @@
                                 <th scope="col" class="py-3 px-4 text-left border-y border-gray-200">Kode Bahan</th>
                                 <th scope="col" class="py-3 px-4 text-right border-y border-gray-200">Gram Keluar</th>
                                 <th scope="col" class="py-3 px-4 text-left text-blue-600 border-y border-gray-200 bg-blue-50/30">Nama Barang Baru <span class="text-red-500">*</span></th>
-                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-gray-200 bg-blue-50/30">Kadar Air Baru <span class="text-red-500">*</span></th>
+                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-gray-200 bg-blue-50/30">Kadar Air Baru</th>
                                 <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-r border-gray-200 rounded-r-lg bg-blue-50/30">Gram Aktual Diterima <span class="text-red-500">*</span></th>
                             </tr>
                         </thead>
@@ -92,7 +92,7 @@
                                 <!-- Gram Keluar Column -->
                                 <td class="px-4 py-4 whitespace-nowrap border-y border-gray-100 group-hover:border-blue-100 text-right">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-semibold bg-gray-100 text-gray-800 border border-gray-200 shadow-sm">
-                                        {{ number_format($item->berat_per_pcs, 2, ',', '.') }}
+                                        {{ number_format($item->berat, 2, ',', '.') }}
                                         <span class="ml-1 text-gray-500 text-xs font-normal">gr</span>
                                     </span>
                                 </td>

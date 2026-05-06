@@ -29,7 +29,8 @@ class BarangKeluarJasaCuciService
                     'barang_keluar_id' => $barangKeluar->id,
                     'kode_bahan_id' => $kodeBahan->id,
                     'keterangan_cetak' => $item['keterangan_cetak'] ?? null,
-                    'berat_per_pcs' => $item['berat_per_pcs'],
+                    'berat' => $item['berat'],
+                    'pcs' => $item['pcs'] ?? null,
                     'kadar_air' => $item['kadar_air'] ?? null,
                 ]);
             }
@@ -59,7 +60,8 @@ class BarangKeluarJasaCuciService
                     'barang_keluar_id' => $barangKeluar->id,
                     'kode_bahan_id' => $kodeBahan->id,
                     'keterangan_cetak' => $item['keterangan_cetak'] ?? null,
-                    'berat_per_pcs' => $item['berat_per_pcs'],
+                    'berat' => $item['berat'],
+                    'pcs' => $item['pcs'] ?? null,
                     'kadar_air' => $item['kadar_air'] ?? null,
                 ]);
             }

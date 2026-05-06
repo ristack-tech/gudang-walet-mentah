@@ -81,7 +81,8 @@ class BarangKeluarJasaCuciController extends Controller
         $validated = $request->validate([
             'kode_bahan' => 'required|string',
             'keterangan_cetak' => 'nullable|string',
-            'berat_per_pcs' => 'required|numeric',
+            'berat' => 'required|numeric',
+            'pcs' => 'nullable|numeric',
             'kadar_air' => 'nullable|numeric',
         ]);
 
@@ -152,7 +153,8 @@ class BarangKeluarJasaCuciController extends Controller
             'items' => 'required|array|min:1',
             'items.*.kode_bahan' => 'required|string',
             'items.*.keterangan_cetak' => 'nullable|string',
-            'items.*.berat_per_pcs' => 'required|numeric',
+            'items.*.berat' => 'required|numeric',
+            'items.*.pcs' => 'nullable|numeric',
             'items.*.kadar_air' => 'nullable|numeric',
         ]);
 

@@ -28,12 +28,12 @@ class BarangMasukJasaCuciService
             foreach ($selectedItems as $item) {
                 $outItem = BarangKeluarJasaCuci::findOrFail($item['barang_keluar_jasa_cuci_id']);
                 
-                // Berat out is in berat_per_pcs apparently based on db schema naming convention used.
-                $susut = $outItem->berat_per_pcs - $item['gram_diterima'];
+                // Berat out is now 'berat' in barang_keluar_jasa_cuci after schema change
+                $susut = $outItem->berat - $item['gram_diterima'];
                 $totalSusut += $susut;
 
                 // Calculate persentase_susut
-                $persentase = $outItem->berat_per_pcs > 0 ? ($susut / $outItem->berat_per_pcs) * 100 : 0;
+                $persentase = $outItem->berat > 0 ? ($susut / $outItem->berat) * 100 : 0;
 
                 BarangMasukJasaCuci::create([
                     'barang_masuk_id' => $barangMasuk->id,

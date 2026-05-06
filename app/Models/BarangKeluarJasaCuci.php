@@ -16,7 +16,8 @@ class BarangKeluarJasaCuci extends Model
         'nama_barang_id',
         'kode_bahan_id',
         'keterangan_cetak',
-        'berat_per_pcs',
+        'berat',
+        'pcs',
         'kadar_air',
         'status_kembali',
     ];
