@@ -33,6 +33,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referensi Keluar</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Terima</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Susut Barang</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rata-rata Susut (%)</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
@@ -47,6 +48,15 @@
                                     
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-red-600">
                                         {{ number_format($item->total_susut_batch, 2, ',', '.') }} gr
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-orange-600">
+                                        @php
+                                            $totalGramBatch = $item->barangMasukDemak->sum('gram');
+                                            $totalSusutBatch = $item->total_susut_batch;
+                                            $totalBeratAwal = $totalGramBatch + $totalSusutBatch;
+                                            $rataRataSusutBatch = $totalBeratAwal > 0 ? ($totalSusutBatch / $totalBeratAwal) * 100 : 0;
+                                        @endphp
+                                        {{ number_format($rataRataSusutBatch, 2, ',', '.') }} %
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
