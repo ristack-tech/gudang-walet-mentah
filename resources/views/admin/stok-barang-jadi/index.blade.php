@@ -26,23 +26,6 @@
                 </a>
             </div>
 
-            <!-- Messages/Alerts -->
-            @if (session('success'))
-                <div class="mb-4 p-4 rounded-md bg-green-50 border border-green-200">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-green-800">
-                                {{ session('success') }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            @endif
 
             <!-- Table Actions Container -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-t-lg border border-b-0 border-gray-200 shadow-sm gap-4">
@@ -197,7 +180,7 @@
                                             </td> Ini seng Sebelum e-->
                                              <td class="px-4 py-3 font-medium text-gray-900">
                                                 {{ $namaBarangGlobal }} - {{ strtoupper(str_replace('_', ' ', $detailItem->type)) }} ({{ $detailItem->grade }})
-                                                <br><span class="text-xs text-gray-500 font-normal">Tersedia: {{ number_format($detailItem->berat, 2, ',', '.') }}gr / {{ $detailItem->box }} Box</span> // Harus e box ga sih, org dari Stok Grading aja Box
+                                                <br><span class="text-xs text-gray-500 font-normal">Tersedia: {{ number_format($detailItem->berat, 2, ',', '.') }}gr / {{ $detailItem->box }} Box</span> 
                                             </td> 
                                             <td class="px-4 py-3 text-center">
                                                 <button type="button" 
@@ -236,7 +219,6 @@
                                                 <option value="475">Box 475 gr</option>
                                             </select>
                                         </div>
-// nah disini itu ketika create nanti akan create per box dan pasti per box
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Berat (Gram)</label>
                                             <input type="number" step="0.01" name="berat" id="beratInput" required min="500"

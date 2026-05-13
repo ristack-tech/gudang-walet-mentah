@@ -68,6 +68,7 @@
                                     <th class="px-4 py-3 text-right">Pcs</th>
                                     <th class="px-4 py-3 text-right">Gram Terima</th>
                                     <th class="px-4 py-3 text-right text-red-600">Susut (gr)</th>
+                                    <th class="px-4 py-3 text-right text-orange-600">Susut (%)</th>
                                     <th class="px-4 py-3 rounded-tr-md">Keterangan</th>
                                 </tr>
                             </thead>
@@ -76,12 +77,14 @@
                                     $totalGram = 0;
                                     $totalPcs = 0;
                                     $totalBox = 0;
+                                    $totalSusutAll = 0;
                                 @endphp
                                 @forelse($barangMasukBatch->barangMasukDemak as $index => $item)
                                     @php
                                         $totalGram += $item->gram;
                                         $totalPcs += $item->pcs;
                                         $totalBox += $item->box;
+                                        $totalSusutAll += $item->susut_per_item;
                                     @endphp
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-4 py-3 font-semibold text-gray-900 align-top">{{ $index + 1 }}</td>
@@ -102,13 +105,20 @@
                                         <td class="px-4 py-3 font-mono text-red-600 font-bold text-right align-top text-sm">
                                             {{ number_format($item->susut_per_item, 2, ',', '.') }}
                                         </td>
+                                        <td class="px-4 py-3 font-mono text-orange-600 text-right align-top text-sm">
+                                            @php
+                                                $beratAwal = $item->gram + $item->susut_per_item;
+                                                $persentase = $beratAwal > 0 ? ($item->susut_per_item / $beratAwal) * 100 : 0;
+                                            @endphp
+                                            {{ number_format($persentase, 2, ',', '.') }} %
+                                        </td>
                                         <td class="px-4 py-3 text-gray-600 align-top text-sm">
                                             {{ $item->keterangan ?? '-' }}
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-4 py-8 text-center text-gray-500 text-sm border-t border-gray-200">Tidak ada item dalam batch ini.</td>
+                                        <td colspan="8" class="px-4 py-8 text-center text-gray-500 text-sm border-t border-gray-200">Tidak ada item dalam batch ini.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -120,7 +130,7 @@
             <!-- ✅ Ringkasan Total -->
             <div class="bg-white shadow rounded-lg border p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Kuantitas</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
 
                     <!-- Total Items -->
                     <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
@@ -175,6 +185,25 @@
                                 <div class="text-sm text-purple-600 font-medium">Total Box</div>
                                 <div class="text-2xl font-bold text-purple-900">
                                     {{ !empty($totalBox) ? number_format($totalBox, 0, ',', '.') : '0' }}<span class="text-sm ml-1">bx</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rata-rata Susut (%) -->
+                    <div class="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
+                        <div class="flex items-center">
+                            <svg class="w-8 h-8 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                            </svg>
+                            <div>
+                                <div class="text-sm text-red-600 font-medium">Rata-rata Susut</div>
+                                <div class="text-2xl font-bold text-red-900">
+                                    @php
+                                        $totalAwalAll = $totalGram + ($totalSusutAll ?? 0);
+                                        $rataRataPersentase = $totalAwalAll > 0 ? (($totalSusutAll ?? 0) / $totalAwalAll) * 100 : 0;
+                                    @endphp
+                                    {{ number_format($rataRataPersentase, 2, ',', '.') }}<span class="text-sm ml-1">%</span>
                                 </div>
                             </div>
                         </div>
