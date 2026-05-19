@@ -127,4 +127,26 @@ class BarangMasukJasaCuciController extends Controller
         $barangMasukBatch = \App\Models\BarangMasuk::with(['barangMasukJasaCuci.barangKeluarJasaCuci.namaBarang', 'barangKeluar'])->findOrFail($id);
         return view('admin.barang-masuk.jasa-cuci.show', compact('barangMasukBatch'));
     }
+
+    public function edit($id)
+    {
+        $barangMasuk = \App\Models\BarangMasuk::findOrFail($id);
+        return response()->json([
+            'id' => $barangMasuk->id,
+            'tanggal_terima' => $barangMasuk->tanggal_terima,
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'tanggal_terima' => 'required|date',
+        ]);
+
+        $barangMasuk = \App\Models\BarangMasuk::findOrFail($id);
+        $barangMasuk->tanggal_terima = $validated['tanggal_terima'];
+        $barangMasuk->save();
+
+        return redirect()->back()->with('success', 'Tanggal terima berhasil diperbarui.');
+    }
 }
