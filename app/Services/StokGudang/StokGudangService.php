@@ -138,6 +138,95 @@ class StokGudangService
      * @param string|null $search Search keyword for item name
      * @return \Illuminate\Support\Collection
      */
+    /**
+     * Get Demak stock grouped by partai (not aggregated by barang).
+     * Shows each unique partai with its remaining stock.
+     */
+    public function getDemakByPartai(?string $search = null)
+    {
+        $graded = DB::table('stok_gradings')
+            ->select(
+                'barang_id',
+                'partai',
+                DB::raw('SUM(total_gram_keseluruhan) as used_gram')
+            )
+            ->where('sumber_stok', 'demak')
+            ->whereNull('deleted_at')
+            ->groupBy('barang_id', 'partai');
+
+        $query = DB::table('barang_masuk_demak')
+            ->join('nama_barang', 'barang_masuk_demak.barang_id', '=', 'nama_barang.id')
+            ->leftJoinSub($graded, 'graded', function ($join) {
+                $join->on('barang_masuk_demak.barang_id', '=', 'graded.barang_id')
+                     ->on('barang_masuk_demak.partai', '=', 'graded.partai');
+            })
+            ->select(
+                'barang_masuk_demak.id',
+                'nama_barang.id as barang_id',
+                'nama_barang.nama_barang',
+                'barang_masuk_demak.partai',
+                DB::raw('barang_masuk_demak.gram - COALESCE(graded.used_gram, 0) as total_gram'),
+                DB::raw('barang_masuk_demak.pcs as total_pcs'),
+                DB::raw('barang_masuk_demak.box as total_box')
+            )
+            ->whereNotNull('barang_masuk_demak.partai')
+            ->where('barang_masuk_demak.partai', '!=', '')
+            ->having('total_gram', '>', 0);
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_barang.nama_barang', 'like', "%{$search}%")
+                  ->orWhere('barang_masuk_demak.partai', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Get Jasa Cuci stock grouped by kode_bahan (not aggregated by barang).
+     * Shows each unique kode_bahan with its remaining stock.
+     */
+    public function getJasaCuciByKodeBahan(?string $search = null)
+    {
+        $graded = DB::table('stok_gradings')
+            ->select(
+                'barang_id',
+                'partai as kode_ref',
+                DB::raw('SUM(total_gram_keseluruhan) as used_gram')
+            )
+            ->where('sumber_stok', 'jasa_cuci')
+            ->whereNull('deleted_at')
+            ->groupBy('barang_id', 'partai');
+
+        $query = DB::table('barang_masuk_jasa_cuci')
+            ->join('nama_barang', 'barang_masuk_jasa_cuci.barang_id', '=', 'nama_barang.id')
+            ->join('kode_bahan', 'barang_masuk_jasa_cuci.kode_bahan_id', '=', 'kode_bahan.id')
+            ->leftJoinSub($graded, 'graded', function ($join) {
+                $join->on('barang_masuk_jasa_cuci.barang_id', '=', 'graded.barang_id')
+                     ->on('kode_bahan.nama', '=', 'graded.kode_ref');
+            })
+            ->select(
+                'barang_masuk_jasa_cuci.id',
+                'nama_barang.id as barang_id',
+                'nama_barang.nama_barang',
+                'kode_bahan.nama as kode_bahan',
+                'kode_bahan.id as kode_bahan_id',
+                DB::raw('barang_masuk_jasa_cuci.berat_per_pcs - COALESCE(graded.used_gram, 0) as total_gram'),
+                DB::raw('1 as total_pcs'),
+                DB::raw('0 as total_box')
+            );
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_barang.nama_barang', 'like', "%{$search}%")
+                  ->orWhere('kode_bahan.nama', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->having('total_gram', '>', 0)->get();
+    }
+
     public function getGlobalSummary(?string $search = null)
     {
         $demak = DB::table('barang_masuk_demak')

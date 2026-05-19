@@ -16,8 +16,10 @@ class StokGudangController extends Controller
 
     public function index()
     {
-        $demakCount = \App\Models\BarangMasukDemak::count();
-        $jasaCuciCount = \App\Models\BarangMasukJasaCuci::count();
+        // Use service methods that account for grading deductions,
+        // so fully-graded items are no longer counted
+        $demakCount = collect($this->stokGudangService->getDemakSummary())->count();
+        $jasaCuciCount = collect($this->stokGudangService->getJasaCuciSummary())->count();
         $globalCount = collect($this->stokGudangService->getGlobalSummary())->count();
 
         return view('admin.stok-gudang.index', compact('demakCount', 'jasaCuciCount', 'globalCount'));

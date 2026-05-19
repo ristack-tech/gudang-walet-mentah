@@ -23,13 +23,19 @@ class StokGradingController extends Controller
 
     public function index(Request $request)
     {
-        $query = StokGrading::with('namaBarang')->orderBy('tanggal', 'desc');
+        // Group by no_kartu to combine items from same grading batch
+        $query = StokGrading::select('no_kartu', 'tanggal')
+            ->selectRaw('MIN(id) as first_id')
+            ->selectRaw('SUM(total_gram_keseluruhan) as total_gram')
+            ->selectRaw('SUM(total_box_keseluruhan) as total_box')
+            ->groupBy('no_kartu', 'tanggal')
+            ->orderBy('tanggal', 'desc');
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->whereHas('namaBarang', function($q) use ($search) {
-                $q->where('nama_barang', 'like', "%{$search}%");
-            })->orWhere('no_kartu', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('no_kartu', 'like', "%{$search}%");
+            });
         }
 
         $stokGradingBatch = $query->paginate(10);
@@ -39,8 +45,8 @@ class StokGradingController extends Controller
 
     public function createStep1(Request $request)
     {
-        $demakSummary = $this->stokGudangService->getDemakSummary($request->search);
-        $jasaCuciSummary = $this->stokGudangService->getJasaCuciSummary($request->search);
+        $demakSummary = $this->stokGudangService->getDemakByPartai($request->search);
+        $jasaCuciSummary = $this->stokGudangService->getJasaCuciByKodeBahan($request->search);
 
         return view('admin.stok-grading.create-step-1', compact('demakSummary', 'jasaCuciSummary'));
     }
@@ -97,9 +103,12 @@ class StokGradingController extends Controller
 
     public function store(Request $request)
     {
+        \Log::info('STORE REQUEST items_data: ' . $request->input('items_data'));
+
         // Handle new checklist pattern with items_data JSON
         if ($request->has('items_data')) {
             $itemsData = json_decode($request->input('items_data'), true);
+            \Log::info('STORE decoded items_data: ' . json_encode($itemsData));
 
             if (empty($itemsData)) {
                 return redirect()->route('stok-grading.create.step1')->with('error', 'Silahkan pilih minimal satu item terlebih dahulu.');
@@ -127,37 +136,48 @@ class StokGradingController extends Controller
                 return back()->withErrors(['grades' => 'Minimal harus ada satu grade yang ditambahkan dan memiliki berat (Gram)-nya.'])->withInput();
             }
 
-            // Loop melalui setiap item yang dipilih
-            $createdCount = 0;
+            // Calculate total gram available from all selected items
+            $totalGramAvailable = 0;
             foreach ($itemsData as $item) {
-                $stokId = $item['id'];
+                $totalGramAvailable += (float) $item['gram'];
+            }
+
+            // Validasi: total gram grades tidak boleh melebihi total gram semua item yang dipilih
+            if (round($totalGramGrades, 2) > round($totalGramAvailable, 2)) {
+                return back()->withErrors(['grades' => 'Total berat grade ('.$totalGramGrades.' Gr) melebihi total stok yang dipilih ('.$totalGramAvailable.' Gr).'])->withInput();
+            }
+
+            // Create separate grading per item with same no_kartu for grouping
+            $noKartu = 'STG-' . date('YmdHis');
+            $createdCount = 0;
+
+            foreach ($itemsData as $index => $item) {
+                $barangId = $item['barang_id'];
                 $sumberStok = $item['sumber'];
-                $gramInput = (float) $item['gram'];
 
-                // Validasi: total gram dari grades tidak boleh melebihi gram yang dipilih dari item
-                if (round($totalGramGrades, 2) > round($gramInput, 2)) {
-                    continue; // Skip item ini karena exceeds
-                }
-
-                // Get nama barang
-                $namaBarangModel = \App\Models\NamaBarang::find($stokId);
-                $namaBarang = $namaBarangModel ? $namaBarangModel->nama_barang : '-';
+                // Determine partai/kode_bahan based on sumber
+                $partai = $sumberStok === 'demak'
+                    ? ($item['partai'] ?? $item['nama'])
+                    : ($item['kode_bahan'] ?? $item['nama']);
 
                 $data = [
-                    'barang_id' => $stokId,
+                    'barang_id' => $barangId,
                     'sumber_stok' => $sumberStok,
-                    'partai' => $namaBarang,
+                    'partai' => $partai,
                     'box_awal' => 0,
-                    'grades' => $grades,
+                    // Only the first item gets the grades; others are partai markers only
+                    'grades' => $index === 0 ? $grades : [],
+                    'no_kartu' => $noKartu, // Same no_kartu for grouping
+                    // Each item's consumed gram from step 1 (for stok gudang deduction)
+                    'consumed_gram' => (float) $item['gram'],
                 ];
 
-                $this->stokGradingService->storeGrading($data);
+                $this->stokGradingService->storeGradingWithNoKartu($data);
                 $createdCount++;
             }
 
             return redirect()->route('stok-grading.index')
-                ->with('success', "Grading berhasil disimpan untuk {$createdCount} item.");
-
+                ->with('success', "Grading berhasil disimpan untuk " . count($itemsData) . " item ({$totalGramGrades} Gr).");
         } else {
             // Legacy single-item pattern
             $validatedData = $request->validate([
@@ -213,12 +233,36 @@ class StokGradingController extends Controller
 
     public function show($id)
     {
-        $gradingBatch = $this->stokGradingService->getGradingFormatted($id);
-        
-        $namaBarangModel = \App\Models\NamaBarang::find($gradingBatch['barang_id']);
-        $namaBarang = $namaBarangModel ? $namaBarangModel->nama_barang : 'Unknown';
+        // Find the grading record to get its no_kartu
+        $grading = StokGrading::findOrFail($id);
+        $noKartu = $grading->no_kartu;
 
-        return view('admin.stok-grading.show', compact('gradingBatch', 'namaBarang'));
+        // Fetch ALL grading records in this batch (same no_kartu)
+        $batchGradings = StokGrading::with('details', 'namaBarang')
+            ->where('no_kartu', $noKartu)
+            ->get();
+
+        // Build partai list: P-001, P-002, etc.
+        // Each record stores the same total_gram_keseluruhan (batch total),
+        // so for individual partai gram, we show the original input gram from step 1
+        $partaiList = [];
+        foreach ($batchGradings as $index => $g) {
+            $partaiList[] = [
+                'label' => 'P-' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
+                'partai' => $g->partai,
+                'nama_barang' => $g->namaBarang->nama_barang ?? 'Unknown',
+                'sumber_stok' => $g->sumber_stok,
+            ];
+        }
+
+        // Use only the FIRST grading record for grade details
+        // (all records in a batch share the same grades data)
+        $firstGrading = $batchGradings->first();
+        $gradingBatch = $this->stokGradingService->getGradingFormatted($firstGrading->id);
+        $gradingBatch['partai_list'] = $partaiList;
+        $gradingBatch['no_kartu'] = $noKartu;
+
+        return view('admin.stok-grading.show', compact('gradingBatch'));
     }
 
     public function edit($id)
