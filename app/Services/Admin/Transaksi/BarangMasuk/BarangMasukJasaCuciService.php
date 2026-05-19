@@ -28,12 +28,14 @@ class BarangMasukJasaCuciService
             foreach ($selectedItems as $item) {
                 $outItem = BarangKeluarJasaCuci::findOrFail($item['barang_keluar_jasa_cuci_id']);
                 
-                // Berat out is now 'berat' in barang_keluar_jasa_cuci after schema change
-                $susut = $outItem->berat - $item['gram_diterima'];
+                $beratSetoran = $item['gram_diterima'];
+                $beratTambangan = $item['berat_timbangan_gudang'];
+                
+                $susut = $beratSetoran - $beratTambangan;
                 $totalSusut += $susut;
 
-                // Calculate persentase_susut
-                $persentase = $outItem->berat > 0 ? ($susut / $outItem->berat) * 100 : 0;
+                // Calculate persentase_selisih from the fields (beratSetoran and beratTambangan)
+                $persentase = $beratSetoran > 0 ? ($susut / $beratSetoran) * 100 : 0;
 
                 BarangMasukJasaCuci::create([
                     'barang_masuk_id' => $barangMasuk->id,
@@ -41,9 +43,9 @@ class BarangMasukJasaCuciService
                     'lokasi_jasa_cuci_id' => $step1['lokasi_jasa_cuci_id'],
                     'barang_id' => $item['barang_id'],
                     'kode_bahan_id' => $outItem->kode_bahan_id,
-                    'berat_per_pcs' => $item['gram_diterima'],
-                    'persentase_susut' => $persentase,
-                    'kadar_air' => $item['kadar_air'],
+                    'berat_per_pcs' => $beratSetoran,
+                    'persentase_selisih' => $persentase,
+                    'berat_timbangan_gudang' => $beratTambangan,
                     'susut_per_item' => $susut,
                 ]);
 

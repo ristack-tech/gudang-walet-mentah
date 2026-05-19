@@ -39,17 +39,6 @@
                 </div>
             </div>
 
-            @if(session('error'))
-                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-                    <div class="text-red-700 text-sm">{{ session('error') }}</div>
-                </div>
-            @endif
-            @if(session('success'))
-                <div id="alert-success" class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-md">
-                    <div class="text-green-700 text-sm">{{ session('success') }}</div>
-                </div>
-            @endif
-
             <!-- Form Box -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
                 <div class="p-6 sm:p-8">

@@ -93,18 +93,30 @@ class BarangMasukJasaCuciController extends Controller
             'items.*.barang_keluar_jasa_cuci_id' => 'required|exists:barang_keluar_jasa_cuci,id',
             'items.*.gram_diterima' => 'nullable|numeric',
             'items.*.barang_id' => 'nullable|exists:nama_barang,id',
-            'items.*.kadar_air' => 'nullable|numeric',
+            'items.*.berat_timbangan_gudang' => 'nullable|numeric',
         ]);
 
         try {
             $selectedItems = collect($request->items)->filter(function ($item) {
                 return isset($item['is_checked']) && $item['is_checked'] == '1';
             })->map(function ($item) {
+                $outItem = \App\Models\BarangKeluarJasaCuci::findOrFail($item['barang_keluar_jasa_cuci_id']);
+                $maxGram = $outItem->berat;
+
                 if (empty($item['gram_diterima']) || $item['gram_diterima'] <= 0) {
                     throw new \Exception('Gram diterima tidak boleh kosong atau <= 0 untuk item yang dicentang.');
                 }
+                if ($item['gram_diterima'] > $maxGram) {
+                    throw new \Exception("Berat Setoran tidak boleh melebihi Gram Keluar (" . number_format($maxGram, 2, ',', '.') . " gr) untuk item yang dicentang.");
+                }
                 if (empty($item['barang_id'])) {
                     throw new \Exception('Nama Barang tidak boleh kosong untuk item yang dicentang.');
+                }
+                if (empty($item['berat_timbangan_gudang']) || $item['berat_timbangan_gudang'] <= 0) {
+                    throw new \Exception('Berat timbangan gudang tidak boleh kosong atau <= 0 untuk item yang dicentang.');
+                }
+                if ($item['berat_timbangan_gudang'] > $maxGram) {
+                    throw new \Exception("Berat Timbangan Gudang tidak boleh melebihi Gram Keluar (" . number_format($maxGram, 2, ',', '.') . " gr) untuk item yang dicentang.");
                 }
                 return $item;
             })->toArray();

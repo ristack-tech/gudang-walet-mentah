@@ -56,8 +56,8 @@
                                 <th scope="col" class="py-3 px-4 text-left border-y border-gray-200">Kode Bahan</th>
                                 <th scope="col" class="py-3 px-4 text-right border-y border-gray-200">Gram Keluar</th>
                                 <th scope="col" class="py-3 px-4 text-left text-blue-600 border-y border-gray-200 bg-blue-50/30">Nama Barang Baru <span class="text-red-500">*</span></th>
-                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-gray-200 bg-blue-50/30">Kadar Air Baru</th>
-                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-r border-gray-200 rounded-r-lg bg-blue-50/30">Gram Aktual Diterima <span class="text-red-500">*</span></th>
+                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-gray-200 bg-blue-50/30">Berat Setoran <span class="text-red-500">*</span></th>
+                                <th scope="col" class="py-3 px-4 text-right text-blue-600 border-y border-r border-gray-200 rounded-r-lg bg-blue-50/30">Berat Timbangan Gudang <span class="text-red-500">*</span></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -107,25 +107,25 @@
                                     </select>
                                 </td>
 
-                                <!-- New Kadar Air Column -->
+                                <!-- Berat Setoran Column -->
                                 <td class="px-4 py-4 whitespace-nowrap border-y border-gray-100 group-hover:border-blue-100 group-hover:bg-blue-50/10 text-right">
                                     <div class="flex items-center justify-end">
                                         <div class="relative rounded-md shadow-sm">
-                                            <input type="number" step="0.01" name="items[{{ $idx }}][kadar_air]"
-                                                class="form-input block w-24 sm:text-sm sm:leading-6 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-right pr-6"
-                                                value="{{ $item->kadar_air ?? '' }}" placeholder="0">
+                                            <input type="number" step="0.01" min="0" max="{{ $item->berat }}" name="items[{{ $idx }}][gram_diterima]"
+                                                class="form-input block w-32 sm:text-sm sm:leading-6 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-right pr-8 transition duration-150"
+                                                placeholder="0.00">
                                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                                <span class="text-gray-500 sm:text-xs">%</span>
+                                                <span class="text-gray-500 sm:text-xs">gr</span>
                                             </div>
                                         </div>
                                     </div>
                                 </td>
 
-                                <!-- Gram Diterima Column -->
+                                <!-- Berat Timbangan Gudang Column -->
                                 <td class="px-4 py-4 whitespace-nowrap border-y border-r border-gray-100 group-hover:border-blue-100 rounded-r-xl group-hover:bg-blue-50/10 text-right">
                                     <div class="flex items-center justify-end">
                                         <div class="relative rounded-md shadow-sm">
-                                            <input type="number" step="0.01" name="items[{{ $idx }}][gram_diterima]"
+                                            <input type="number" step="0.01" min="0" max="{{ $item->berat }}" name="items[{{ $idx }}][berat_timbangan_gudang]"
                                                 class="form-input block w-32 sm:text-sm sm:leading-6 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-right pr-8 transition duration-150"
                                                 placeholder="0.00">
                                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -188,7 +188,7 @@
                             <div class="mt-3">
                                 <p class="text-sm text-gray-600 leading-relaxed">
                                     Apakah Anda yakin ingin menyimpan data penerimaan jasa cuci ini? Data yang sudah tersimpan <strong class="text-red-600">bersifat permanen</strong> dan <strong>tidak dapat di-edit ataupun dihapus</strong> setelah langkah ini untuk menjaga validitas susut! <br><br>
-                                    Pastikan <span class="font-semibold text-blue-600">Gram Aktual Diterima</span> sudah akurat.
+                                    Pastikan <span class="font-semibold text-blue-600">Berat Setoran</span> dan <span class="font-semibold text-blue-600">Berat Timbangan Gudang</span> sudah akurat.
                                 </p>
                             </div>
                         </div>
