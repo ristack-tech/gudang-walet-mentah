@@ -78,23 +78,23 @@
                                 <tr>
                                     <th class="px-4 py-3 w-12 text-center">No</th>
                                     <th class="px-4 py-3">Barang & Kode Bahan</th>
-                                    <th class="px-4 py-3 text-right">Berat Diterima</th>
-                                    <th class="px-4 py-3 text-right">Susut (%)</th>
-                                    <th class="px-4 py-3 text-right">Kadar Air</th>
+                                    <th class="px-4 py-3 text-right">Berat Setoran</th>
+                                    <th class="px-4 py-3 text-right">Berat Timbangan Gudang</th>
+                                    <th class="px-4 py-3 text-right">Selisih (%)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 @php
                                     $totalBeratPcs = 0;
-                                    $totalSusut = 0;
-                                    $totalKA = 0;
+                                    $totalSelisih = 0;
+                                    $totalBeratTimbanganGudang = 0;
                                     $itemCount = $barangMasukBatch->barangMasukJasaCuci->count();
                                 @endphp
                                 @forelse($barangMasukBatch->barangMasukJasaCuci as $index => $item)
                                     @php
                                         $totalBeratPcs += $item->berat_per_pcs;
-                                        $totalSusut += $item->persentase_susut;
-                                        $totalKA += $item->kadar_air;
+                                        $totalSelisih += $item->persentase_selisih;
+                                        $totalBeratTimbanganGudang += $item->berat_timbangan_gudang;
                                     @endphp
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-4 py-3 text-center text-gray-500 font-medium">{{ $index + 1 }}</td>
@@ -108,13 +108,16 @@
                                             {{ number_format($item->berat_per_pcs, 2, ',', '.') }} <span
                                                 class="text-[10px] text-gray-400">gr</span>
                                         </td>
-                                        <td class="px-4 py-3 text-right font-mono text-red-600">
-                                            {{ number_format($item->persentase_susut, 2, ',', '.') }} <span
-                                                class="text-[10px] text-gray-400">%</span>
-                                        </td>
                                         <td class="px-4 py-3 text-right font-mono text-gray-700">
-                                            {{ number_format($item->kadar_air, 2, ',', '.') }} <span
-                                                class="text-[10px] text-gray-400">%</span>
+                                            {{ number_format($item->berat_timbangan_gudang, 2, ',', '.') }} <span
+                                                class="text-[10px] text-gray-400">gr</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-right font-mono">
+                                            @if($item->persentase_selisih < 0)
+                                                <span class="text-green-600 font-semibold">+{{ number_format(abs($item->persentase_selisih), 2, ',', '.') }} %</span>
+                                            @else
+                                                <span class="text-red-600 font-semibold">{{ number_format($item->persentase_selisih, 2, ',', '.') }} %</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
@@ -135,26 +138,33 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Avg Berat -->
                     <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                        <div class="text-sm text-blue-600 font-medium">Rata-rata Berat/Pcs</div>
+                        <div class="text-sm text-blue-600 font-medium">Rata-rata Berat Setoran</div>
                         <div class="text-2xl font-bold text-blue-900">
                             {{ $itemCount > 0 ? number_format($totalBeratPcs / $itemCount, 2, ',', '.') : '0' }}<span
                                 class="text-sm font-medium ml-1">gr</span>
                         </div>
                     </div>
-                    <!-- Avg Susut -->
-                    <div class="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
-                        <div class="text-sm text-red-600 font-medium">Rata-rata Susut</div>
-                        <div class="text-2xl font-bold text-red-900">
-                            {{ $itemCount > 0 ? number_format($totalSusut / $itemCount, 2, ',', '.') : '0' }}<span
-                                class="text-sm font-medium ml-1">%</span>
-                        </div>
-                    </div>
-                    <!-- Avg Kadar Air -->
+                    <!-- Avg Selisih -->
+                                                    @php
+                                                        $avgSelisih = $itemCount > 0 ? ($totalSelisih / $itemCount) : 0;
+                                                    @endphp
+                                                    <div class="bg-gradient-to-r {{ $avgSelisih < 0 ? 'from-green-50 to-green-100 border-green-200' : 'from-red-50 to-red-100 border-red-200' }} p-4 rounded-lg border">
+                                                        <div class="text-sm {{ $avgSelisih < 0 ? 'text-green-600' : 'text-red-600' }} font-medium">Rata-rata Selisih</div>
+                                                        <div class="text-2xl font-bold {{ $avgSelisih < 0 ? 'text-green-900' : 'text-red-900' }}">
+                                                            @if($avgSelisih < 0)
+                                                                +{{ number_format(abs($avgSelisih), 2, ',', '.') }}
+                                                            @else
+                                                                {{ number_format($avgSelisih, 2, ',', '.') }}
+                                                            @endif
+                                                            <span class="text-sm font-medium ml-1">%</span>
+                                                        </div>
+                                                    </div>
+                    <!-- Avg Berat Timbangan Gudang -->
                     <div class="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
-                        <div class="text-sm text-green-600 font-medium">Rata-rata Kadar Air</div>
+                        <div class="text-sm text-green-600 font-medium">Rata-rata Berat Timbangan Gudang</div>
                         <div class="text-2xl font-bold text-green-900">
-                            {{ $itemCount > 0 ? number_format($totalKA / $itemCount, 2, ',', '.') : '0' }}<span
-                                class="text-sm font-medium ml-1">%</span>
+                            {{ $itemCount > 0 ? number_format($totalBeratTimbanganGudang / $itemCount, 2, ',', '.') : '0' }}<span
+                                class="text-sm font-medium ml-1">gr</span>
                         </div>
                     </div>
                 </div>

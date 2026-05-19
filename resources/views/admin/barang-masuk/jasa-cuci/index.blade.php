@@ -33,7 +33,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referensi Keluar</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Terima</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Susut Barang</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rata-rata Susut (%)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rata-rata Selisih (%)</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
@@ -46,15 +46,24 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ \Carbon\Carbon::parse($item->tanggal_terima)->format('d M Y') }}</td>
                                     
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-red-600">
-                                        {{ number_format($item->total_susut_batch, 2, ',', '.') }} gr
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                                        @if($item->total_susut_batch < 0)
+                                            <span class="text-green-600">+{{ number_format(abs($item->total_susut_batch), 2, ',', '.') }} gr</span>
+                                        @else
+                                            <span class="text-red-600">{{ number_format($item->total_susut_batch, 2, ',', '.') }} gr</span>
+                                        @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-orange-600">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">
                                         @php
                                             $itemCount = $item->barangMasukJasaCuci->count();
-                                            $totalSusut = $item->barangMasukJasaCuci->sum('persentase_susut');
+                                            $totalSelisih = $item->barangMasukJasaCuci->sum('persentase_selisih');
+                                            $avgSelisih = $itemCount > 0 ? ($totalSelisih / $itemCount) : 0;
                                         @endphp
-                                        {{ $itemCount > 0 ? number_format($totalSusut / $itemCount, 2, ',', '.') : '0' }} %
+                                        @if($avgSelisih < 0)
+                                            <span class="text-green-600">+{{ number_format(abs($avgSelisih), 2, ',', '.') }} %</span>
+                                        @else
+                                            <span class="text-red-600">{{ number_format($avgSelisih, 2, ',', '.') }} %</span>
+                                        @endif
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">

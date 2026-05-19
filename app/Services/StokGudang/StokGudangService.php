@@ -72,12 +72,12 @@ class StokGudangService
             ->select(
                 'nama_barang.id',
                 'nama_barang.nama_barang',
-                DB::raw('SUM(barang_masuk_jasa_cuci.berat_per_pcs) - COALESCE(MAX(graded.used_gram), 0) as total_gram'),
+                DB::raw('SUM(barang_masuk_jasa_cuci.berat_timbangan_gudang) - COALESCE(MAX(graded.used_gram), 0) as total_gram'),
                 DB::raw('COUNT(barang_masuk_jasa_cuci.id) as total_pcs'),
                 DB::raw('0 - COALESCE(MAX(graded.used_box), 0) as total_box')
             )
             ->groupBy('nama_barang.id', 'nama_barang.nama_barang')
-            ->having(DB::raw('SUM(barang_masuk_jasa_cuci.berat_per_pcs) - COALESCE(MAX(graded.used_gram), 0)'), '>', 0);
+            ->having(DB::raw('SUM(barang_masuk_jasa_cuci.berat_timbangan_gudang) - COALESCE(MAX(graded.used_gram), 0)'), '>', 0);
 
         if ($search) {
             $query->where('nama_barang.nama_barang', 'like', "%{$search}%");
@@ -124,8 +124,8 @@ class StokGudangService
                 'barang_masuk.tanggal_terima',
                 'kode_bahan.nama as kode_bahan',
                 'barang_masuk_jasa_cuci.berat_per_pcs',
-                'barang_masuk_jasa_cuci.persentase_susut',
-                'barang_masuk_jasa_cuci.kadar_air'
+                'barang_masuk_jasa_cuci.persentase_selisih',
+                'barang_masuk_jasa_cuci.berat_timbangan_gudang'
             )
             ->where('barang_masuk_jasa_cuci.barang_id', $barangId)
             ->orderBy('barang_masuk.tanggal_terima', 'desc')
@@ -152,7 +152,7 @@ class StokGudangService
         $jasaCuci = DB::table('barang_masuk_jasa_cuci')
             ->select(
                 'barang_id',
-                DB::raw('SUM(berat_per_pcs) as total_gram'),
+                DB::raw('SUM(berat_timbangan_gudang) as total_gram'),
                 DB::raw('COUNT(id) as total_pcs'),
                 DB::raw('0 as total_box')
             )
@@ -210,7 +210,7 @@ class StokGudangService
         $jasaCuci = DB::table('barang_masuk_jasa_cuci')
             ->select(
                 'barang_id',
-                DB::raw('SUM(berat_per_pcs) as total_gram'),
+                DB::raw('SUM(berat_timbangan_gudang) as total_gram'),
                 DB::raw('COUNT(id) as total_pcs'),
                 DB::raw('0 as total_box')
             )
@@ -280,7 +280,7 @@ class StokGudangService
                 'barang_masuk.tanggal_terima',
                 DB::raw("'Jasa Cuci' as sumber"),
                 'kode_bahan.nama as identifier',
-                'barang_masuk_jasa_cuci.berat_per_pcs as total_gram',
+                'barang_masuk_jasa_cuci.berat_timbangan_gudang as total_gram',
                 DB::raw("1 as total_pcs"),
                 DB::raw("0 as total_box")
             )

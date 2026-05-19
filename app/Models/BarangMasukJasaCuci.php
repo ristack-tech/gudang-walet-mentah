@@ -18,8 +18,8 @@ class BarangMasukJasaCuci extends Model
         'barang_id',
         'kode_bahan_id',
         'berat_per_pcs',
-        'persentase_susut',
-        'kadar_air',
+        'persentase_selisih',
+        'berat_timbangan_gudang',
         'susut_per_item',
     ];
 

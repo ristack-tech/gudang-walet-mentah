@@ -25,9 +25,9 @@
                             <tr>
                                 <th scope="col" class="px-6 py-4 font-semibold">Tanggal Masuk</th>
                                 <th scope="col" class="px-6 py-4 font-semibold">Kode Bahan</th>
-                                <th scope="col" class="px-6 py-4 font-semibold text-right">Berat Per Pcs (Gram)</th>
-                                <th scope="col" class="px-6 py-4 font-semibold text-right">Persentase Susut (%)</th>
-                                <th scope="col" class="px-6 py-4 font-semibold text-right">Kadar Air (%)</th>
+                                <th scope="col" class="px-6 py-4 font-semibold text-right">Berat Setoran (Gram)</th>
+                                <th scope="col" class="px-6 py-4 font-semibold text-right">Berat Timbangan Gudang (Gram)</th>
+                                <th scope="col" class="px-6 py-4 font-semibold text-right">Persentase Selisih (%)</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -42,11 +42,15 @@
                                     <td class="px-6 py-4 text-right font-medium text-gray-900">
                                         {{ number_format($detail->berat_per_pcs, 2) }}
                                     </td>
-                                    <td class="px-6 py-4 text-right text-orange-600 font-medium">
-                                        {{ number_format($detail->persentase_susut, 2) }}%
-                                    </td>
                                     <td class="px-6 py-4 text-right text-blue-600 font-medium">
-                                        {{ number_format($detail->kadar_air, 2) }}%
+                                        {{ number_format($detail->berat_timbangan_gudang, 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-medium">
+                                        @if($detail->persentase_selisih < 0)
+                                            <span class="text-green-600 font-semibold">+{{ number_format(abs($detail->persentase_selisih), 2) }}%</span>
+                                        @else
+                                            <span class="text-orange-600 font-semibold">{{ number_format($detail->persentase_selisih, 2) }}%</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
