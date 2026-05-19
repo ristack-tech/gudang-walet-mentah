@@ -77,7 +77,7 @@
                                 <!-- Keluar Data Reference Column -->
                                 <td class="px-4 py-4 whitespace-nowrap border-y border-gray-100 group-hover:border-blue-100">
                                     <div class="flex flex-col">
-                                        <span class="text-sm font-semibold text-gray-900">{{ $item->partai->nama_partai ?? '-' }}</span>
+                                        <span class="text-sm font-semibold text-gray-900">{{ $item->kode_lp ?? '-' }}</span>
                                         <div class="text-xs text-gray-500 flex items-center mt-1 space-x-2">
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                                                 {{ $item->pcs }} pcs

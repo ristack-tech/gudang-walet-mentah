@@ -64,7 +64,7 @@
                                             {{ $item->kodeBahan->nama ?? '-' }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">{{ $item->pcs ? number_format($item->pcs, 2, ',', '.') : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">{{ $item->pcs ? number_format($item->pcs, 0, ',', '.') : '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">{{ number_format($item->berat, 2, ',', '.') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->kadar_air ? $item->kadar_air . ' %' : '-' }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500">{{ $item->keterangan_cetak ?? '-' }}</td>
