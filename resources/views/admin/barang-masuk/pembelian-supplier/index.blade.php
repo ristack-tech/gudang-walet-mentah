@@ -95,11 +95,38 @@
                                                     Detail Batch
                                                 </a>
 
-                                                <button
-                                                    onclick="confirmDelete({{ $batch->id }}, '{{ \Carbon\Carbon::parse($batch->tanggal_terima)->format('Ymd') . '-' . strtoupper(substr(md5($batch->id), 0, 3)) }}')"
-                                                    class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
-                                                    Hapus Batch
+                                                <button type="button"
+                                                    onclick="openEditModal({{ $batch->id }}, '{{ $batch->tanggal_terima }}')"
+                                                    class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-bold transition duration-200">
+                                                    Edit
                                                 </button>
+
+                                                @php
+                                                    // Check if any item in this batch has been graded
+                                                    $hasGraded = false;
+                                                    foreach($batch->barangMasukSupplier as $bmItem) {
+                                                        $graded = \App\Models\StokGrading::where('sumber_stok', 'pembelian_supplier')
+                                                            ->where('barang_id', $bmItem->barang_id)
+                                                            ->where('partai', optional($bmItem->supplier)->nama)
+                                                            ->exists();
+                                                        if ($graded) {
+                                                            $hasGraded = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                @endphp
+
+                                                @if($hasGraded)
+                                                    <span class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed" title="Tidak dapat dihapus karena item dari supplier ini telah di-grading">
+                                                        Hapus Batch
+                                                    </span>
+                                                @else
+                                                    <button
+                                                        onclick="confirmDelete({{ $batch->id }}, '{{ \Carbon\Carbon::parse($batch->tanggal_terima)->format('Ymd') . '-' . strtoupper(substr(md5($batch->id), 0, 3)) }}')"
+                                                        class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">
+                                                        Hapus Batch
+                                                    </button>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -155,34 +182,77 @@
             </div>
         </div>
 
-        <script>
-            function confirmDelete(id, name) {
-                document.getElementById('dataName').textContent = name;
-                var url = '{{ route('barang-masuk.pembelian-supplier.destroy', ':id') }}';
-                url = url.replace(':id', id);
-                document.getElementById('deleteForm').action = url;
-                document.getElementById('deleteModal').classList.remove('hidden');
-            }
+         <!-- Edit Confirmation Modal -->
+         <div id="editModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+             <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm"></div>
+             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                     <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm">
+                         <form id="editForm" method="POST">
+                             @csrf
+                             @method('PUT')
+                             <div class="bg-white px-4 py-5 sm:p-6">
+                                 <h3 class="text-lg font-bold leading-6 text-gray-900" id="modal-title">Edit Tanggal Terima</h3>
+                                 <div class="mt-4">
+                                     <label for="edit_tanggal_terima" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Terima</label>
+                                     <input type="date" name="tanggal_terima" id="edit_tanggal_terima" required
+                                         class="block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                 </div>
+                             </div>
+                             <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-2">
+                                 <button type="submit" class="inline-flex w-full justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:w-auto sm:justify-end transition-colors">Simpan</button>
+                                 <button type="button" onclick="closeEditModal()" class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:justify-end transition-colors">Batal</button>
+                             </div>
+                         </form>
+                     </div>
+                 </div>
+             </div>
+         </div>
 
-            function closeDeleteModal() {
-                document.getElementById('deleteModal').classList.add('hidden');
-            }
+         <script>
+             function openEditModal(id, tanggalTerima) {
+                 document.getElementById('edit_tanggal_terima').value = tanggalTerima;
+                 document.getElementById('editForm').action = '{{ route("barang-masuk.pembelian-supplier.update", ":id") }}'.replace(':id', id);
+                 document.getElementById('editModal').classList.remove('hidden');
+             }
 
-            document.getElementById('deleteModal')?.addEventListener('click', function (event) {
-                if (event.target === this) {
-                    closeDeleteModal();
-                }
-            });
+             function closeEditModal() {
+                 document.getElementById('editModal').classList.add('hidden');
+             }
 
-            setTimeout(() => {
-                const alerts = document.querySelectorAll('[id^="alert-"]');
-                alerts.forEach(alert => {
-                    if (alert) {
-                        alert.style.transition = 'opacity 0.5s ease-out';
-                        alert.style.opacity = '0';
-                        setTimeout(() => alert.remove(), 500);
-                    }
-                });
-            }, 5000);
-        </script>
+             document.getElementById('editModal')?.addEventListener('click', function(e) {
+                 if (e.target === this) {
+                     closeEditModal();
+                 }
+             });
+
+             function confirmDelete(id, name) {
+                 document.getElementById('dataName').textContent = name;
+                 var url = '{{ route('barang-masuk.pembelian-supplier.destroy', ':id') }}';
+                 url = url.replace(':id', id);
+                 document.getElementById('deleteForm').action = url;
+                 document.getElementById('deleteModal').classList.remove('hidden');
+             }
+
+             function closeDeleteModal() {
+                 document.getElementById('deleteModal').classList.add('hidden');
+             }
+
+             document.getElementById('deleteModal')?.addEventListener('click', function (event) {
+                 if (event.target === this) {
+                     closeDeleteModal();
+                 }
+             });
+
+             setTimeout(() => {
+                 const alerts = document.querySelectorAll('[id^="alert-"]');
+                 alerts.forEach(alert => {
+                     if (alert) {
+                         alert.style.transition = 'opacity 0.5s ease-out';
+                         alert.style.opacity = '0';
+                         setTimeout(() => alert.remove(), 500);
+                     }
+                 });
+             }, 5000);
+         </script>
 @endsection

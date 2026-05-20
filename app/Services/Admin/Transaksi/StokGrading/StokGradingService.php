@@ -237,6 +237,13 @@ class StokGradingService
         $lempengKotor = [];
         $mangkok = [];
 
+        $totalLempengBersihGram = 0;
+        $totalLempengBersihBox = 0;
+        $totalLempengKotorGram = 0;
+        $totalLempengKotorBox = 0;
+        $totalMangkokGram = 0;
+        $totalMangkokBox = 0;
+
         foreach ($stokGrading->details as $detail) {
             $mappedDetail = [
                 'grade' => $detail->grade,
@@ -246,10 +253,16 @@ class StokGradingService
 
             if ($detail->type === 'lempeng_bersih') {
                 $lempengBersih[] = $mappedDetail;
+                $totalLempengBersihGram += $detail->berat;
+                $totalLempengBersihBox += $detail->box;
             } elseif ($detail->type === 'lempeng_kotor') {
                 $lempengKotor[] = $mappedDetail;
+                $totalLempengKotorGram += $detail->berat;
+                $totalLempengKotorBox += $detail->box;
             } elseif ($detail->type === 'mangkok') {
                 $mangkok[] = $mappedDetail;
+                $totalMangkokGram += $detail->berat;
+                $totalMangkokBox += $detail->box;
             }
         }
 
@@ -267,24 +280,24 @@ class StokGradingService
             'mangkok' => $mangkok,
             'totals' => [
                 'lempeng_bersih' => [
-                    'gram' => $stokGrading->total_gram_lempeng_bersih,
-                    'pcs' => $stokGrading->total_pcs_lempeng_bersih,
-                    'box' => $stokGrading->total_box_lempeng_bersih,
+                    'gram' => $totalLempengBersihGram,
+                    'pcs' => $stokGrading->total_pcs_lempeng_bersih, // pcs is not used
+                    'box' => $totalLempengBersihBox,
                 ],
                 'lempeng_kotor' => [
-                    'gram' => $stokGrading->total_gram_lempeng_kotor,
+                    'gram' => $totalLempengKotorGram,
                     'pcs' => $stokGrading->total_pcs_lempeng_kotor,
-                    'box' => $stokGrading->total_box_lempeng_kotor,
+                    'box' => $totalLempengKotorBox,
                 ],
                 'mangkok' => [
-                    'gram' => $stokGrading->total_gram_mangkok,
+                    'gram' => $totalMangkokGram,
                     'pcs' => $stokGrading->total_pcs_mangkok,
-                    'box' => $stokGrading->total_box_mangkok,
+                    'box' => $totalMangkokBox,
                 ],
                 'keseluruhan' => [
-                    'gram' => $stokGrading->total_gram_keseluruhan,
+                    'gram' => $totalLempengBersihGram + $totalLempengKotorGram + $totalMangkokGram,
                     'pcs' => $stokGrading->total_pcs_keseluruhan,
-                    'box' => $stokGrading->total_box_keseluruhan,
+                    'box' => $totalLempengBersihBox + $totalLempengKotorBox + $totalMangkokBox,
                 ],
             ]
         ];

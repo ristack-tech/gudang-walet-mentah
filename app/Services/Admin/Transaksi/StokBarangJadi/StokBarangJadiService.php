@@ -13,9 +13,23 @@ class StokBarangJadiService
      */
     public function getPaginatedStok($type = 'global', $perPage = 10)
     {
-        return StokBarangJadi::with('details')
-            ->where('type', $type)
-            ->orderBy('tanggal', 'desc')
+        $query = StokBarangJadi::with('details')
+            ->where('type', $type);
+
+        // For clop type, only show records that still have available stock
+        // (berat > 0 or jumlah_box > 0). This hides items that have been
+        // fully exported. When an export is cancelled and stock is restored,
+        // they will automatically reappear.
+        if ($type === 'clop') {
+            $query->whereHas('details', function ($q) {
+                $q->where(function ($inner) {
+                    $inner->where('berat', '>', 0)
+                          ->orWhere('jumlah_box', '>', 0);
+                });
+            });
+        }
+
+        return $query->orderBy('tanggal', 'desc')
             ->paginate($perPage);
     }
     
