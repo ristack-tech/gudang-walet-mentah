@@ -160,4 +160,29 @@ class BarangMasukDemakController extends Controller
 
         return redirect()->back()->with('success', 'Tanggal terima berhasil diperbarui.');
     }
+
+    public function destroy($id, BarangMasukDemakService $service)
+    {
+        $barangMasukBatch = \App\Models\BarangMasuk::with('barangMasukDemak')->findOrFail($id);
+
+        // Check if already graded
+        foreach ($barangMasukBatch->barangMasukDemak as $bmItem) {
+            $graded = \App\Models\StokGrading::where('sumber_stok', 'demak')
+                ->where('barang_id', $bmItem->barang_id)
+                ->where('partai', $bmItem->partai)
+                ->exists();
+            if ($graded) {
+                return redirect()->route('barang-masuk.demak.index')
+                    ->with('error', 'Gagal menghapus data: Item dari batch ini telah di-grading.');
+            }
+        }
+
+        try {
+            $service->destroyData($barangMasukBatch);
+            return redirect()->route('barang-masuk.demak.index')
+                ->with('success', 'Data Batch Barang Masuk (Demak) berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
 }

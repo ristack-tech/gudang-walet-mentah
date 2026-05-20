@@ -49,13 +49,14 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-red-600">
                                         {{ number_format($item->total_susut_batch, 2, ',', '.') }} gr
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-orange-600">
-                                        @php
-                                            $totalGramBatch = $item->barangMasukDemak->sum('gram');
-                                            $totalSusutBatch = $item->total_susut_batch;
-                                            $totalBeratAwal = $totalGramBatch + $totalSusutBatch;
-                                            $rataRataSusutBatch = $totalBeratAwal > 0 ? ($totalSusutBatch / $totalBeratAwal) * 100 : 0;
-                                        @endphp
+                                    
+                                    @php
+                                        $totalGramBatch = $item->barangMasukDemak->sum('gram');
+                                        $totalSusutBatch = $item->total_susut_batch;
+                                        $totalBeratAwal = $totalGramBatch + $totalSusutBatch;
+                                        $rataRataSusutBatch = $totalBeratAwal > 0 ? ($totalSusutBatch / $totalBeratAwal) * 100 : 0;
+                                    @endphp
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
                                         {{ number_format($rataRataSusutBatch, 2, ',', '.') }} %
                                     </td>
 
@@ -67,6 +68,28 @@
                                                 Edit
                                             </button>
                                             <a href="{{ route('barang-masuk.demak.show', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 font-bold transition duration-200">Detail Penerimaan</a>
+                                            
+                                            @php
+                                                $hasGraded = false;
+                                                foreach($item->barangMasukDemak as $bmItem) {
+                                                    if(\App\Models\StokGrading::where('sumber_stok', 'demak')
+                                                        ->where('barang_id', $bmItem->barang_id)
+                                                        ->where('partai', $bmItem->partai)
+                                                        ->exists()) {
+                                                        $hasGraded = true;
+                                                        break;
+                                                    }
+                                                }
+                                            @endphp
+                                            @if($hasGraded)
+                                                <button type="button" disabled title="Tidak bisa dihapus karena sudah di-grading" class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed font-bold">Hapus Batch</button>
+                                            @else
+                                                <form action="{{ route('barang-masuk.demak.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data batch ini beserta seluruh itemnya?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 font-bold transition duration-200">Hapus Batch</button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

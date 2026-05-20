@@ -161,4 +161,29 @@ class BarangMasukJasaCuciController extends Controller
 
         return redirect()->back()->with('success', 'Tanggal terima berhasil diperbarui.');
     }
+
+    public function destroy($id, BarangMasukJasaCuciService $service)
+    {
+        $barangMasukBatch = \App\Models\BarangMasuk::with('barangMasukJasaCuci.kodeBahan')->findOrFail($id);
+
+        // Check if already graded
+        foreach ($barangMasukBatch->barangMasukJasaCuci as $bmItem) {
+            $graded = \App\Models\StokGrading::where('sumber_stok', 'jasa_cuci')
+                ->where('barang_id', $bmItem->barang_id)
+                ->where('partai', optional($bmItem->kodeBahan)->nama)
+                ->exists();
+            if ($graded) {
+                return redirect()->route('barang-masuk.jasa-cuci.index')
+                    ->with('error', 'Gagal menghapus data: Item dari batch ini telah di-grading.');
+            }
+        }
+
+        try {
+            $service->destroyData($barangMasukBatch);
+            return redirect()->route('barang-masuk.jasa-cuci.index')
+                ->with('success', 'Data Batch Barang Masuk (Jasa Cuci) berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
 }

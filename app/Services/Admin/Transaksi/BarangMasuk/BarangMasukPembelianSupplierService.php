@@ -42,21 +42,6 @@ class BarangMasukPembelianSupplierService
                 'tanggal_terima' => $data['tanggal_terima'],
             ]);
 
-            // Delete existing items
-            $barangMasukBatch->barangMasukSupplier()->delete();
-
-            // Recreate items
-            foreach ($data['items'] as $item) {
-                BarangMasukPembelianSupplier::create([
-                    'barang_masuk_id' => $barangMasukBatch->id,
-                    'barang_id' => $item['barang_id'],
-                    'supplier_id' => $data['supplier_id'],
-                    'berat' => $item['berat'],
-                    'pcs' => $item['pcs'],
-                    'box' => $item['box'],
-                ]);
-            }
-
             return $barangMasukBatch;
         });
     }

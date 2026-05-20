@@ -65,4 +65,27 @@ class BarangMasukJasaCuciService
             return $barangMasuk;
         });
     }
+
+    public function destroyData(BarangMasuk $barangMasukBatch)
+    {
+        return DB::transaction(function () use ($barangMasukBatch) {
+            $barangKeluar = $barangMasukBatch->barangKeluar;
+            
+            // Revert status on child items
+            foreach ($barangMasukBatch->barangMasukJasaCuci as $item) {
+                if ($item->barangKeluarJasaCuci) {
+                    $item->barangKeluarJasaCuci->update(['status_kembali' => false]);
+                }
+                $item->delete();
+            }
+
+            // Revert parent status if it was marked as fully returned
+            if ($barangKeluar && $barangKeluar->status_lunas) {
+                $barangKeluar->update(['status_lunas' => false]);
+            }
+
+            // Delete the batch
+            $barangMasukBatch->delete();
+        });
+    }
 }

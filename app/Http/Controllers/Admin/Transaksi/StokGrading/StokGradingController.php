@@ -24,12 +24,17 @@ class StokGradingController extends Controller
     public function index(Request $request)
     {
         // Group by no_kartu to combine items from same grading batch
-        $query = StokGrading::select('no_kartu', 'tanggal')
-            ->selectRaw('MIN(id) as first_id')
-            ->selectRaw('SUM(total_gram_keseluruhan) as total_gram')
-            ->selectRaw('SUM(total_box_keseluruhan) as total_box')
-            ->groupBy('no_kartu', 'tanggal')
-            ->orderBy('tanggal', 'desc');
+        // Only show batches that still have remaining stock in their details (not fully transferred to Clop)
+        $query = StokGrading::whereHas('details', function ($query) {
+                $query->where('berat', '>', 0);
+            })
+            ->join('stok_grading_details', 'stok_gradings.id', '=', 'stok_grading_details.stok_grading_id')
+            ->select('stok_gradings.no_kartu', 'stok_gradings.tanggal')
+            ->selectRaw('MIN(stok_gradings.id) as first_id')
+            ->selectRaw('SUM(stok_grading_details.berat) as total_gram')
+            ->selectRaw('SUM(stok_grading_details.box) as total_box')
+            ->groupBy('stok_gradings.no_kartu', 'stok_gradings.tanggal')
+            ->orderBy('stok_gradings.tanggal', 'desc');
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -225,6 +230,7 @@ class StokGradingController extends Controller
                 'partai' => $partai,
                 'box_awal' => 0,
                 'grades' => $request->input('grades'),
+                'consumed_gram' => (float) $request->input('box_awal'),
             ];
 
             $grading = $this->stokGradingService->storeGrading($data);

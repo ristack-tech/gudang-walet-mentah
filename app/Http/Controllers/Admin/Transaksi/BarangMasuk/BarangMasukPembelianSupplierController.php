@@ -150,39 +150,44 @@ class BarangMasukPembelianSupplierController extends Controller
 
     public function edit($id)
     {
-        $barangMasukBatch = \App\Models\BarangMasuk::with(['barangMasukSupplier.barang', 'barangMasukSupplier.supplier'])->findOrFail($id);
-        $barang = NamaBarang::all();
-        $supplier = Supplier::all();
-
-        return view('admin.barang-masuk.pembelian-supplier.edit', compact('barangMasukBatch', 'barang', 'supplier'));
+        $barangMasuk = \App\Models\BarangMasuk::findOrFail($id);
+        return response()->json([
+            'id' => $barangMasuk->id,
+            'tanggal_terima' => $barangMasuk->tanggal_terima,
+        ]);
     }
 
     public function update(Request $request, $id, BarangMasukPembelianSupplierService $service)
     {
         $validated = $request->validate([
             'tanggal_terima' => 'required|date',
-            'supplier_id' => 'required|exists:supplier,id',
-            'items' => 'required|array|min:1',
-            'items.*.barang_id' => 'required|exists:nama_barang,id',
-            'items.*.berat' => 'required|numeric',
-            'items.*.pcs' => 'required|integer',
-            'items.*.box' => 'required|integer',
         ]);
 
         $barangMasukBatch = \App\Models\BarangMasuk::findOrFail($id);
 
         try {
             $service->updateData($barangMasukBatch, $validated);
-            return redirect()->route('barang-masuk.pembelian-supplier.index')
-                ->with('success', 'Data Batch Barang Masuk (Pembelian Supplier) berhasil diperbarui.');
+            return redirect()->back()->with('success', 'Tanggal terima berhasil diperbarui.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
     public function destroy($id, BarangMasukPembelianSupplierService $service)
     {
-        $barangMasukBatch = \App\Models\BarangMasuk::findOrFail($id);
+        $barangMasukBatch = \App\Models\BarangMasuk::with('barangMasukSupplier.supplier')->findOrFail($id);
+
+        // Check if already graded
+        foreach ($barangMasukBatch->barangMasukSupplier as $bmItem) {
+            $graded = \App\Models\StokGrading::where('sumber_stok', 'pembelian_supplier')
+                ->where('barang_id', $bmItem->barang_id)
+                ->where('partai', optional($bmItem->supplier)->nama)
+                ->exists();
+            if ($graded) {
+                return redirect()->route('barang-masuk.pembelian-supplier.index')
+                    ->with('error', 'Gagal menghapus data: Item dari batch ini telah di-grading.');
+            }
+        }
 
         try {
             $service->destroyData($barangMasukBatch);
