@@ -68,9 +68,12 @@
                                     <input type="hidden" name="items[{{ $idx }}][nama]" value="{{ $item["nama"] }}">
                                     @if($item["sumber"] == "demak")
                                     <input type="hidden" name="items[{{ $idx }}][partai]" value="{{ $item["partai"] }}">
-                                    @else
+                                    @elseif($item["sumber"] == "jasa_cuci")
                                     <input type="hidden" name="items[{{ $idx }}][kode_bahan]" value="{{ $item["kode_bahan"] }}">
                                     <input type="hidden" name="items[{{ $idx }}][kode_bahan_id]" value="{{ $item["kode_bahan_id"] }}">
+                                    @elseif($item["sumber"] == "pembelian_supplier")
+                                    <input type="hidden" name="items[{{ $idx }}][supplier_name]" value="{{ $item["supplier_name"] ?? '' }}">
+                                    <input type="hidden" name="items[{{ $idx }}][supplier_id]" value="{{ $item["supplier_id"] ?? '' }}">
                                     @endif
                                 </td>
                                 <td class="px-4 py-4 border-y border-gray-100 group-hover:border-blue-100">
@@ -80,8 +83,8 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 border-y border-gray-100 text-center">
-                                    <span class="inline-flex px-2.5 py-1 rounded-md text-xs font-medium {{ $item["sumber"] == "demak" ? "bg-blue-100 text-blue-700" : "bg-orange-100 text-orange-700" }}">
-                                        {{ $item["sumber"] == "demak" ? "Demak" : "Jasa Cuci" }}
+                                    <span class="inline-flex px-2.5 py-1 rounded-md text-xs font-medium {{ $item["sumber"] == "demak" ? "bg-blue-100 text-blue-700" : ($item["sumber"] == "jasa_cuci" ? "bg-orange-100 text-orange-700" : "bg-teal-100 text-teal-700") }}">
+                                        {{ $item["sumber"] == "demak" ? "Demak" : ($item["sumber"] == "jasa_cuci" ? "Jasa Cuci" : "Pembelian Supplier") }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-4 border-y border-gray-100 text-right">
@@ -552,11 +555,17 @@
 
             // Add source-specific fields
             const partaiInput = tr.querySelector(`input[name='items[${idx}][partai]']`);
+            const kodeBahanInput = tr.querySelector(`input[name='items[${idx}][kode_bahan]']`);
+            const supplierNameInput = tr.querySelector(`input[name='items[${idx}][supplier_name]']`);
+
             if (partaiInput) {
                 item.partai = partaiInput.value;
-            } else {
-                item.kode_bahan = tr.querySelector(`input[name='items[${idx}][kode_bahan]']`).value;
+            } else if (kodeBahanInput) {
+                item.kode_bahan = kodeBahanInput.value;
                 item.kode_bahan_id = tr.querySelector(`input[name='items[${idx}][kode_bahan_id]']`).value;
+            } else if (supplierNameInput) {
+                item.supplier_name = supplierNameInput.value;
+                item.supplier_id = tr.querySelector(`input[name='items[${idx}][supplier_id]']`).value;
             }
 
             checkedItems.push(item);

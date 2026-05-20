@@ -49,7 +49,7 @@ class StokGradingController extends Controller
         $jasaCuciSummary = $this->stokGudangService->getJasaCuciByKodeBahan($request->search);
         $pembelianSupplierSummary = $this->stokGudangService->getPembelianSupplierBySupplier($request->search);
 
-        return view('admin.stok-grading.create-step-1', compact('demakSummary', 'jasaCuciSummary'));
+        return view('admin.stok-grading.create-step-1', compact('demakSummary', 'jasaCuciSummary', 'pembelianSupplierSummary'));
     }
 
     public function createStep2(Request $request)
@@ -159,7 +159,9 @@ class StokGradingController extends Controller
                 // Determine partai/kode_bahan based on sumber
                 $partai = $sumberStok === 'demak'
                     ? ($item['partai'] ?? $item['nama'])
-                    : ($item['kode_bahan'] ?? $item['nama']);
+                    : ($sumberStok === 'jasa_cuci'
+                        ? ($item['kode_bahan'] ?? $item['nama'])
+                        : ($item['supplier_name'] ?? $item['nama']));
 
                 $data = [
                     'barang_id' => $barangId,
@@ -183,7 +185,7 @@ class StokGradingController extends Controller
             // Legacy single-item pattern
             $validatedData = $request->validate([
                 'stok_id' => 'required|string',
-                'sumber_stok' => 'required|string|in:demak,jasa_cuci',
+                'sumber_stok' => 'required|string|in:demak,jasa_cuci,pembelian_supplier',
                 'box_awal' => 'required|numeric|min:0',
                 'grades' => 'required|array',
                 'grades.*.name' => 'required|string',

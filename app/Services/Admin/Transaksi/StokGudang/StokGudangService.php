@@ -227,6 +227,84 @@ class StokGudangService
         return $query->having('total_gram', '>', 0)->get();
     }
 
+    /**
+     * Get aggregated stock summary for Pembelian Supplier.
+     */
+    public function getPembelianSupplierSummary(?string $search = null)
+    {
+        $query = DB::table('barang_masuk_supplier')
+            ->join('nama_barang', 'barang_masuk_supplier.barang_id', '=', 'nama_barang.id')
+            ->join('supplier', 'barang_masuk_supplier.supplier_id', '=', 'supplier.id')
+            ->select(
+                'nama_barang.id',
+                'nama_barang.nama_barang',
+                DB::raw('SUM(barang_masuk_supplier.berat) as total_gram'),
+                DB::raw('SUM(COALESCE(barang_masuk_supplier.pcs, 0)) as total_pcs'),
+                DB::raw('SUM(barang_masuk_supplier.box) as total_box')
+            )
+            ->groupBy('nama_barang.id', 'nama_barang.nama_barang')
+            ->having('total_gram', '>', 0);
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_barang.nama_barang', 'like', "%{$search}%")
+                  ->orWhere('supplier.nama', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Get detail of incoming Pembelian Supplier stock for a specific material.
+     */
+    public function getPembelianSupplierDetail($barangId)
+    {
+        return DB::table('barang_masuk_supplier')
+            ->join('barang_masuk', 'barang_masuk_supplier.barang_masuk_id', '=', 'barang_masuk.id')
+            ->join('supplier', 'barang_masuk_supplier.supplier_id', '=', 'supplier.id')
+            ->select(
+                'barang_masuk.tanggal_terima',
+                'supplier.nama as supplier_name',
+                'barang_masuk_supplier.berat',
+                'barang_masuk_supplier.pcs',
+                'barang_masuk_supplier.box'
+            )
+            ->where('barang_masuk_supplier.barang_id', $barangId)
+            ->orderBy('barang_masuk.tanggal_terima', 'desc')
+            ->get();
+    }
+
+    /**
+     * Get Pembelian Supplier stock grouped by supplier.
+     */
+    public function getPembelianSupplierBySupplier(?string $search = null)
+    {
+        $query = DB::table('barang_masuk_supplier')
+            ->join('nama_barang', 'barang_masuk_supplier.barang_id', '=', 'nama_barang.id')
+            ->join('supplier', 'barang_masuk_supplier.supplier_id', '=', 'supplier.id')
+            ->select(
+                'barang_masuk_supplier.id',
+                'nama_barang.id as barang_id',
+                'nama_barang.nama_barang',
+                'supplier.nama as supplier_name',
+                'supplier.id as supplier_id',
+                DB::raw('barang_masuk_supplier.berat as total_gram'),
+                DB::raw('COALESCE(barang_masuk_supplier.pcs, 0) as total_pcs'),
+                DB::raw('barang_masuk_supplier.box as total_box')
+            )
+            ->having('total_gram', '>', 0);
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_barang.nama_barang', 'like', "%{$search}%")
+                  ->orWhere('supplier.nama', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->get();
+    }
+
     public function getGlobalSummary(?string $search = null)
     {
         $demak = DB::table('barang_masuk_demak')
@@ -247,7 +325,16 @@ class StokGudangService
             )
             ->groupBy('barang_id');
 
-        $unionQuery = $demak->unionAll($jasaCuci);
+        $pembelianSupplier = DB::table('barang_masuk_supplier')
+            ->select(
+                'barang_id',
+                DB::raw('SUM(berat) as total_gram'),
+                DB::raw('SUM(COALESCE(pcs, 0)) as total_pcs'),
+                DB::raw('SUM(box) as total_box')
+            )
+            ->groupBy('barang_id');
+
+        $unionQuery = $demak->unionAll($jasaCuci)->unionAll($pembelianSupplier);
 
         $graded = DB::table('stok_gradings')
             ->select(
@@ -287,96 +374,71 @@ class StokGudangService
     public function getGlobalSummaryForBarang($barangId)
     {
         $demak = DB::table('barang_masuk_demak')
-            ->select(
-                'barang_id',
-                DB::raw('SUM(gram) as total_gram'),
-                DB::raw('SUM(pcs) as total_pcs'),
-                DB::raw('SUM(box) as total_box')
-            )
-            ->where('barang_id', $barangId)
-            ->groupBy('barang_id');
+            ->select('barang_id', DB::raw('SUM(gram) as total_gram'), DB::raw('SUM(pcs) as total_pcs'), DB::raw('SUM(box) as total_box'))
+            ->where('barang_id', $barangId)->groupBy('barang_id');
 
         $jasaCuci = DB::table('barang_masuk_jasa_cuci')
-            ->select(
-                'barang_id',
-                DB::raw('SUM(berat_timbangan_gudang) as total_gram'),
-                DB::raw('COUNT(id) as total_pcs'),
-                DB::raw('0 as total_box')
-            )
-            ->where('barang_id', $barangId)
-            ->groupBy('barang_id');
+            ->select('barang_id', DB::raw('SUM(berat_timbangan_gudang) as total_gram'), DB::raw('COUNT(id) as total_pcs'), DB::raw('0 as total_box'))
+            ->where('barang_id', $barangId)->groupBy('barang_id');
 
-        $unionQuery = $demak->unionAll($jasaCuci);
+        $supplier = DB::table('barang_masuk_supplier')
+            ->select('barang_id', DB::raw('SUM(berat) as total_gram'), DB::raw('SUM(COALESCE(pcs, 0)) as total_pcs'), DB::raw('SUM(box) as total_box'))
+            ->where('barang_id', $barangId)->groupBy('barang_id');
+
+        $unionQuery = $demak->unionAll($jasaCuci)->unionAll($supplier);
 
         $graded = DB::table('stok_gradings')
-            ->select(
-                DB::raw('SUM(total_gram_keseluruhan) as used_gram'),
-                DB::raw('SUM(box_awal) as used_box')
-            )
-            ->where('barang_id', $barangId)
-            ->whereNull('deleted_at')
-            ->first();
+            ->select(DB::raw('SUM(total_gram_keseluruhan) as used_gram'), DB::raw('SUM(box_awal) as used_box'))
+            ->where('barang_id', $barangId)->whereNull('deleted_at')->first();
             
         $usedGram = $graded->used_gram ?? 0;
         $usedBox = $graded->used_box ?? 0;
 
-        $result = DB::query()
-            ->fromSub($unionQuery, 'combined')
-            ->select(
-                DB::raw('SUM(total_gram) as total_gram'),
-                DB::raw('SUM(total_pcs) as total_pcs'),
-                DB::raw('SUM(total_box) as total_box')
-            )
+        $result = DB::query()->fromSub($unionQuery, 'combined')
+            ->select(DB::raw('SUM(total_gram) as total_gram'), DB::raw('SUM(total_pcs) as total_pcs'), DB::raw('SUM(total_box) as total_box'))
             ->first();
             
         if ($result) {
-            $result->total_gram -= $usedGram;
-            $result->total_box -= $usedBox;
-            
-            $result->total_gram = max(0, $result->total_gram);
+            $result->total_gram = max(0, $result->total_gram - $usedGram);
             $result->total_pcs = max(0, $result->total_pcs);
-            $result->total_box = max(0, $result->total_box);
+            $result->total_box = max(0, $result->total_box - $usedBox);
         }
         
         return $result;
     }
 
     /**
-     * Get detail of incoming global stock for a specific material combining Demak and Jasa Cuci.
-     * We use a unified alias structure so the blade file can iterate them uniformly.
-     *
-     * @param int $barangId
-     * @return \Illuminate\Support\Collection
+     * Get detail of incoming global stock for a specific material combining all sources.
      */
     public function getGlobalDetail($barangId)
     {
         $demak = DB::table('barang_masuk_demak')
             ->join('barang_masuk', 'barang_masuk_demak.barang_masuk_id', '=', 'barang_masuk.id')
             ->select(
-                'barang_masuk.tanggal_terima',
-                DB::raw("'Demak' as sumber"),
+                'barang_masuk.tanggal_terima', DB::raw("'Demak' as sumber"),
                 'barang_masuk_demak.partai as identifier',
-                'barang_masuk_demak.gram as total_gram',
-                'barang_masuk_demak.pcs as total_pcs',
-                'barang_masuk_demak.box as total_box'
-            )
-            ->where('barang_masuk_demak.barang_id', $barangId);
+                'barang_masuk_demak.gram as total_gram', 'barang_masuk_demak.pcs as total_pcs', 'barang_masuk_demak.box as total_box'
+            )->where('barang_masuk_demak.barang_id', $barangId);
 
         $jasaCuci = DB::table('barang_masuk_jasa_cuci')
             ->join('barang_masuk', 'barang_masuk_jasa_cuci.barang_masuk_id', '=', 'barang_masuk.id')
             ->join('kode_bahan', 'barang_masuk_jasa_cuci.kode_bahan_id', '=', 'kode_bahan.id')
             ->select(
-                'barang_masuk.tanggal_terima',
-                DB::raw("'Jasa Cuci' as sumber"),
+                'barang_masuk.tanggal_terima', DB::raw("'Jasa Cuci' as sumber"),
                 'kode_bahan.nama as identifier',
-                'barang_masuk_jasa_cuci.berat_timbangan_gudang as total_gram',
-                DB::raw("1 as total_pcs"),
-                DB::raw("0 as total_box")
-            )
-            ->where('barang_masuk_jasa_cuci.barang_id', $barangId);
+                'barang_masuk_jasa_cuci.berat_timbangan_gudang as total_gram', DB::raw("1 as total_pcs"), DB::raw("0 as total_box")
+            )->where('barang_masuk_jasa_cuci.barang_id', $barangId);
 
-        // Union both histories together and sort newest first
-        return $demak->unionAll($jasaCuci)
+        $supplier = DB::table('barang_masuk_supplier')
+            ->join('barang_masuk', 'barang_masuk_supplier.barang_masuk_id', '=', 'barang_masuk.id')
+            ->join('supplier', 'barang_masuk_supplier.supplier_id', '=', 'supplier.id')
+            ->select(
+                'barang_masuk.tanggal_terima', DB::raw("'Pembelian Supplier' as sumber"),
+                'supplier.nama as identifier',
+                'barang_masuk_supplier.berat as total_gram', DB::raw("COALESCE(barang_masuk_supplier.pcs, 0) as total_pcs"), 'barang_masuk_supplier.box as total_box'
+            )->where('barang_masuk_supplier.barang_id', $barangId);
+
+        return $demak->unionAll($jasaCuci)->unionAll($supplier)
             ->orderBy('tanggal_terima', 'desc')
             ->get();
     }

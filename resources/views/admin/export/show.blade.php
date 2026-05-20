@@ -53,8 +53,8 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                             {{ $detail->box }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium text-red-600">
-                            -{{ $detail->berat }}g
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                            {{ $detail->berat }}g
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                             {{ number_format($detail->harga, 2, ',', '.') }}
@@ -72,7 +72,7 @@
                     <tr>
                         <td colspan="2" class="px-6 py-4 text-right text-sm text-gray-700 uppercase">Total Keseluruhan:</td>
                         <td class="px-6 py-4 text-right text-sm text-gray-900">{{ $export->exportDetails->sum('box') }}</td>
-                        <td class="px-6 py-4 text-right text-sm text-red-600">-{{ $export->exportDetails->sum('berat') }}g</td>
+                        <td class="px-6 py-4 text-right text-sm text-gray-900">{{ $export->exportDetails->sum('berat') }}g</td>
                         <td class="px-6 py-4 text-right text-sm text-gray-900">{{ number_format($export->exportDetails->sum('harga'), 2, ',', '.') }}</td>
                     </tr>
                 </tfoot>

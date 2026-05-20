@@ -76,7 +76,7 @@ class ExportController extends Controller
                 'jumlah_box' => $jumlahBox,
                 'berat' => $totalBerat,
                 'berat_per_box' => $beratPerBox,
-                'harga' => floatval($item['harga'] ?? 0),
+                'harga' => $jumlahBox * floatval($item['harga'] ?? 0),
             ];
         }
 

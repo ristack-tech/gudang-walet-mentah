@@ -45,14 +45,18 @@
             <input type="hidden" name="items_data" id="items_data" value="">
 
             <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6">
-                <div class="p-6 bg-white border-b border-gray-200 flex space-x-4 justify-center">
-                    <button type="button" onclick="showTable('demak')" id="btn_tab_demak" class="px-6 py-3 bg-white border-2 border-blue-500 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition shadow-sm flex items-center">
+                <div class="p-6 bg-white border-b border-gray-200 flex flex-wrap space-x-4 justify-center">
+                    <button type="button" onclick="showTable('demak')" id="btn_tab_demak" class="px-6 py-3 bg-white border-2 border-blue-500 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition shadow-sm flex items-center mb-2">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                         Lihat Stok Gudang Demak
                     </button>
-                    <button type="button" onclick="showTable('jasacuci')" id="btn_tab_jasacuci" class="px-6 py-3 bg-white border-2 border-gray-300 text-gray-500 font-semibold rounded-lg hover:bg-gray-50 transition shadow-sm flex items-center">
+                    <button type="button" onclick="showTable('jasacuci')" id="btn_tab_jasacuci" class="px-6 py-3 bg-white border-2 border-gray-300 text-gray-500 font-semibold rounded-lg hover:bg-gray-50 transition shadow-sm flex items-center mb-2">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
                         Lihat Stok Jasa Cuci
+                    </button>
+                    <button type="button" onclick="showTable('supplier')" id="btn_tab_supplier" class="px-6 py-3 bg-white border-2 border-gray-300 text-gray-500 font-semibold rounded-lg hover:bg-gray-50 transition shadow-sm flex items-center mb-2">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Lihat Stok Pembelian Supplier
                     </button>
                 </div>
 
@@ -189,6 +193,73 @@
                     </div>
                 </div>
 
+                <!-- Pembelian Supplier Table Container -->
+                <div id="table_supplier" class="hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-teal-50 flex items-center justify-between">
+                        <h3 class="text-lg font-medium text-teal-900 flex items-center">
+                            Sumber: Pembelian Supplier
+                        </h3>
+                        <label class="flex items-center text-sm text-teal-700 font-medium cursor-pointer hover:text-teal-900">
+                            <input type="checkbox" id="selectAllSupplier" onchange="toggleAllSupplier(this)" class="w-4 h-4 mr-2 rounded border-teal-300 text-teal-600 focus:ring-teal-500">
+                            Pilih Semua
+                        </label>
+                    </div>
+                    <div class="overflow-x-auto min-h-[200px]">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                                        <span class="sr-only">Checkbox</span>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Gram</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pcs</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Gram</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="tbody_supplier">
+                                @forelse($pembelianSupplierSummary as $index => $item)
+                                <tr class="hover:bg-teal-50/30" id="tr_supplier_{{ $item->id }}">
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
+                                            class="row-checkbox w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500 cursor-pointer"
+                                            data-sumber="pembelian_supplier"
+                                            data-barang_id="{{ $item->barang_id }}"
+                                            data-nama="{{ $item->nama_barang }}"
+                                            data-supplier_name="{{ $item->supplier_name }}"
+                                            data-supplier_id="{{ $item->supplier_id }}"
+                                            data-gram="{{ $item->total_gram }}"
+                                            data-pcs="{{ $item->total_pcs }}"
+                                            data-box="{{ $item->total_box }}"
+                                            onchange="updateSelection()">
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $index + 1 }}.</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{{ $item->supplier_name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item->nama_barang }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ number_format($item->total_gram, 2, ',', '.') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_pcs }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <input type="number" step="0.01" min="0.01" max="{{ $item->total_gram }}"
+                                            placeholder="Jml Gram"
+                                            class="gram-input w-24 px-2 py-1 border border-gray-300 rounded focus:ring-teal-500 focus:border-teal-500 text-sm"
+                                            data-max="{{ $item->total_gram }}"
+                                            onchange="validateGramInput(this)">
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500">
+                                        Tidak ada ketersediaan stok Pembelian Supplier yang bisa digrading.
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Selection Summary -->
                 <div class="p-4 bg-gray-50 border-t border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -213,30 +284,31 @@
 
 <script>
     function showTable(type) {
-        const tableDemak = document.getElementById('table_demak');
-        const tableJasaCuci = document.getElementById('table_jasacuci');
-        const btnDemak = document.getElementById('btn_tab_demak');
-        const btnJasaCuci = document.getElementById('btn_tab_jasacuci');
+        const tables = ['table_demak', 'table_jasacuci', 'table_supplier'];
+        const buttons = {
+            demak: { id: 'btn_tab_demak', active: ['border-blue-500', 'text-blue-600'] },
+            jasacuci: { id: 'btn_tab_jasacuci', active: ['border-purple-500', 'text-purple-600'] },
+            supplier: { id: 'btn_tab_supplier', active: ['border-teal-500', 'text-teal-600'] }
+        };
 
-        if (type === 'demak') {
-            tableDemak.classList.remove('hidden');
-            tableJasaCuci.classList.add('hidden');
+        // Hide all tables
+        tables.forEach(t => document.getElementById(t).classList.add('hidden'));
 
-            btnDemak.classList.add('border-blue-500', 'text-blue-600');
-            btnDemak.classList.remove('border-gray-300', 'text-gray-500');
+        // Reset all buttons
+        Object.values(buttons).forEach(b => {
+            const el = document.getElementById(b.id);
+            el.classList.add('border-gray-300', 'text-gray-500');
+            b.active.forEach(c => el.classList.remove(c));
+        });
 
-            btnJasaCuci.classList.add('border-gray-300', 'text-gray-500');
-            btnJasaCuci.classList.remove('border-purple-500', 'text-purple-600');
-        } else {
-            tableJasaCuci.classList.remove('hidden');
-            tableDemak.classList.add('hidden');
+        // Show selected table
+        const tableMap = { demak: 'table_demak', jasacuci: 'table_jasacuci', supplier: 'table_supplier' };
+        document.getElementById(tableMap[type]).classList.remove('hidden');
 
-            btnJasaCuci.classList.add('border-purple-500', 'text-purple-600');
-            btnJasaCuci.classList.remove('border-gray-300', 'text-gray-500');
-
-            btnDemak.classList.add('border-gray-300', 'text-gray-500');
-            btnDemak.classList.remove('border-blue-500', 'text-blue-600');
-        }
+        // Activate selected button
+        const activeBtn = document.getElementById(buttons[type].id);
+        activeBtn.classList.remove('border-gray-300', 'text-gray-500');
+        buttons[type].active.forEach(c => activeBtn.classList.add(c));
     }
 
     function validateGramInput(input) {
@@ -257,6 +329,12 @@
 
     function toggleAllJasaCuci(checkbox) {
         const checkboxes = document.querySelectorAll('#tbody_jasacuci .row-checkbox');
+        checkboxes.forEach(cb => cb.checked = checkbox.checked);
+        updateSelection();
+    }
+
+    function toggleAllSupplier(checkbox) {
+        const checkboxes = document.querySelectorAll('#tbody_supplier .row-checkbox');
         checkboxes.forEach(cb => cb.checked = checkbox.checked);
         updateSelection();
     }
@@ -305,10 +383,11 @@
                 gram = parseFloat(cb.dataset.gram) || 0;
             }
 
+            const sumber = cb.getAttribute('data-sumber');
             const itemData = {
                 id: cb.value,
                 barang_id: cb.getAttribute('data-barang_id'),
-                sumber: cb.getAttribute('data-sumber'),
+                sumber: sumber,
                 nama: cb.getAttribute('data-nama'),
                 gram: gram,
                 pcs: cb.getAttribute('data-pcs'),
@@ -316,17 +395,19 @@
             };
 
             // Add source-specific identifier
-            if (cb.getAttribute('data-sumber') === 'demak') {
+            if (sumber === 'demak') {
                 itemData.partai = cb.getAttribute('data-partai');
-            } else {
+            } else if (sumber === 'jasa_cuci') {
                 itemData.kode_bahan = cb.getAttribute('data-kode_bahan');
                 itemData.kode_bahan_id = cb.getAttribute('data-kode_bahan_id');
+            } else if (sumber === 'pembelian_supplier') {
+                itemData.supplier_name = cb.getAttribute('data-supplier_name');
+                itemData.supplier_id = cb.getAttribute('data-supplier_id');
             }
 
             selectedItems.push(itemData);
         });
 
-        // Debug: check what we're sending
         console.log('selectedItems:', selectedItems);
         console.log('items_data:', JSON.stringify(selectedItems));
 

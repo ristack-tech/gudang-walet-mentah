@@ -61,7 +61,29 @@
                     </a>
                 </div>
 
-                {{-- Card 3: Stok Gudang Global --}}
+                {{-- Card 3: Stok Pembelian Supplier --}}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-6">
+                        {{-- Icon --}}
+                        <div class="w-12 h-12 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        {{-- Badge --}}
+                        <span class="bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1 rounded-md">
+                            {{ $pembelianSupplierCount }} Item
+                        </span>
+                    </div>
+                    
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">Stok Pembelian Supplier</h3>
+                    <p class="text-sm text-gray-500 mb-6 flex-grow">Lihat data stok dari pembelian supplier</p>
+                    
+                    <a href="{{ route('stok-gudang.pembelian-supplier') }}" class="w-full text-center px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium rounded-lg border border-gray-200 transition-colors">
+                        Buka Detail
+                    </a>
+                </div>
+
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
                     <div class="flex justify-between items-start mb-6">
                         {{-- Icon --}}
@@ -77,7 +99,7 @@
                     </div>
                     
                     <h3 class="text-lg font-bold text-gray-900 mb-1">Stok Gudang Global</h3>
-                    <p class="text-sm text-gray-500 mb-6 flex-grow">Lihat seluruh rekap stok gudang secara menyeluruh (Demak + Jasa Cuci)</p>
+                    <p class="text-sm text-gray-500 mb-6 flex-grow">Lihat seluruh rekap stok gudang secara menyeluruh (Demak + Jasa Cuci + Supplier)</p>
                     
                     <a href="{{ route('stok-gudang.global') }}" class="w-full text-center px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium rounded-lg border border-gray-200 transition-colors">
                         Buka Detail

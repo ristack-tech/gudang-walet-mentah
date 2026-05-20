@@ -126,6 +126,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/demak/{id}', 'showDemak')->name('demak.show');
             Route::get('/jasa-cuci', 'jasaCuci')->name('jasa-cuci');
             Route::get('/jasa-cuci/{id}', 'showJasaCuci')->name('jasa-cuci.show');
+            Route::get('/pembelian-supplier', 'pembelianSupplier')->name('pembelian-supplier');
+            Route::get('/pembelian-supplier/{id}', 'showPembelianSupplier')->name('pembelian-supplier.show');
             Route::get('/global', 'global')->name('global');
             Route::get('/global/{id}', 'showGlobal')->name('global.show');
         });

@@ -20,9 +20,10 @@ class StokGudangController extends Controller
         // so fully-graded items are no longer counted
         $demakCount = collect($this->stokGudangService->getDemakSummary())->count();
         $jasaCuciCount = collect($this->stokGudangService->getJasaCuciSummary())->count();
+        $pembelianSupplierCount = collect($this->stokGudangService->getPembelianSupplierSummary())->count();
         $globalCount = collect($this->stokGudangService->getGlobalSummary())->count();
 
-        return view('admin.stok-gudang.index', compact('demakCount', 'jasaCuciCount', 'globalCount'));
+        return view('admin.stok-gudang.index', compact('demakCount', 'jasaCuciCount', 'pembelianSupplierCount', 'globalCount'));
     }
 
     public function demak(\Illuminate\Http\Request $request)
@@ -39,6 +40,13 @@ class StokGudangController extends Controller
         return view('admin.stok-gudang.jasa-cuci', compact('jasaCuciStock'));
     }
 
+    public function pembelianSupplier(\Illuminate\Http\Request $request)
+    {
+        $pembelianSupplierStock = $this->stokGudangService->getPembelianSupplierSummary($request->search);
+
+        return view('admin.stok-gudang.pembelian-supplier', compact('pembelianSupplierStock'));
+    }
+
     public function showDemak($id)
     {
         $namaBarang = \App\Models\NamaBarang::findOrFail($id);
@@ -53,6 +61,14 @@ class StokGudangController extends Controller
         $details = $this->stokGudangService->getJasaCuciDetail($id);
 
         return view('admin.stok-gudang.show-jasa-cuci', compact('namaBarang', 'details'));
+    }
+
+    public function showPembelianSupplier($id)
+    {
+        $namaBarang = \App\Models\NamaBarang::findOrFail($id);
+        $details = $this->stokGudangService->getPembelianSupplierDetail($id);
+
+        return view('admin.stok-gudang.show-pembelian-supplier', compact('namaBarang', 'details'));
     }
 
     public function global(\Illuminate\Http\Request $request)
