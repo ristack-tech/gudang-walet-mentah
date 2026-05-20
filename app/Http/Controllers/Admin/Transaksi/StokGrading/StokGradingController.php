@@ -15,7 +15,7 @@ class StokGradingController extends Controller
 
     public function __construct(
         StokGradingService $stokGradingService,
-        \App\Services\StokGudang\StokGudangService $stokGudangService
+        \App\Services\Admin\Transaksi\StokGudang\StokGudangService $stokGudangService
     ) {
         $this->stokGradingService = $stokGradingService;
         $this->stokGudangService = $stokGudangService;
@@ -47,6 +47,7 @@ class StokGradingController extends Controller
     {
         $demakSummary = $this->stokGudangService->getDemakByPartai($request->search);
         $jasaCuciSummary = $this->stokGudangService->getJasaCuciByKodeBahan($request->search);
+        $pembelianSupplierSummary = $this->stokGudangService->getPembelianSupplierBySupplier($request->search);
 
         return view('admin.stok-grading.create-step-1', compact('demakSummary', 'jasaCuciSummary'));
     }

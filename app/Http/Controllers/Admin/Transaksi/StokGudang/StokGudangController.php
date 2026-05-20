@@ -9,7 +9,7 @@ class StokGudangController extends Controller
 {
     protected $stokGudangService;
 
-    public function __construct(\App\Services\StokGudang\StokGudangService $stokGudangService)
+    public function __construct(\App\Services\Admin\Transaksi\StokGudang\StokGudangService $stokGudangService)
     {
         $this->stokGudangService = $stokGudangService;
     }
