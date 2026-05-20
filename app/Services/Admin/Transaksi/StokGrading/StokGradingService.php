@@ -114,6 +114,119 @@ class StokGradingService
     }
 
     /**
+     * Store a new Stok Grading record with custom no_kartu (for combined items).
+     */
+    public function storeGradingWithNoKartu(array $data)
+    {
+        return DB::transaction(function () use ($data) {
+            $stokId = $data['barang_id'] ?? null;
+            $noKartu = $data['no_kartu'] ?? ('STG-' . date('YmdHis'));
+
+            // Calculate totals
+            $totals = [
+                'gram_lempeng_bersih' => 0,
+                'pcs_lempeng_bersih' => 0,
+                'box_lempeng_bersih' => 0,
+                'gram_lempeng_kotor' => 0,
+                'pcs_lempeng_kotor' => 0,
+                'box_lempeng_kotor' => 0,
+                'gram_mangkok' => 0,
+                'pcs_mangkok' => 0,
+                'box_mangkok' => 0,
+            ];
+
+            foreach ($data['grades'] as $grade) {
+                if ($grade['berat'] > 0 || $grade['box'] > 0) {
+                    if ($grade['type'] === 'lempeng_bersih') {
+                        $totals['gram_lempeng_bersih'] += (float) $grade['berat'];
+                        $totals['box_lempeng_bersih'] += (int) $grade['box'];
+                    } elseif ($grade['type'] === 'lempeng_kotor') {
+                        $totals['gram_lempeng_kotor'] += (float) $grade['berat'];
+                        $totals['box_lempeng_kotor'] += (int) $grade['box'];
+                    } elseif ($grade['type'] === 'mangkok') {
+                        $totals['gram_mangkok'] += (float) $grade['berat'];
+                        $totals['box_mangkok'] += (int) $grade['box'];
+                    }
+                }
+            }
+
+            $totalGramKeseluruhan = $totals['gram_lempeng_bersih'] + $totals['gram_lempeng_kotor'] + $totals['gram_mangkok'];
+
+            // If consumed_gram is provided (multi-item batch), use it for stok gudang deduction
+            // consumed_gram = how much raw material was consumed from THIS specific item's stock
+            $consumedGram = $data['consumed_gram'] ?? null;
+            $effectiveGram = $consumedGram !== null ? (float) $consumedGram : $totalGramKeseluruhan;
+
+            // Lock source stock rows for update to prevent race condition
+            if ($stokId && $effectiveGram > 0) {
+                $sumberStok = $data['sumber_stok'] ?? null;
+
+                if ($sumberStok === 'demak') {
+                    DB::table('barang_masuk_demak')
+                        ->where('barang_id', $stokId)
+                        ->lockForUpdate()
+                        ->get();
+                } elseif ($sumberStok === 'jasa_cuci') {
+                    DB::table('barang_masuk_jasa_cuci')
+                        ->where('barang_id', $stokId)
+                        ->lockForUpdate()
+                        ->get();
+                }
+
+                DB::table('stok_gradings')
+                    ->where('barang_id', $stokId)
+                    ->whereNull('deleted_at')
+                    ->lockForUpdate()
+                    ->get();
+            }
+
+            $totalPcsKeseluruhan = 0;
+            $totalBoxKeseluruhan = $totals['box_lempeng_bersih'] + $totals['box_lempeng_kotor'] + $totals['box_mangkok'];
+
+            // Save parent record with custom no_kartu
+            // total_gram_keseluruhan uses effectiveGram (consumed_gram when available)
+            // to correctly track per-item stock deduction for stok gudang
+            $stokGrading = StokGrading::create([
+                'barang_id' => $data['barang_id'] ?? null,
+                'sumber_stok' => $data['sumber_stok'] ?? null,
+                'no_kartu' => $noKartu,
+                'tanggal' => now()->toDateString(),
+                'partai' => $data['partai'] ?? '-',
+                'pekerja' => '-',
+                'box_awal' => $data['box_awal'] ?? 0,
+                'total_gram_lempeng_bersih' => $totals['gram_lempeng_bersih'],
+                'total_pcs_lempeng_bersih' => 0,
+                'total_box_lempeng_bersih' => $totals['box_lempeng_bersih'],
+                'total_gram_lempeng_kotor' => $totals['gram_lempeng_kotor'],
+                'total_pcs_lempeng_kotor' => 0,
+                'total_box_lempeng_kotor' => $totals['box_lempeng_kotor'],
+                'total_gram_mangkok' => $totals['gram_mangkok'],
+                'total_pcs_mangkok' => 0,
+                'total_box_mangkok' => $totals['box_mangkok'],
+                'total_gram_keseluruhan' => $effectiveGram,
+                'total_pcs_keseluruhan' => 0,
+                'total_box_keseluruhan' => $totalBoxKeseluruhan,
+            ]);
+
+            // Save details
+            foreach ($data['grades'] as $grade) {
+                if ($grade['berat'] > 0 || $grade['box'] > 0) {
+                    StokGradingDetail::create([
+                        'stok_grading_id' => $stokGrading->id,
+                        'type' => $grade['type'],
+                        'grade' => $grade['name'],
+                        'berat' => $grade['berat'] ?? 0,
+                        'pcs' => 0,
+                        'box' => $grade['box'] ?? 0,
+                    ]);
+                }
+            }
+
+            return $stokGrading;
+        });
+    }
+
+    /**
      * Get a Stok Grading record with its details mapped by type for view formatting.
      */
     public function getGradingFormatted($id)
@@ -174,6 +287,49 @@ class StokGradingService
                     'box' => $stokGrading->total_box_keseluruhan,
                 ],
             ]
+        ];
+    }
+
+    /**
+     * Get aggregated grading data from a collection of StokGrading models (batch by no_kartu).
+     * Combines all grade details from multiple grading records into one unified view.
+     */
+    public function getGradingFormattedBatch($batchGradings)
+    {
+        $first = $batchGradings->first();
+        
+        $lempengBersih = [];
+        $lempengKotor = [];
+        $mangkok = [];
+
+        foreach ($batchGradings as $grading) {
+            foreach ($grading->details as $detail) {
+                $mappedDetail = [
+                    'grade' => $detail->grade,
+                    'berat' => $detail->berat,
+                    'box' => $detail->box,
+                ];
+
+                if ($detail->type === 'lempeng_bersih') {
+                    $lempengBersih[] = $mappedDetail;
+                } elseif ($detail->type === 'lempeng_kotor') {
+                    $lempengKotor[] = $mappedDetail;
+                } elseif ($detail->type === 'mangkok') {
+                    $mangkok[] = $mappedDetail;
+                }
+            }
+        }
+
+        return [
+            'id' => $first->id,
+            'no_kartu' => $first->no_kartu,
+            'tanggal' => $first->tanggal,
+            'pekerja' => $first->pekerja,
+            'total_gram_keseluruhan' => $batchGradings->sum('total_gram_keseluruhan'),
+            'total_box_keseluruhan' => $batchGradings->sum('total_box_keseluruhan'),
+            'lempeng_bersih' => $lempengBersih,
+            'lempeng_kotor' => $lempengKotor,
+            'mangkok' => $mangkok,
         ];
     }
 

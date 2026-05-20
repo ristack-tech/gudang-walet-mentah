@@ -42,7 +42,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Batch</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Gram Grading</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
@@ -53,20 +53,20 @@
                                         {{ $stokGradingBatch->firstItem() + $index }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                                        SG-{{ \Carbon\Carbon::parse($item->tanggal)->format('Ymd') . '-' . strtoupper(substr(md5($item->id), 0, 3)) }}
+                                        SG-{{ \Carbon\Carbon::parse($item->tanggal)->format('Ymd') . '-' . strtoupper(substr(md5($item->first_id), 0, 3)) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                                         {{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
-                                        <a href="{{ route('stok-grading.show', $item->id) }}" class="hover:underline text-blue-600">
-                                            {{ $item->namaBarang->nama_barang ?? 'Unknown' }}
-                                        </a>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            {{ number_format($item->total_gram ?? 0, 2, ',', '.') }} gr
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <div class="flex items-center justify-center space-x-2">
-                                            <a href="{{ route('stok-grading.show', $item->id) }}" class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">Detail Grading</a>
-                                            <form action="{{ route('stok-grading.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data grading ini?');">
+                                            <a href="{{ route('stok-grading.show', $item->first_id) }}" class="inline-flex items-center px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 transition duration-200">Detail Grading</a>
+                                            <form action="{{ route('stok-grading.destroy', $item->first_id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data grading ini?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-200">Hapus Grading</button>

@@ -63,8 +63,15 @@
                                         data-gram-available="{{ $item["gram"] }}"
                                         onchange="updateItemSelection()">
                                     <input type="hidden" name="items[{{ $idx }}][id]" value="{{ $item["id"] }}">
+                                    <input type="hidden" name="items[{{ $idx }}][barang_id]" value="{{ $item["barang_id"] }}">
                                     <input type="hidden" name="items[{{ $idx }}][sumber]" value="{{ $item["sumber"] }}">
                                     <input type="hidden" name="items[{{ $idx }}][nama]" value="{{ $item["nama"] }}">
+                                    @if($item["sumber"] == "demak")
+                                    <input type="hidden" name="items[{{ $idx }}][partai]" value="{{ $item["partai"] }}">
+                                    @else
+                                    <input type="hidden" name="items[{{ $idx }}][kode_bahan]" value="{{ $item["kode_bahan"] }}">
+                                    <input type="hidden" name="items[{{ $idx }}][kode_bahan_id]" value="{{ $item["kode_bahan_id"] }}">
+                                    @endif
                                 </td>
                                 <td class="px-4 py-4 border-y border-gray-100 group-hover:border-blue-100">
                                     <div class="flex flex-col">
@@ -533,12 +540,26 @@
         document.querySelectorAll(".item-checkbox:checked").forEach(cb => {
             const tr = cb.closest("tr");
             const gramInput = tr.querySelector(".gram-input");
-            checkedItems.push({
-                id: cb.closest("tr").querySelector("input[name*='[id]']").value,
-                sumber: cb.closest("tr").querySelector("input[name*='[sumber]']").value,
-                nama: cb.closest("tr").querySelector("input[name*='[nama]']").value,
+            const idx = cb.getAttribute("data-idx");
+
+            const item = {
+                id: tr.querySelector(`input[name='items[${idx}][id]']`).value,
+                barang_id: tr.querySelector(`input[name='items[${idx}][barang_id]']`).value,
+                sumber: tr.querySelector(`input[name='items[${idx}][sumber]']`).value,
+                nama: tr.querySelector(`input[name='items[${idx}][nama]']`).value,
                 gram: parseFloat(gramInput.value) || 0
-            });
+            };
+
+            // Add source-specific fields
+            const partaiInput = tr.querySelector(`input[name='items[${idx}][partai]']`);
+            if (partaiInput) {
+                item.partai = partaiInput.value;
+            } else {
+                item.kode_bahan = tr.querySelector(`input[name='items[${idx}][kode_bahan]']`).value;
+                item.kode_bahan_id = tr.querySelector(`input[name='items[${idx}][kode_bahan_id]']`).value;
+            }
+
+            checkedItems.push(item);
         });
 
         // Store in hidden input as JSON

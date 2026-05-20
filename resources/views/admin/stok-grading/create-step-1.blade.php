@@ -75,10 +75,10 @@
                                         <span class="sr-only">Checkbox</span>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Partai</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Gram</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pcs</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Box</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Gram</th>
                                 </tr>
                             </thead>
@@ -89,17 +89,19 @@
                                         <input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
                                             class="row-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                             data-sumber="demak"
-                                            data-nama="{{ $item->nama_barang }}"
+                                            data-barang_id="{{ $item->barang_id }}"
+                                            data-nama="{{ $item->partai }}"
+                                            data-partai="{{ $item->partai }}"
                                             data-gram="{{ $item->total_gram }}"
                                             data-pcs="{{ $item->total_pcs }}"
                                             data-box="{{ $item->total_box }}"
                                             onchange="updateSelection()">
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $index + 1 }}.</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->nama_barang }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{{ $item->partai }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item->nama_barang }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ number_format($item->total_gram, 2, ',', '.') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_pcs }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_box }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <input type="number" step="0.01" min="0.01" max="{{ $item->total_gram }}"
                                             placeholder="Jml Gram"
@@ -139,6 +141,7 @@
                                         <span class="sr-only">Checkbox</span>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Bahan</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Gram</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pcs</th>
@@ -152,14 +155,18 @@
                                         <input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
                                             class="row-checkbox w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
                                             data-sumber="jasa_cuci"
-                                            data-nama="{{ $item->nama_barang }}"
+                                            data-barang_id="{{ $item->barang_id }}"
+                                            data-nama="{{ $item->kode_bahan }}"
+                                            data-kode_bahan="{{ $item->kode_bahan }}"
+                                            data-kode_bahan_id="{{ $item->kode_bahan_id }}"
                                             data-gram="{{ $item->total_gram }}"
                                             data-pcs="{{ $item->total_pcs }}"
                                             data-box="0"
                                             onchange="updateSelection()">
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $index + 1 }}.</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->nama_barang }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{{ $item->kode_bahan }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $item->nama_barang }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ number_format($item->total_gram, 2, ',', '.') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $item->total_pcs }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -172,7 +179,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
+                                    <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500">
                                         Tidak ada ketersediaan stok Jasa Cuci yang bisa digrading.
                                     </td>
                                 </tr>
@@ -298,15 +305,30 @@
                 gram = parseFloat(cb.dataset.gram) || 0;
             }
 
-            selectedItems.push({
+            const itemData = {
                 id: cb.value,
-                sumber: cb.dataset.sumber,
-                nama: cb.dataset.nama,
+                barang_id: cb.getAttribute('data-barang_id'),
+                sumber: cb.getAttribute('data-sumber'),
+                nama: cb.getAttribute('data-nama'),
                 gram: gram,
-                pcs: cb.dataset.pcs,
-                box: cb.dataset.box
-            });
+                pcs: cb.getAttribute('data-pcs'),
+                box: cb.getAttribute('data-box')
+            };
+
+            // Add source-specific identifier
+            if (cb.getAttribute('data-sumber') === 'demak') {
+                itemData.partai = cb.getAttribute('data-partai');
+            } else {
+                itemData.kode_bahan = cb.getAttribute('data-kode_bahan');
+                itemData.kode_bahan_id = cb.getAttribute('data-kode_bahan_id');
+            }
+
+            selectedItems.push(itemData);
         });
+
+        // Debug: check what we're sending
+        console.log('selectedItems:', selectedItems);
+        console.log('items_data:', JSON.stringify(selectedItems));
 
         // Store as JSON in hidden input
         document.getElementById('items_data').value = JSON.stringify(selectedItems);

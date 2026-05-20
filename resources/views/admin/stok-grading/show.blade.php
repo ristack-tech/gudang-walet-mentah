@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Grading - Barang')
+@section('title', 'Detail Grading - Batch')
 
 @section('content')
 <div class="py-8 bg-gray-50 min-h-screen">
@@ -11,8 +11,8 @@
             <div class="p-6 sm:p-10 border-b border-gray-200 bg-white">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h1 class="text-2xl font-semibold text-gray-900">Detail Grading - Barang: {{ $namaBarang }}</h1>
-                        <p class="text-sm text-gray-600">ID Grading: SG-{{ str_pad($gradingBatch['id'], 3, '0', STR_PAD_LEFT) }}</p>
+                        <h1 class="text-2xl font-semibold text-gray-900">Detail Grading Batch</h1>
+                        <p class="text-sm text-gray-600">No Kartu: {{ $gradingBatch['no_kartu'] }}</p>
                     </div>
                 <div class="flex gap-2">
                     <a href="{{ route('stok-grading.index') }}"
@@ -26,39 +26,76 @@
                 </div>
             </div>
 
-            <!-- ✅ Informasi Stok Awal (Dari Step 1) -->
+            <!-- ✅ Informasi Batch -->
             <div class="bg-white shadow rounded-lg border mb-6 p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Informasi Stok Gudang Awal</h2>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Informasi Batch Grading</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Tanggal Grading</dt>
                         <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ \Carbon\Carbon::parse($gradingBatch['tanggal'])->format('d M Y') }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">Partai</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ $gradingBatch['partai'] }}</dd>
+                        <dt class="text-sm font-medium text-gray-500">No Kartu</dt>
+                        <dd class="mt-1 text-sm text-gray-900 font-medium">{{ $gradingBatch['no_kartu'] }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Pekerja</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $gradingBatch['pekerja'] }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">Nama Barang Stok Sumber</dt>
-                        <dd class="mt-1 text-sm text-blue-600 font-medium">
-                            {{ $namaBarang }}
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ml-2 {{ ($gradingBatch['sumber_stok'] ?? '') == 'demak' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
-                                {{ ($gradingBatch['sumber_stok'] ?? '') == 'demak' ? 'Demak' : 'Jasa Cuci' }}
+                        <dt class="text-sm font-medium text-gray-500">Total Gram Keseluruhan</dt>
+                        <dd class="mt-1">
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                {{ number_format($gradingBatch['totals']['keseluruhan']['gram'] ?? 0, 2, ',', '.') }} gr
                             </span>
-                        </dd>
-                    </div>
-                    <div class="md:col-span-2 mt-2 pt-2 border-t border-gray-100">
-                        <dt class="text-sm font-medium text-gray-700">Jumlah Awal Sebelum Digrading</dt>
-                        <dd class="mt-1 text-sm text-gray-900">
-                            Box Awal Digrading: <span class="font-bold">{{ number_format($gradingBatch['box_awal'] ?? 0, 0, ',', '.') }}</span> Box
                         </dd>
                     </div>
                 </div>
             </div>
+
+            <!-- ✅ Daftar Partai (P-001, P-002, etc.) -->
+            @if(!empty($gradingBatch['partai_list']) && count($gradingBatch['partai_list']) > 0)
+            <div class="bg-white shadow rounded-lg border overflow-hidden mb-6">
+                <div class="px-6 py-4 border-b bg-indigo-50">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-indigo-900">Daftar Partai dalam Batch</h2>
+                        <span class="text-sm text-indigo-800">{{ count($gradingBatch['partai_list']) }} partai</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="w-full text-sm">
+                            <thead class="text-left text-xs font-medium text-gray-500 bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 rounded-tl-md">Kode</th>
+                                    <th class="px-4 py-3">Partai / Kode Bahan</th>
+                                    <th class="px-4 py-3">Nama Barang</th>
+                                    <th class="px-4 py-3">Sumber</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                @foreach($gradingBatch['partai_list'] as $partai)
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">
+                                                {{ $partai['label'] }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-900 font-medium">{{ $partai['partai'] }}</td>
+                                        <td class="px-4 py-3 text-gray-700">{{ $partai['nama_barang'] }}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $partai['sumber_stok'] == 'demak' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                                {{ $partai['sumber_stok'] == 'demak' ? 'Demak' : 'Jasa Cuci' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <!-- ✅ Detail Item Grading Lempeng Bersih -->
             <div class="bg-white shadow rounded-lg border overflow-hidden mb-6">
@@ -289,4 +326,5 @@
 
         </div>
     </div>
+</div>
 @endsection
