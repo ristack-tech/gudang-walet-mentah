@@ -1,0 +1,120 @@
+"id","jenis_barang_keluar_id","tanggal_kirim","created_at","updated_at","deleted_at","lokasi_id","status_lunas"
+"1","1","2026-05-19","2026-05-19 14:58:52","2026-05-19 15:03:31",NULL,"2","1"
+"2","1","2026-05-19","2026-05-19 15:04:08","2026-05-19 15:04:27",NULL,"2","1"
+"3","2","2026-05-20","2026-05-20 07:06:31","2026-05-20 07:06:31",NULL,NULL,"0"
+"id","barang_keluar_id","partai_id","warna_id","kode_lp","gram","pcs","kadar_air","timbangan_ulang","keterangan","created_at","updated_at","deleted_at","status_kembali"
+"1","3","2","1","12","1000.00","2","12.00",NULL,"12","2026-05-20 07:06:31","2026-05-20 07:06:31",NULL,"0"
+"id","barang_keluar_id","kode_bahan_id","keterangan_cetak","berat","pcs","kadar_air","created_at","updated_at","deleted_at","status_kembali"
+"1","1","1","=tt","1000.00","2.00","2.00","2026-05-19 14:58:52","2026-05-19 15:03:31",NULL,"1"
+"2","2","1","2","1000.00","1.99","21.00","2026-05-19 15:04:08","2026-05-19 15:04:27",NULL,"1"
+"id","jenis_barang_masuk_id","tanggal_terima","created_at","updated_at","deleted_at","barang_keluar_id","total_susut_batch"
+"1","1","2026-05-19","2026-05-19 15:03:31","2026-05-19 15:03:31",NULL,"1","-50.00"
+"2","1","2026-05-19","2026-05-19 15:04:27","2026-05-19 15:04:27",NULL,"2","50.00"
+"4","3","2026-05-20","2026-05-20 08:52:59","2026-05-20 08:52:59",NULL,NULL,NULL
+"id","barang_masuk_id","barang_id","partai","gram","pcs","box","transaksi_dari_id","transaksi_ke_id","keterangan","created_at","updated_at","deleted_at","barang_keluar_demak_id","susut_per_item"
+"id","barang_masuk_id","lokasi_jasa_cuci_id","barang_id","kode_bahan_id","berat_per_pcs","persentase_selisih","created_at","updated_at","deleted_at","barang_keluar_jasa_cuci_id","susut_per_item","berat_timbangan_gudang"
+"1","1","2","1","1","900.00","-5.56","2026-05-19 15:03:31","2026-05-19 15:03:31",NULL,"1","-50.00","950.00"
+"2","2","3","1","1","900.00","5.56","2026-05-19 15:04:27","2026-05-19 15:04:27",NULL,"2","50.00","850.00"
+"id","barang_masuk_id","barang_id","supplier_id","berat","pcs","box","created_at","updated_at","deleted_at"
+"4","4","1","1","1000.00","1","1","2026-05-20 08:52:59","2026-05-20 08:52:59",NULL
+"id","batch","tanggal_transfer","keterangan","created_at","updated_at","deleted_at"
+"1","EXP-20260520-090539-QA2m","2026-05-20","e","2026-05-20 09:05:39","2026-05-20 09:06:00","2026-05-20 09:06:00"
+"2","EXP-20260520-090639-QCkP","2026-05-20","sxz","2026-05-20 09:06:39","2026-05-20 09:12:32","2026-05-20 09:12:32"
+"3","EXP-20260520-091340-a33o","2026-05-20","k","2026-05-20 09:13:40","2026-05-20 09:15:03","2026-05-20 09:15:03"
+"4","EXP-20260520-091534-v5OX","2026-05-20","u","2026-05-20 09:15:34","2026-05-20 09:15:34",NULL
+"id","export_id","stok_barang_jadi_detail_id","berat","pcs","box","harga","created_at","updated_at","deleted_at"
+"1","1","1","500.00","1","1","20000.00","2026-05-20 09:05:39","2026-05-20 09:06:00","2026-05-20 09:06:00"
+"2","2","1","500.00","1","1","2000.00","2026-05-20 09:06:39","2026-05-20 09:12:32","2026-05-20 09:12:32"
+"3","3","3","1000.00","2","2","1000.00","2026-05-20 09:13:40","2026-05-20 09:15:03","2026-05-20 09:15:03"
+"4","4","3","1000.00","2","2","2000.00","2026-05-20 09:15:34","2026-05-20 09:15:34",NULL
+"id","uuid","connection","queue","payload","exception","failed_at"
+"id","nama","created_at","updated_at","deleted_at"
+"1","Jasa Cuci","2026-05-19 14:58:25","2026-05-19 14:58:25",NULL
+"2","Demak","2026-05-20 07:03:28","2026-05-20 07:03:28",NULL
+"id","nama","created_at","updated_at","deleted_at"
+"1","Jasa Cuci","2026-05-19 14:58:59","2026-05-19 14:58:59",NULL
+"2","Demak","2026-05-20 07:03:26","2026-05-20 07:03:26",NULL
+"3","Pembelian Supplier","2026-05-20 07:34:43","2026-05-20 07:34:43",NULL
+"id","nama","created_at","updated_at","deleted_at"
+"1","awdsa","2026-05-19 14:58:52","2026-05-19 14:58:52",NULL
+"id","nama_lokasi","is_jasa_cuci","created_at","updated_at","deleted_at"
+"1","Gudang Demak","0","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"2","Jasa Cuci A","1","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"3","Jasa Cuci B","1","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"4","Gudang Utama","0","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"id","migration","batch"
+"1","2014_10_12_000000_create_users_table","1"
+"2","2014_10_12_100000_create_password_reset_tokens_table","1"
+"3","2019_08_19_000000_create_failed_jobs_table","1"
+"4","2019_12_14_000001_create_personal_access_tokens_table","1"
+"5","2026_02_15_035917_master_nama_barang_table","1"
+"6","2026_02_15_040103_master_lokasi_table","1"
+"7","2026_02_15_040110_master_partai_table","1"
+"8","2026_02_15_040118_master_warna_table","1"
+"9","2026_02_15_040125_master_kode_bahan_table","1"
+"10","2026_02_20_155247_master_supplier_table","1"
+"11","2026_02_28_132614_create_jenis_barang_keluar_table","1"
+"12","2026_02_28_132714_create_barang_keluar_table","1"
+"13","2026_02_28_133049_create_barang_keluar_demak_table","1"
+"14","2026_02_28_134152_create_barang_keluar_jasa_cuci_table","1"
+"15","2026_02_28_152550_create_jenis_barang_masuk_table","1"
+"16","2026_02_28_152619_create_barang_masuk_table","1"
+"17","2026_02_28_152713_create_barang_masuk_demak_table","1"
+"18","2026_02_28_152933_create_barang_masuk_jasa_cuci_table","1"
+"19","2026_02_28_153241_create_barang_masuk_supplier_table","1"
+"20","2026_03_08_165248_create_stok_gudangs_table","1"
+"21","2026_03_09_042412_create_stok_gradings_table","1"
+"22","2026_03_09_042657_create_stok_grading_details_table","1"
+"23","2026_03_09_044812_create_stok_barang_jadis_table","1"
+"24","2026_03_09_044813_create_stok_barang_jadi_details_table","1"
+"25","2026_03_10_035545_create_export_table","1"
+"26","2026_03_10_193042_rename_batch_utama_to_barang_id_on_stok_gradings_table","1"
+"27","2026_03_10_193051_add_barang_id_to_stok_barang_jadi_details_table","1"
+"28","2026_03_11_052021_add_sumber_stok_to_stok_gradings_table","1"
+"29","2026_03_11_220828_add_lokasi_id_to_barang_keluar_table","1"
+"30","2026_04_17_180136_create_exports_and_export_details_tables","1"
+"31","2026_04_17_180500_rename_pcs_awal_to_box_awal_in_stok_gradings_table","1"
+"32","2026_04_17_180655_add_tracking_columns_to_barang_masuk_keluar_tables","1"
+"33","2026_04_25_060000_add_keterangan_to_supplier_table","1"
+"34","2026_04_26_000001_rename_jumlah_pcs_to_jumlah_box_in_stok_barang_jadi_details","1"
+"35","2026_05_06_000000_separate_berat_pcs_barang_keluar_jasa_cuci","1"
+"36","2026_05_06_000001_nullable_kadar_air_barang_masuk_jasa_cuci","1"
+"37","2026_05_19_210000_modify_columns_in_barang_masuk_jasa_cuci_table","1"
+"38","2026_05_20_080000_make_pcs_nullable_in_barang_masuk_supplier_table","2"
+"id","nama_barang","deskripsi","created_at","updated_at","deleted_at"
+"1","PLK","Plontos Kecil","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"2","PLB","Plontos Besar","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"3","MANGKOK","Bentuk Mangkok","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"4","SUDUT","Bentuk Sudut","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"5","PATAHAN","Barang Patahan","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"6","HANCURAN","Barang Hancuran","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"id","nama_partai","keterangan","kategori","created_at","updated_at","deleted_at"
+"1","P-001","Partai Perdana","barang masuk","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"2","P-002","Partai Reguler","barang masuk","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"3","P-003","Partai Premium","barang masuk","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"email","token","created_at"
+"id","tokenable_type","tokenable_id","name","token","abilities","last_used_at","expires_at","created_at","updated_at","deleted_at"
+"id","batch","tanggal","type","keterangan","created_at","updated_at","deleted_at"
+"1","TRF-CLOP-20260520090459","2026-05-20","clop","Transfer dari Global Stok Grading No Kartu: STG-20260520090047 / ZT","2026-05-20 09:04:59","2026-05-20 09:06:56","2026-05-20 09:06:56"
+"2","TRF-CLOP-20260520091119","2026-05-20","clop","Transfer dari Global Stok Grading No Kartu: STG-20260520091108 / MBS","2026-05-20 09:11:19","2026-05-20 09:11:30","2026-05-20 09:11:30"
+"3","TRF-CLOP-20260520091319","2026-05-20","clop","Transfer dari Global Stok Grading No Kartu: STG-20260520091108 / MBS","2026-05-20 09:13:19","2026-05-20 09:13:19",NULL
+"id","stok_barang_jadi_id","nama_barang","jumlah_box","berat","created_at","updated_at","deleted_at","barang_id"
+"1","1","PLK - LEMPENG BERSIH (ZT)","1","500.00","2026-05-20 09:04:59","2026-05-20 09:06:56","2026-05-20 09:06:56","1"
+"2","2","PLK - LEMPENG KOTOR (MBS)","2","1000.00","2026-05-20 09:11:19","2026-05-20 09:11:30","2026-05-20 09:11:30","1"
+"3","3","PLK - LEMPENG KOTOR (MBS)","0","0.00","2026-05-20 09:13:19","2026-05-20 09:15:34",NULL,"1"
+"id","barang_id","sumber_stok","no_kartu","tanggal","partai","pekerja","box_awal","total_gram_lempeng_bersih","total_pcs_lempeng_bersih","total_box_lempeng_bersih","total_gram_lempeng_kotor","total_pcs_lempeng_kotor","total_box_lempeng_kotor","total_gram_mangkok","total_pcs_mangkok","total_box_mangkok","total_gram_keseluruhan","total_pcs_keseluruhan","total_box_keseluruhan","keterangan","created_at","updated_at","deleted_at"
+"6","1","pembelian_supplier","STG-20260520091108","2026-05-20","Supplier Kalimantan","-","0","0.00","0","0","1000.00","0","1","0.00","0","0","1000.00","0","1",NULL,"2026-05-20 09:11:08","2026-05-20 09:11:08",NULL
+"id","stok_grading_id","type","grade","berat","pcs","box","created_at","updated_at","deleted_at"
+"6","6","lempeng_kotor","MBS","0.00","0","1","2026-05-20 09:11:08","2026-05-20 09:13:19",NULL
+"id","lokasi_id","barang_id","total_gram","total_pcs","total_box","created_at","updated_at"
+"id","nama","keterangan","created_at","updated_at","deleted_at"
+"1","Supplier Kalimantan","Kualitas Tinggi","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"2","Supplier Sumatera","Harga Bersaing","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"3","Supplier Lokal","Pengiriman Cepat","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"id","name","email","email_verified_at","password","remember_token","created_at","updated_at","deleted_at"
+"1","Super Admin","admin@gudangwalet.com",NULL,"$2y$10$5bDIi3LgVK5tyeBJmHDOyuHgTYXEOXQkxgeCFDzpIlwrZ.ibQVUXe",NULL,"2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"id","kode_warna","warna","created_at","updated_at","deleted_at"
+"1","W01","Putih","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"2","W02","Kuning","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"3","W03","Bulu Ringan","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
+"4","W04","Bulu Berat","2026-05-19 14:57:52","2026-05-19 14:57:52",NULL
