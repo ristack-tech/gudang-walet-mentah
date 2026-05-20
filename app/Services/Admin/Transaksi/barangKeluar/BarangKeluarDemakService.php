@@ -29,7 +29,6 @@ class BarangKeluarDemakService
                     'gram' => $item['gram'],
                     'pcs' => $item['pcs'],
                     'kadar_air' => $item['kadar_air'] ?? null,
-                    'timbangan_ulang' => $item['timbangan_ulang'] ?? null,
                     'keterangan' => $item['keterangan'] ?? null,
                 ]);
             }
@@ -60,7 +59,6 @@ class BarangKeluarDemakService
                     'gram' => $item['gram'],
                     'pcs' => $item['pcs'],
                     'kadar_air' => $item['kadar_air'] ?? null,
-                    'timbangan_ulang' => $item['timbangan_ulang'] ?? null,
                     'keterangan' => $item['keterangan'] ?? null,
                 ]);
             }
