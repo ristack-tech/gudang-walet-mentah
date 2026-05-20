@@ -140,13 +140,15 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
+                                @php $totalGram = 0; @endphp
                                 @foreach($items as $index => $item)
+                                    @php $totalGram += $item['gram']; @endphp
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">{{ $item['kode_lp'] }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ $item['warna'] }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
-                                            <span class="font-bold text-gray-800">{{ number_format($item['gram'], 2, ',', '.') }}</span> g / 
+                                            <span class="font-bold text-gray-800">{{ number_format($item['gram'], 2, ',', '.') }}</span> g /
                                             {{ number_format($item['pcs'], 0, ',', '.') }} pcs
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap text-center text-sm">
@@ -159,6 +161,15 @@
                                     </tr>
                                 @endforeach
                             </tbody>
+                            <tfoot class="bg-gray-50 border-t-2 border-gray-300">
+                                <tr>
+                                    <td colspan="3" class="px-4 py-3 text-right text-sm font-bold text-gray-700">TOTAL BERAT:</td>
+                                    <td class="px-4 py-3 text-right text-sm font-bold text-gray-900">
+                                        {{ number_format($totalGram, 2, ',', '.') }} g
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
 

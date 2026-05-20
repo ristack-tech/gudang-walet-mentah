@@ -125,7 +125,9 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
+                                @php $totalBerat = 0; @endphp
                                 @foreach($items as $index => $item)
+                                    @php $totalBerat += $item['berat']; @endphp
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">{{ $item['kode_bahan'] }}</td>
@@ -148,6 +150,16 @@
                                     </tr>
                                 @endforeach
                             </tbody>
+                            <tfoot class="bg-gray-50 border-t-2 border-gray-300">
+                                <tr>
+                                    <td colspan="2" class="px-4 py-3 text-right text-sm font-bold text-gray-700">TOTAL BERAT:</td>
+                                    <td class="px-4 py-3 text-right text-sm font-bold text-gray-900">
+                                        {{ number_format($totalBerat, 2, ',', '.') }} g
+                                    </td>
+                                    <td colspan="2"></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
 
