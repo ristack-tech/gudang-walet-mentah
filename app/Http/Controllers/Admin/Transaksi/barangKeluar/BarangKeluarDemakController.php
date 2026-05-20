@@ -83,7 +83,6 @@ class BarangKeluarDemakController extends Controller
             'pcs' => 'required|integer',
             'kadar_air' => 'nullable|numeric',
             'warna_id' => 'nullable|exists:warna,id',
-            'timbangan_ulang' => 'nullable|numeric',
             'keterangan' => 'nullable|string'
         ]);
 
@@ -168,7 +167,6 @@ class BarangKeluarDemakController extends Controller
             'items.*.pcs' => 'required|integer',
             'items.*.kadar_air' => 'nullable|numeric',
             'items.*.warna_id' => 'nullable|exists:warna,id',
-            'items.*.timbangan_ulang' => 'nullable|numeric',
             'items.*.keterangan' => 'nullable|string'
         ]);
 

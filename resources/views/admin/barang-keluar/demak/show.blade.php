@@ -52,7 +52,6 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Warna</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Gram</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Pcs</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">T. Ulang</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
                             </tr>
                         </thead>
@@ -64,12 +63,11 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->warna->kode_warna ?? '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">{{ number_format($item->gram, 2, ',', '.') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">{{ number_format($item->pcs, 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">{{ $item->timbangan_ulang ? number_format($item->timbangan_ulang, 2, ',', '.') : '-' }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500">{{ $item->keterangan ?? '-' }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada item dalam batch ini.</td>
+                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada item dalam batch ini.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -79,7 +77,7 @@
                                     <td colspan="3" class="px-6 py-4 text-right text-sm">Total:</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right">{{ number_format($data->barangKeluarDemak->sum('gram'), 2, ',', '.') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right">{{ number_format($data->barangKeluarDemak->sum('pcs'), 0, ',', '.') }}</td>
-                                    <td colspan="2"></td>
+                                    <td></td>
                                 </tr>
                             </tfoot>
                         @endif

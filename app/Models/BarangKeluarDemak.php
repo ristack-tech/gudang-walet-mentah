@@ -19,7 +19,6 @@ class BarangKeluarDemak extends Model
         'gram',
         'pcs',
         'kadar_air',
-        'timbangan_ulang',
         'keterangan',
         'status_kembali',
     ];

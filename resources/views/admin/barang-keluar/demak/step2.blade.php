@@ -39,16 +39,6 @@
                 </div>
             </div>
 
-            @if(session('error'))
-                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-                    <div class="text-red-700 text-sm">{{ session('error') }}</div>
-                </div>
-            @endif
-            @if(session('success'))
-                <div id="alert-success" class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-md">
-                    <div class="text-green-700 text-sm">{{ session('success') }}</div>
-                </div>
-            @endif
 
             <!-- Form Box -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
@@ -109,14 +99,6 @@
                                     <input type="number" step="0.01" min="0" max="100" name="kadar_air" id="kadar_air" value="{{ old('kadar_air') }}"
                                         class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-200 @error('kadar_air') border-red-500 @enderror">
                                     @error('kadar_air')
-                                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label for="timbangan_ulang" class="block text-sm font-medium text-gray-700 mb-1">Timbangan Ulang (Gram)</label>
-                                    <input type="number" step="0.01" min="0" name="timbangan_ulang" id="timbangan_ulang" value="{{ old('timbangan_ulang') }}"
-                                        class="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-200 @error('timbangan_ulang') border-red-500 @enderror">
-                                    @error('timbangan_ulang')
                                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                                     @enderror
                                 </div>
