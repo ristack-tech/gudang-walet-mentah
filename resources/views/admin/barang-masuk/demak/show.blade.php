@@ -69,7 +69,7 @@
                                     <th class="px-4 py-3 text-right">Gram Terima</th>
                                     <th class="px-4 py-3 text-right text-red-600">Susut (gr)</th>
                                     <th class="px-4 py-3 text-right text-orange-600">Susut (%)</th>
-                                    <th class="px-4 py-3 rounded-tr-md">Keterangan</th>
+                                    <th class="px-4 py-3 rounded-tr-md">Kode LP</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">

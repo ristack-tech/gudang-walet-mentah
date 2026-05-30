@@ -5,7 +5,6 @@ namespace App\Services\Admin\Transaksi\BarangMasuk;
 use App\Models\BarangMasuk;
 use App\Models\BarangMasukDemak;
 use App\Models\JenisBarangMasuk;
-use App\Models\BarangKeluar;
 use App\Models\BarangKeluarDemak;
 use Illuminate\Support\Facades\DB;
 
@@ -18,12 +17,8 @@ class BarangMasukDemakService
 
             $barangMasuk = BarangMasuk::create([
                 'jenis_barang_masuk_id' => $jenisBarangMasuk->id,
-                'barang_keluar_id' => $step1['barang_keluar_id'],
                 'tanggal_terima' => $step1['tanggal_terima'],
             ]);
-
-            $totalSusut = 0;
-            $barangKeluar = BarangKeluar::findOrFail($step1['barang_keluar_id']);
 
             // BUG-1: Ambil lokasi ID "Gudang Utama" secara dinamis
             $lokasiPusat = \App\Models\Lokasi::where('nama_lokasi', 'like', '%Gudang Utama%')->first();
@@ -33,6 +28,8 @@ class BarangMasukDemakService
             if (!$lokasiPusat) {
                 throw new \Exception('Lokasi Gudang Utama tidak ditemukan. Harap setup master data lokasi terlebih dahulu.');
             }
+
+            $totalSusut = 0;
 
             foreach ($selectedItems as $item) {
                 $outItem = BarangKeluarDemak::with('partai')->findOrFail($item['barang_keluar_demak_id']);
@@ -46,26 +43,17 @@ class BarangMasukDemakService
                     'barang_id' => $item['barang_id'],
                     'partai' => $item['partai'],
                     'transaksi_dari_id' => $step1['transaksi_dari_id'],
-                    'transaksi_ke_id' => $lokasiPusat->id, // BUG-1: Dynamic lookup instead of hardcoded 1  
+                    'transaksi_ke_id' => $lokasiPusat->id,  
                     'gram' => $item['gram_diterima'],
                     'pcs' => $item['pcs'],
                     'box' => $item['box'],
-                    'keterangan' => 'Retur dari batch BK-'.$barangKeluar->id,
+                    'keterangan' => $outItem->kode_lp,
                     'susut_per_item' => $susut,
                 ]);
-
-                // Update original status
-                $outItem->update(['status_kembali' => true]);
             }
 
             // Update parent susut
             $barangMasuk->update(['total_susut_batch' => $totalSusut]);
-
-            // Check completely returned
-            $remaining = $barangKeluar->barangKeluarDemak()->where('status_kembali', false)->count();
-            if ($remaining === 0) {
-                $barangKeluar->update(['status_lunas' => true]);
-            }
 
             return $barangMasuk;
         });
@@ -74,22 +62,9 @@ class BarangMasukDemakService
     public function destroyData(BarangMasuk $barangMasukBatch)
     {
         return DB::transaction(function () use ($barangMasukBatch) {
-            $barangKeluar = $barangMasukBatch->barangKeluar;
-            
-            // Revert status on child items
             foreach ($barangMasukBatch->barangMasukDemak as $item) {
-                if ($item->barangKeluarDemak) {
-                    $item->barangKeluarDemak->update(['status_kembali' => false]);
-                }
                 $item->delete();
             }
-
-            // Revert parent status if it was marked as fully returned
-            if ($barangKeluar && $barangKeluar->status_lunas) {
-                $barangKeluar->update(['status_lunas' => false]);
-            }
-
-            // Delete the batch
             $barangMasukBatch->delete();
         });
     }

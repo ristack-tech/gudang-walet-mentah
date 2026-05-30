@@ -5,11 +5,9 @@ namespace App\Http\Controllers\Admin\Transaksi\BarangMasuk;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Models\BarangMasukDemak;
 use App\Models\BarangKeluar;
 use App\Models\JenisBarangMasuk;
 use App\Models\JenisBarangKeluar;
-use App\Models\NamaBarang;
 use App\Services\Admin\Transaksi\BarangMasuk\BarangMasukDemakService;
 
 class BarangMasukDemakController extends Controller
@@ -27,25 +25,18 @@ class BarangMasukDemakController extends Controller
         return view('admin.barang-masuk.demak.index', compact('barangMasukBatch'));
     }
 
-    public function createStep1(Request $request)
+    public function createStep1()
     {
-        $jenisDemakKeluar = JenisBarangKeluar::firstOrCreate(['nama' => 'Demak']);
-        $outstandingBatches = BarangKeluar::where('jenis_barang_keluar_id', $jenisDemakKeluar->id)
-            ->where('status_lunas', false)
-            ->get();
-
         $lokasiList = \App\Models\Lokasi::where('is_jasa_cuci', false)->get();
-
         $step1Data = session('barang_masuk_demak_step1', []);
 
-        return view('admin.barang-masuk.demak.step1', compact('outstandingBatches', 'lokasiList', 'step1Data'));
+        return view('admin.barang-masuk.demak.step1', compact('lokasiList', 'step1Data'));
     }
 
     public function storeStep1(Request $request)
     {
         $validated = $request->validate([
             'tanggal_terima' => 'required|date',
-            'barang_keluar_id' => 'required|exists:barang_keluar,id',
             'transaksi_dari_id' => 'required|exists:lokasi,id',
         ]);
 
@@ -63,19 +54,31 @@ class BarangMasukDemakController extends Controller
 
         $step1Data = session('barang_masuk_demak_step1');
 
-        $barangKeluar = BarangKeluar::with([
-            'barangKeluarDemak' => function ($q) {
-                // Hanya ambil yang belum kembali
-                $q->where('status_kembali', false);
-            },
-            'barangKeluarDemak.partai',
-            'barangKeluarDemak.warna',
-        ])->findOrFail($step1Data['barang_keluar_id']);
+        $processedIds = \App\Models\BarangMasukDemak::pluck('barang_keluar_demak_id')->toArray();
 
-        $pendingItems = $barangKeluar->barangKeluarDemak;
-        $barangList = NamaBarang::all();
+        $query = \App\Models\BarangKeluarDemak::with(['barangKeluar', 'partai', 'warna'])
+            ->whereHas('barangKeluar', function ($q) {
+                $q->where('jenis_barang_keluar_id', \App\Models\JenisBarangKeluar::where('nama', 'Demak')->first()->id ?? 0);
+            })
+            ->whereNotIn('id', $processedIds);
 
-        return view('admin.barang-masuk.demak.step2', compact('step1Data', 'barangKeluar', 'pendingItems', 'barangList'));
+        // Filter by partai (lempeng, mangkok, etc)
+        if ($request->filled('partai') && $request->partai !== 'all') {
+            $query->whereHas('partai', function ($q) use ($request) {
+                $q->where('nama_partai', $request->partai);
+            });
+        }
+
+        // Search by kode_lp
+        if ($request->filled('search')) {
+            $query->where('kode_lp', 'like', '%' . $request->search . '%');
+        }
+
+        $items = $query->get();
+        $barangList = \App\Models\NamaBarang::all();
+        $partaiList = \App\Models\Partai::where('kategori', 'barang masuk')->get();
+
+        return view('admin.barang-masuk.demak.step2', compact('step1Data', 'items', 'barangList', 'partaiList'));
     }
 
     public function storeStep2(Request $request, BarangMasukDemakService $service)
@@ -121,13 +124,13 @@ class BarangMasukDemakController extends Controller
             })->toArray();
 
             if (empty($selectedItems)) {
-                return redirect()->back()->with('error', 'Anda harus mencentang minimal 1 barang yang dikembalikan.');
+                return redirect()->back()->with('error', 'Anda harus mencentang minimal 1 barang.');
             }
 
             $service->storeData($step1Data, $selectedItems);
             session()->forget('barang_masuk_demak_step1');
             return redirect()->route('barang-masuk.demak.index')
-                ->with('success', 'Data Barang Masuk Demak berhasil disimpan. Tidak bisa diedit.');
+                ->with('success', 'Data Barang Masuk Demak berhasil disimpan.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
@@ -164,18 +167,6 @@ class BarangMasukDemakController extends Controller
     public function destroy($id, BarangMasukDemakService $service)
     {
         $barangMasukBatch = \App\Models\BarangMasuk::with('barangMasukDemak')->findOrFail($id);
-
-        // Check if already graded
-        foreach ($barangMasukBatch->barangMasukDemak as $bmItem) {
-            $graded = \App\Models\StokGrading::where('sumber_stok', 'demak')
-                ->where('barang_id', $bmItem->barang_id)
-                ->where('partai', $bmItem->partai)
-                ->exists();
-            if ($graded) {
-                return redirect()->route('barang-masuk.demak.index')
-                    ->with('error', 'Gagal menghapus data: Item dari batch ini telah di-grading.');
-            }
-        }
 
         try {
             $service->destroyData($barangMasukBatch);
