@@ -9,7 +9,7 @@
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-semibold text-gray-900">Tambah Data Masuk Demak</h1>
-                <p class="mt-1 text-sm text-gray-600">Pilih Nota Pengiriman Keluar yang akan diretur.</p>
+                <p class="mt-1 text-sm text-gray-600">Pilih tanggal terima dan lokasi asal barang.</p>
             </div>
             <a href="{{ route('barang-masuk.demak.index') }}"
                 class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm">
@@ -22,13 +22,13 @@
                 <div class="flex flex-col items-center flex-1">
                     <div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 text-white font-semibold text-sm shadow-sm">
                         1</div>
-                    <span class="mt-2 text-xs sm:text-sm font-medium text-blue-600">Pilih Batch Keluar</span>
+                    <span class="mt-2 text-xs sm:text-sm font-medium text-blue-600">Data Awal</span>
                 </div>
                 <div class="flex-1 h-0.5 bg-gray-200 mx-2 sm:mx-4 -mt-6"></div>
                 <div class="flex flex-col items-center flex-1">
                     <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 font-semibold text-sm">
                         2</div>
-                    <span class="mt-2 text-xs sm:text-sm font-medium text-gray-400">Centang Barang Kembali</span>
+                    <span class="mt-2 text-xs sm:text-sm font-medium text-gray-400">Pilih & Input Barang</span>
                 </div>
             </div>
         </div>
@@ -49,20 +49,6 @@
                             <label for="tanggal_terima" class="block text-sm font-medium text-gray-700">Tanggal Terima <span class="text-red-500">*</span></label>
                             <input type="date" name="tanggal_terima" id="tanggal_terima" value="{{ old('tanggal_terima', $step1Data['tanggal_terima'] ?? date('Y-m-d')) }}"
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2.5 px-3" required>
-                        </div>
-
-                        <!-- Pilih Batch -->
-                        <div>
-                            <label for="barang_keluar_id" class="block text-sm font-medium text-gray-700">Pilih Batch Pengiriman ke Demak <span class="text-red-500">*</span></label>
-                            <select id="barang_keluar_id" name="barang_keluar_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2.5 px-3" required>
-                                <option value="">-- Pilih Batch / Nota Keluar --</option>
-                                @foreach($outstandingBatches as $batch)
-                                    <option value="{{ $batch->id }}" {{ old('barang_keluar_id', $step1Data['barang_keluar_id'] ?? '') == $batch->id ? 'selected' : '' }}>
-                                        {{ \Carbon\Carbon::parse($batch->tanggal_kirim)->format('Ymd') . '-' . strtoupper(substr(md5($batch->id), 0, 3)) }} | Dikirim: {{ \Carbon\Carbon::parse($batch->tanggal_kirim)->format('d M Y') }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <p class="text-xs text-gray-500 mt-2">Catatan: Hanya batch yang belum kembali 100% yang akan muncul di daftar ini.</p>
                         </div>
 
                         <!-- Lokasi -->

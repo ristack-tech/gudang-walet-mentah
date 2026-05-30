@@ -84,7 +84,7 @@
                                             @if($hasGraded)
                                                 <button type="button" disabled title="Tidak bisa dihapus karena sudah di-grading" class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed font-bold">Hapus Batch</button>
                                             @else
-                                                <form action="{{ route('barang-masuk.demak.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data batch ini beserta seluruh itemnya?');">
+                                                <form action="{{ route('barang-masuk.demak.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin hapus batch ini? Data akan hilang dari barang masuk (hapus jika belum di-grading).');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 font-bold transition duration-200">Hapus Batch</button>
