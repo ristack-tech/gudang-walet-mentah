@@ -62,19 +62,18 @@ class BarangMasukDemakController extends Controller
             })
             ->whereNotIn('id', $processedIds);
 
-        // Filter by partai (lempeng, mangkok, etc)
         if ($request->filled('partai') && $request->partai !== 'all') {
             $query->whereHas('partai', function ($q) use ($request) {
                 $q->where('nama_partai', $request->partai);
             });
         }
 
-        // Search by kode_lp
         if ($request->filled('search')) {
             $query->where('kode_lp', 'like', '%' . $request->search . '%');
         }
 
-        $items = $query->get();
+        $perPage = $request->get('per_page', 10);
+        $items = $query->paginate($perPage);
         $barangList = \App\Models\NamaBarang::all();
         $partaiList = \App\Models\Partai::where('kategori', 'barang masuk')->get();
 

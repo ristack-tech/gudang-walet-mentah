@@ -156,6 +156,36 @@
                     </table>
                 </div>
 
+                <!-- Pagination & Show Entries - Outside form -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <span>Show</span>
+                            <select id="perPageSelect" class="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                <option value="10" {{ $items->perPage() == 10 ? 'selected' : '' }}>10</option>
+                                <option value="20" {{ $items->perPage() == 20 ? 'selected' : '' }}>20</option>
+                                <option value="30" {{ $items->perPage() == 30 ? 'selected' : '' }}>30</option>
+                                <option value="40" {{ $items->perPage() == 40 ? 'selected' : '' }}>40</option>
+                                <option value="50" {{ $items->perPage() == 50 ? 'selected' : '' }}>50</option>
+                            </select>
+                            <span>of {{ $items->total() }} entries</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            Page {{ $items->currentPage() }} of {{ $items->lastPage() }}
+                        </div>
+                    </div>
+                    <!-- Page Numbers -->
+                    <div class="flex items-center justify-center gap-1 flex-wrap">
+                        @for ($i = 1; $i <= $items->lastPage(); $i++)
+                            @if ($i == $items->currentPage())
+                                <span class="px-3 py-1 border border-blue-500 rounded text-sm font-medium text-blue-600 bg-blue-50">{{ $i }}</span>
+                            @else
+                                <a href="javascript:void(0)" data-page="{{ $i }}" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 pagination-link">{{ $i }}</a>
+                            @endif
+                        @endfor
+                    </div>
+                </div>
+
                 <!-- Footer Summary/Action -->
                 <div class="bg-gray-50 px-6 py-5 rounded-b-2xl border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between">
                     <div class="flex items-center mb-4 sm:mb-0 text-sm text-gray-500">
@@ -221,5 +251,29 @@
     function submitForm() {
         document.getElementById('receiveForm').submit();
     }
+
+    // Build URL with current params
+    function buildPageUrl(page) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('page', page);
+        return window.location.pathname + '?' + params.toString();
+    }
+
+    // Pagination - per page
+    document.getElementById('perPageSelect').addEventListener('change', function() {
+        const params = new URLSearchParams(window.location.search);
+        params.set('per_page', this.value);
+        params.delete('page');
+        window.location.href = window.location.pathname + '?' + params.toString();
+    });
+
+    // Update pagination links
+    document.querySelectorAll('.pagination-link').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = this.dataset.page;
+            window.location.href = buildPageUrl(page);
+        });
+    });
 </script>
 @endsection
